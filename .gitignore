@@ -4,6 +4,7 @@
 *.deps
 *.dirstamp
 .DS_Store
+*.user
 Makefile
 autom4te.cache
 config.h
