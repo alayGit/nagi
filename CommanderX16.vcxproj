@@ -10,6 +10,44 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.gitignore" />
+    <None Include="makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\AGICODES.H" />
+    <ClInclude Include="src\AGIFILES.H" />
+    <ClInclude Include="src\DECOMP.H" />
+    <ClInclude Include="src\GENERAL.H" />
+    <ClInclude Include="src\GUI.H" />
+    <ClInclude Include="src\LIST.H" />
+    <ClInclude Include="src\LOGIC.H" />
+    <ClInclude Include="src\OBJECT.H" />
+    <ClInclude Include="src\PALETTE.H" />
+    <ClInclude Include="src\PARSER.H" />
+    <ClInclude Include="src\PICTURE.H" />
+    <ClInclude Include="src\SOUND.H" />
+    <ClInclude Include="src\VIEW.H" />
+    <ClInclude Include="src\WORDS.H" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AGIFILES.C" />
+    <ClCompile Include="src\COMMANDS.C" />
+    <ClCompile Include="src\DECOMP.C" />
+    <ClCompile Include="src\GRAPHICS.C" />
+    <ClCompile Include="src\GUI.C" />
+    <ClCompile Include="src\LOGIC.C" />
+    <ClCompile Include="src\MEKA.C" />
+    <ClCompile Include="src\OBJECT.C" />
+    <ClCompile Include="src\PARSER.C" />
+    <ClCompile Include="src\PICTURE.C" />
+    <ClCompile Include="src\PLAY.C" />
+    <ClCompile Include="src\SHOWLOG.C" />
+    <ClCompile Include="src\SOUND.C" />
+    <ClCompile Include="src\TEXT.C" />
+    <ClCompile Include="src\VIEW.C" />
+    <ClCompile Include="src\WORDS.C" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9EA7EC3D-1771-420F-932F-231A35ED1200}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
@@ -85,17 +123,6 @@ rmdir /S /Q "$(SolutionDir)Release"</NMakeCleanCommandLine>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Text Include="readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\helloc64.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Debug.bat" />
-    <None Include="makefile" />
-    <None Include="MyTemplate.vstemplate" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

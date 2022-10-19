@@ -5,6 +5,9 @@
 *.dirstamp
 .DS_Store
 *.user
+*.suo
+*.ipch
+*.log
 Makefile
 autom4te.cache
 config.h

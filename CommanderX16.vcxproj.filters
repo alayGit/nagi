@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\.gitignore" />
+    <None Include="makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\AGICODES.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AGIFILES.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DECOMP.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GENERAL.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GUI.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LIST.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LOGIC.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OBJECT.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PALETTE.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PARSER.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PICTURE.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SOUND.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VIEW.H">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WORDS.H">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AGIFILES.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\COMMANDS.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DECOMP.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GRAPHICS.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GUI.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LOGIC.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MEKA.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OBJECT.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PARSER.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PICTURE.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PLAY.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SHOWLOG.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SOUND.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TEXT.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VIEW.C">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WORDS.C">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{c7ec4cc1-2dad-4cd4-94ef-c15464dcdfb4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
