@@ -11,6 +11,7 @@
 ***************************************************************************/
 
 #include "general.h"
+#include "timer.h"
 //#include "agifiles.h"
 //#include "logic.h"
 //#include "view.h"
@@ -28,6 +29,8 @@ byte horizon;
 
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
+
+const int TIMER_WAIT_MS = 50;
 
 volatile int counter;              /* Used for timer control */
 volatile int hund;                 /* Used for interpreters clock */
@@ -159,7 +162,7 @@ void interpret()
    } while (hasEnteredNewRoom);*/
 }
 
-/*void timing_proc()
+void timing_proc()
 {
    counter++;
    hund += 5;
@@ -180,11 +183,12 @@ void interpret()
       hund = 0;
    }
 }
-END_OF_FUNCTION(timing_proc)*/
 
 void initialise()
 {
-   //int i;
+    int i;
+
+    initTimer(&timing_proc);
 
    //allegro_init();
    //install_keyboard();
@@ -192,16 +196,16 @@ void initialise()
    //install_timer();
    //initFiles();             /* Load resource directories */
    //// <<--  Determine exact version in here
-   //for (i=0; i<255; i++) {  /* Initialize variables and flags */
-   //   var[i] = 0;
-   //   flag[i] = FALSE;
-   //}
-   //flag[5] = TRUE;
-   //var[24] = 0x29;
-   //var[22] = 3;
-   //var[26] = 3;
-   //var[8] = 255;     /* Number of free 256 byte pages of memory */
-   //var[10] = 2;      /* Normal speed */
+   for (i=0; i<255; i++) {  /* Initialize variables and flags */
+      var[i] = 0;
+      flag[i] = FALSE;
+   }
+   flag[5] = TRUE;
+   var[24] = 0x29;
+   var[22] = 3;
+   var[26] = 3;
+   var[8] = 255;     /* Number of free 256 byte pages of memory */
+   var[10] = 2;      /* Normal speed */
 
    ///* SQ2 patch. I don't know where these are set in the game. */
    ///* var[86] = 1; var[87] = 2; var[88] = 3; */
@@ -251,11 +255,12 @@ void main()
    initialise();
    while (TRUE) {
       /* Cycle initiator. Controlled by delay variable (var[10). */
-       printf("Cycle Run");
       if (counter >= var[10]) {
-        interpret();
+          printf("Interpret Runs");
+          interpret();
         counter=0;
       }
+      checkTimer(TIMER_WAIT_MS);
    }
 
    //chdir("\\HACK\\AGI\\D\\AGI\\MEKA");
