@@ -10,6 +10,7 @@
 ** (c) Lance Ewing, 1998.
 ***************************************************************************/
 #include <string.h>
+#include <stdlib.h>
 #include "general.h"
 #include "timer.h"
 //#include "agifiles.h"
@@ -135,20 +136,20 @@ void interpret()
 {
    flag[2] = FALSE;   //The player has issued a command line
    flag[4] = FALSE;   //The 'said' command has accepted the input
-   //pollKeyboard();
+   pollKeyboard();
    //if (controlMode == PROGRAM_CONTROL)
    //   dirnOfEgo = var[6];
    //else
    //   var[6] = dirnOfEgo;
    viewtab[0].direction = var[6];
-   //calcObjMotion();
+   calcObjMotion();
    // <<-- Update status line here (score & sound)
    updateStatusLine();
 
    do {
       hasEnteredNewRoom = FALSE;
       exitAllLogics = FALSE;
-      //executeLogic(0);
+      executeLogic(0);
       //dirnOfEgo = var[6];
       viewtab[0].direction = var[6];
       // <<-- Update status line here (score & sound)
@@ -191,11 +192,7 @@ void initialise()
 
     initTimer(&timing_proc);
 
-   //allegro_init();
-   //install_keyboard();
-   //install_mouse();
-   //install_timer();
-   //initFiles();             /* Load resource directories */
+   initFiles();             /* Load resource directories */
    //// <<--  Determine exact version in here
    for (i=0; i<255; i++) {  /* Initialize variables and flags */
       var[i] = 0;
@@ -211,34 +208,30 @@ void initialise()
    ///* SQ2 patch. I don't know where these are set in the game. */
    ///* var[86] = 1; var[87] = 2; var[88] = 3; */
 
-   //initAGIScreen();
-   //initPalette();
-   //initLogics();
-   //initPicture();
-   //initPictures();
-   //initSound();
-   //initViews();
-   //initObjects();
-   //loadObjectFile();
-   //loadWords();
-   //initEvents();
-   //horizon = 36;
+    initAGIScreen();
+    initPalette();
+    initLogics();
+    initPicture();
+    initPictures();
+    initSound();
+    initViews();
+    initObjects();
+    loadObjectFile();
+    loadWords();
+    initEvents();
+    horizon = 36;
 
    ///* Set up timer. The timer controls the interpreter speed. */
-   //counter = 0;
-   //LOCK_VARIABLE(counter);
-   //LOCK_FUNCTION(timing_proc);
-   //install_int_ex(timing_proc, MSEC_TO_TIMER(50));
+    counter = 0;
 }
 
 void closedown()
 {
- /*  freeMenuItems();
+   freeMenuItems();
    discardObjects();
    discardWords();
    closePicture();
-   allegro_exit();
-   exit(0);*/
+   exit(0);
 }
 
 void main()

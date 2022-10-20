@@ -4,12 +4,17 @@
 
 //Logic
 void discardLogicFile(int logFileNum);
+void initLogics();
 
 //Picture
 void discardPictureFile(int picFileNum);
+void initPicture();
+void initPictures();
+void closePicture();
 
 //Sound
 void discardSoundFile(int soundNum);
+void initSound();
 
 //View
 typedef struct {
@@ -19,7 +24,10 @@ typedef struct {
 	BITMAP* bmp;
 } Cel;
 
+void initViews();
+void initObjects();
 void resetViews();
+void discardObjects();
 
 typedef struct {
 	byte numberOfCels;
@@ -71,6 +79,8 @@ extern ViewTable viewtab[];
 
 void discardView(byte viewNum);
 
+void calcObjMotion();
+
 //Logic 
 extern byte directions[9];
 
@@ -81,8 +91,28 @@ void rectfill(BITMAP* bmp, int x1, int y1, int x2, int y2, int color);
 
 //Picture
 extern boolean statusLineDisplayed, inputLineDisplayed;
+void initAGIScreen();
+void initPalette();
 
 
 //Graphics
 void drawBigString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour);
 #endif
+
+//Parser
+void pollKeyboard();
+void initEvents();
+
+//Commander
+void executeLogic(int logNum);
+void freeMenuItems();
+
+//AGI Files
+void initFiles();
+
+//Object
+void loadObjectFile();
+
+//Words
+void loadWords();
+void discardWords();

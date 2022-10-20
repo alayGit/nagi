@@ -7,6 +7,10 @@ void discardLogicFile(int logFileNum) {
 
 }
 
+void initLogics() {
+
+}
+
 void resetViews()
 {
 }
@@ -29,10 +33,35 @@ void discardPictureFile(int picFileNum) {
 
 }
 
+void initPicture() {
+
+}
+
+void initPictures() {
+
+}
+
+void initSound() {
+
+}
+
+void initAGIScreen()
+{
+}
+
+void initPalette()
+{
+
+}
+
 boolean statusLineDisplayed, inputLineDisplayed;
 
 void discardSoundFile(int soundNum)
 {
+
+}
+
+void closePicture() {
 
 }
 
@@ -47,3 +76,64 @@ byte directions[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 //allgero
 BITMAP* screen;
+
+//Parser
+void pollKeyboard()
+{
+
+}
+
+void initEvents()
+{
+
+}
+
+
+//View
+void calcObjMotion()
+{
+}
+
+void initViews() {
+
+}
+
+void initObjects()
+{
+}
+
+void discardObjects() {
+
+}
+
+//Command
+void executeLogic(int logNum)
+{
+
+}
+
+void freeMenuItems()
+{
+
+}
+
+//AgiFiles
+void initFiles()
+{
+}
+
+//Object
+void loadObjectFile() {
+
+}
+
+//Words
+void loadWords()
+{
+
+}
+
+void discardWords()
+{
+
+}
