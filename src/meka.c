@@ -14,7 +14,7 @@
 #include "timer.h"
 //#include "agifiles.h"
 //#include "logic.h"
-//#include "view.h"
+#include "view.h"
 //#include "object.h"
 //#include "words.h"
 //#include "picture.h"
@@ -42,20 +42,20 @@ extern int picFNum;    // Debugging. Delete at some stage!!
 
 void adjustEgoPosition()
 {
-   //switch (var[2]) {
-   //   case 1:
-   //      viewtab[0].yPos = 167;
-   //      break;
-   //   case 2:
-   //      viewtab[0].xPos = 0;
-   //      break;
-   //   case 3:
-   //      viewtab[0].yPos = 37;  //Note: This is default horizon + 1 
-   //      break;
-   //   case 4:
-   //      viewtab[0].xPos = 160 - (viewtab[0].xsize);
-   //      break;
-   //}
+   switch (var[2]) {
+      case 1:
+         viewtab[0].yPos = 167;
+         break;
+      case 2:
+         viewtab[0].xPos = 0;
+         break;
+      case 3:
+         viewtab[0].yPos = 37;  //Note: This is default horizon + 1 
+         break;
+      case 4:
+         viewtab[0].xPos = 160 - (viewtab[0].xsize);
+         break;
+   }
 
    // Might need to stop motion of ego 
 }
@@ -132,22 +132,22 @@ void updateStatusLine()
 ***************************************************************************/
 void interpret()
 {
-   /*flag[2] = FALSE;   //The player has issued a command line
+   flag[2] = FALSE;   //The player has issued a command line
    flag[4] = FALSE;   //The 'said' command has accepted the input
-   pollKeyboard();
+   //pollKeyboard();
    //if (controlMode == PROGRAM_CONTROL)
    //   dirnOfEgo = var[6];
    //else
    //   var[6] = dirnOfEgo;
    viewtab[0].direction = var[6];
-   calcObjMotion();
+   //calcObjMotion();
    // <<-- Update status line here (score & sound)
    updateStatusLine();
 
    do {
       hasEnteredNewRoom = FALSE;
       exitAllLogics = FALSE;
-      executeLogic(0);
+      //executeLogic(0);
       //dirnOfEgo = var[6];
       viewtab[0].direction = var[6];
       // <<-- Update status line here (score & sound)
@@ -157,9 +157,9 @@ void interpret()
       flag[5] = 0;
       flag[6] = FALSE;
       flag[12] = FALSE;
-      if (!hasEnteredNewRoom) updateObjects();
+      if (!hasEnteredNewRoom) //updateObjects();
       if (hasEnteredNewRoom) newRoom();
-   } while (hasEnteredNewRoom);*/
+   } while (hasEnteredNewRoom);
 }
 
 void timing_proc()
