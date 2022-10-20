@@ -9,7 +9,7 @@
 **
 ** (c) Lance Ewing, 1998.
 ***************************************************************************/
-
+#include <string.h>
 #include "general.h"
 #include "timer.h"
 //#include "agifiles.h"
@@ -82,28 +82,28 @@ void discardResources()
 ***************************************************************************/
 void newRoom()
 {
-   //resetViews();
+   resetViews();
    //stop_update_all();
    //unanimate_all();
-   //discardResources();
-   //controlMode = PLAYER_CONTROL;
+   discardResources();
+   controlMode = PLAYER_CONTROL;
    //unblock();
-   //horizon = 36;
-   //var[1] = var[0];
-   //var[0] = newRoomNum;
-   //var[4] = 0;
-   //var[5] = 0;
-   //var[9] = 0;
-   //var[16] = 0;
-   //adjustEgoPosition();
-   //var[2] = 0;
-   //flag[2] = 0;
-   //flag[5] = 1;
-   //score = var[3];
+   horizon = 36;
+   var[1] = var[0];
+   var[0] = newRoomNum;
+   var[4] = 0;
+   var[5] = 0;
+   var[9] = 0;
+   var[16] = 0;
+   adjustEgoPosition();
+   var[2] = 0;
+   flag[2] = 0;
+   flag[5] = 1;
+   score = var[3];
 
-   //memset(directions, 0, 9);
-   ///* rectfill(screen, 0, 20+(22*16), 639, 463, 0); */   /* Clear screen */
-   //clear(screen);
+   memset(directions, 0, 9);
+   /* rectfill(screen, 0, 20+(22*16), 639, 463, 0); */   /* Clear screen */
+   clear(screen);
 }
 
 /***************************************************************************
@@ -113,16 +113,16 @@ void newRoom()
 ***************************************************************************/
 void updateStatusLine()
 {
-   //char scoreStr[256], soundStr[256];
+   char scoreStr[256], soundStr[256];
 
-   //if (statusLineDisplayed) {
-   //   sprintf(scoreStr, "Score: %d of %d", var[3], var[7]);
-   //   sprintf(soundStr,  "Sound:%-3s", (flag[9]? "on" : "off"));
-   //   drawBigString(screen, scoreStr, 16, 0, 8, 1);
-   //   drawBigString(screen, soundStr, 496, 0, 8, 1);
-   //} else {
-   //   rectfill(screen, 0, 0, 639, 15, 0);   /* Clear status line */
-   //}
+   if (statusLineDisplayed) {
+      sprintf(scoreStr, "Score: %d of %d", var[3], var[7]);
+      sprintf(soundStr,  "Sound:%-3s", (flag[9]? "on" : "off"));
+      drawBigString(screen, scoreStr, 16, 0, 8, 1);
+      drawBigString(screen, soundStr, 496, 0, 8, 1);
+   } else {
+      rectfill(screen, 0, 0, 639, 15, 0);   /* Clear status line */
+   }
 }
 
 /***************************************************************************

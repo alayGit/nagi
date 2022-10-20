@@ -19,6 +19,8 @@ typedef struct {
 	BITMAP* bmp;
 } Cel;
 
+void resetViews();
+
 typedef struct {
 	byte numberOfCels;
 	Cel* cels;
@@ -69,4 +71,18 @@ extern ViewTable viewtab[];
 
 void discardView(byte viewNum);
 
+//Logic 
+extern byte directions[9];
+
+//allgero
+extern BITMAP* screen;
+void clear(BITMAP* bitmap);
+void rectfill(BITMAP* bmp, int x1, int y1, int x2, int y2, int color);
+
+//Picture
+extern boolean statusLineDisplayed, inputLineDisplayed;
+
+
+//Graphics
+void drawBigString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour);
 #endif
