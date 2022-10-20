@@ -14,7 +14,8 @@
 #include "timer.h"
 //#include "agifiles.h"
 //#include "logic.h"
-#include "view.h"
+//#include "view.h"
+#include "stub.h"
 //#include "object.h"
 //#include "words.h"
 //#include "picture.h"
@@ -60,15 +61,15 @@ void adjustEgoPosition()
    // Might need to stop motion of ego 
 }
 
-//void discardResources()
-//{
-//   //int i;
-//
-//   //for (i=1; i<256; i++) discardLogicFile(i);
-//   //for (i=0; i<256; i++) discardView(i);
-//   //for (i=0; i<256; i++) discardPictureFile(i);
-//   //for (i=0; i<256; i++) discardSoundFile(i);
-//}
+void discardResources()
+{
+   int i;
+
+   for (i=1; i<256; i++) discardLogicFile(i);
+   for (i=0; i<256; i++) discardView(i);
+   for (i=0; i<256; i++) discardPictureFile(i);
+   for (i=0; i<256; i++) discardSoundFile(i);
+}
 
 /***************************************************************************
 ** new_room

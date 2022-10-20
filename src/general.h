@@ -19,4 +19,12 @@ typedef unsigned char byte;
 typedef unsigned short int word;
 typedef char boolean;
 
+typedef struct { 
+	int w;
+	int h;
+	int v_w;
+	int v_h;
+	int color_depth;
+} BITMAP;
+
 #endif  /* _GENERAL_H_ */
