@@ -13,30 +13,30 @@
   <ItemGroup>
     <None Include="..\.gitignore" />
     <None Include="makefile" />
+    <None Include="test.bat" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AGICODES.H" />
-    <ClInclude Include="src\AGIFILES.H" />
+    <ClInclude Include="src\agiFiles.h" />
     <ClInclude Include="src\DECOMP.H" />
     <ClInclude Include="src\GENERAL.H" />
     <ClInclude Include="src\GUI.H" />
     <ClInclude Include="src\LIST.H" />
-    <ClInclude Include="src\LOGIC.H" />
     <ClInclude Include="src\OBJECT.H" />
     <ClInclude Include="src\PALETTE.H" />
     <ClInclude Include="src\PARSER.H" />
     <ClInclude Include="src\PICTURE.H" />
     <ClInclude Include="src\SOUND.H" />
-    <ClInclude Include="src\VIEW.H" />
+    <ClInclude Include="src\stub.h" />
+    <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\WORDS.H" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AGIFILES.C" />
+    <ClCompile Include="src\agiFiles.c" />
     <ClCompile Include="src\COMMANDS.C" />
     <ClCompile Include="src\DECOMP.C" />
     <ClCompile Include="src\GRAPHICS.C" />
     <ClCompile Include="src\GUI.C" />
-    <ClCompile Include="src\LOGIC.C" />
     <ClCompile Include="src\MEKA.C" />
     <ClCompile Include="src\OBJECT.C" />
     <ClCompile Include="src\PARSER.C" />
@@ -44,8 +44,9 @@
     <ClCompile Include="src\PLAY.C" />
     <ClCompile Include="src\SHOWLOG.C" />
     <ClCompile Include="src\SOUND.C" />
+    <ClCompile Include="src\stub.c" />
     <ClCompile Include="src\TEXT.C" />
-    <ClCompile Include="src\VIEW.C" />
+    <ClCompile Include="src\timer.c" />
     <ClCompile Include="src\WORDS.C" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

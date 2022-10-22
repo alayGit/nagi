@@ -11,7 +11,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdint.h>
+#include <cbm.h>
+#include <dbg.h>
 
 #include "general.h"
 #include "agifiles.h"
@@ -31,11 +33,40 @@ char gameSig[10]="";
 ** the AGI files are for an AGIv3 game or for an AGIv2 game. It will also
 ** initialize the game signature in the case of a version 3 game.
 ***************************************************************************/
-void initFiles()
+void initfiles()
 {
+    DbgInit(0);
    loadGameSig(gameSig);
    if (strlen(gameSig) > 0) version3 = TRUE;
    loadAGIDirs();
+}
+
+int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
+#define SETNAM 0xFFBD
+    static struct cmd {
+        char p;
+        uint8_t lfn;
+        uint32_t offset;
+    } cmd;
+
+    // open command channel to DOS and send P command.
+    // P u8 u32 (no spaces) u8 is LFN to seek(), and u32 = offset.
+    cmd.p = 'p';
+    cmd.lfn = channel;
+    cmd.offset = offset;
+    // can't call cbm_open because the P command is binary and may
+    // contain zeros, which C would interpret as null terminator.
+    //
+    // Roll-your-own inline asm call to SETNAM:
+    __asm__("lda #6");
+    __asm__("ldx #<%v", cmd);
+    __asm__("ldy #>%v", cmd);
+    __asm__("jsr %w", SETNAM);
+    cbm_k_setlfs(15, 8, 15);
+    cbm_k_open(); // this sends the CMD bytes..
+    cbm_k_close(15); // close the command channel
+    return 0;
+    // TODO: ERROR HANDLING!!!!!
 }
 
 /***************************************************************************
@@ -48,8 +79,10 @@ void loadAGIDir(int dirNum, char *fName, int *count)
 {
    FILE *fp;
    unsigned char byte1, byte2, byte3;
+   unsigned char address[4] = {0,0,0,0};
    AGIFilePosType tempPos;
-   fpos_t pos;
+   int value;
+
 
    if ((fp = fopen(fName, "rb")) == NULL) {
       printf("Could not find file : %s.\n", fName);
@@ -62,13 +95,37 @@ void loadAGIDir(int dirNum, char *fName, int *count)
       byte2 = fgetc(fp);
       byte3 = fgetc(fp);
 
-      fgetpos(fp, &pos);
-
       tempPos.fileName = (char *)malloc(10);
       sprintf(tempPos.fileName, "VOL.%d", ((byte1 & 0xF0) >> 4));
-      tempPos.filePos = ((long)((byte1 & 0x0F) << 16) +
-                         (long)((byte2 & 0xFF) << 8) +
-                         (long)(byte3 & 0xFF));
+      
+      address[3] = 0;
+      address[2] = byte1 & 0x0F;
+      address[1] = byte2;
+      address[0] = byte3;
+
+
+      memcpy(&tempPos.filePos, &address[0], 4);
+
+      value = tempPos.filePos;
+
+  
+
+      //printf("Value:%p\n", (void*)&value);
+
+      //printf("Address: %p Address: %p, Address: %p Address: %p\n", address[0], address[1], address[2], address[3]);
+
+      //printf("Byte1: %p Byte2: %p, Byte3: %p Value: %lu\n", byte1, byte2, byte3, tempPos.filePos);
+
+      /*tempPos.filePos = ((unsigned long)((byte1 & 0x0F) << 16) +
+          (unsigned long)((byte2 & 0xFF) << 8) +
+          (unsigned long)(byte3 & 0xFF));*/
+
+
+      //printf("Address Is %p\n", (void*)&frog);
+        
+
+
+      //printf("%s %s %lu %d \n", fName, tempPos.fileName, tempPos.filePos, *count);
 
       switch (dirNum) {
          case 0: logdir[*count] = tempPos; break;
@@ -76,6 +133,7 @@ void loadAGIDir(int dirNum, char *fName, int *count)
          case 2: viewdir[*count] = tempPos; break;
          case 3: snddir[*count] = tempPos; break;
       }
+      //printf("tempPos.filePos %lu \n", tempPos.filePos);
       (*count)++;
    }
 
@@ -98,9 +156,9 @@ void loadAGIv3Dir()
       exit(1);
    }
 
-   fseek(dirFile, 0, SEEK_END);
-   dirLength = ftell(dirFile);
-   fseek(dirFile, 0, SEEK_SET);
+   //fseek(dirFile, 0, SEEK_END);
+   dirLength = //ftell(dirFile);
+   //fseek(dirFile, 0, SEEK_SET);
    dirData = (char *)malloc(sizeof(char)*dirLength);
    fread(dirData, sizeof(char), dirLength, dirFile);
    fclose(dirFile);
@@ -157,10 +215,11 @@ void loadAGIDirs()
       loadAGIv3Dir();
    }
    else {
-      loadAGIDir(0, "LOGDIR", &numLogics);
-      loadAGIDir(1, "PICDIR", &numPictures);
-      loadAGIDir(2, "VIEWDIR", &numViews);
-      loadAGIDir(3, "SNDDIR", &numSounds);
+      loadAGIDir(0, "logdir", &numLogics);
+      loadAGIDir(1, "picdir", &numPictures);
+      loadAGIDir(2, "viewdir", &numViews);
+      loadAGIDir(3, "snddir", &numSounds);
+      printf("Index Load Complete");
    }
 }
 
@@ -219,29 +278,29 @@ void convertPic(unsigned char *input, unsigned char *output, int dataLen)
 **
 ** In both cases the format that is easier to deal with is returned.
 **************************************************************************/
-void loadAGIFile(int resType, AGIFilePosType location, AGIFile *AGIData)
+void loadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData)
 {
    FILE *fp;
    short int sig, compSize, startPos, endPos, numMess, avisPos=0, i;
    unsigned char byte1, byte2, volNum, *compBuf, *fileData;
 
-   if (location.filePos == EMPTY) {
+   if (location->filePos == EMPTY) {
       printf("Could not find requested AGI file.\n");
       printf("This could indicate problems with your game data files\n");
       printf("or there may be something wrong with MEKA.\n");
       exit(0);
    }
 
-   if ((fp = fopen(location.fileName, "rb")) == NULL) {
-      printf("Could not find file : %s.\n", location.fileName);
+   if ((fp = fopen(location->fileName, "rb")) == NULL) {
+      printf("Could not find file : %s.\n", location->fileName);
       printf("Make sure you are in an AGI version 2 game directory.\n");
       exit(0);
    }
 
-   fseek(fp, location.filePos, SEEK_SET);
+   //fseek(fp, location->filePos, SEEK_SET);
    fread(&sig, 2, 1, fp);
    if (sig != 0x3412) {  /* All AGI data files start with 0x1234 */
-      printf("Data error reading %s.\n", location.fileName);
+      printf("Data error reading %s.\n", location->fileName);
       printf("The requested AGI file did not have a signature.\n");
       printf("Check if your game files are corrupt.\n");
       exit(0);

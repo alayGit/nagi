@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include "general.h"
 #include "timer.h"
-//#include "agifiles.h"
+#include "agifiles.h"
 //#include "logic.h"
 //#include "view.h"
 #include "stub.h"
@@ -192,7 +192,7 @@ void initialise()
 
     initTimer(&timing_proc);
 
-   initFiles();             /* Load resource directories */
+   initfiles();             /* Load resource directories */
    //// <<--  Determine exact version in here
    for (i=0; i<255; i++) {  /* Initialize variables and flags */
       var[i] = 0;
@@ -250,7 +250,7 @@ void main()
    while (TRUE) {
       /* Cycle initiator. Controlled by delay variable (var[10). */
       if (counter >= var[10]) {
-          printf("Interpret Runs");
+          //printf("Interpret Runs");
           interpret();
         counter=0;
       }

@@ -5,6 +5,8 @@
 #ifndef _AGIFILES_H_
 #define _AGIFILES_H_
 
+#include <string.h>
+
 #define  LOGIC    0
 #define  PICTURE  1
 #define  VIEW     2
@@ -14,7 +16,7 @@
 
 typedef struct {          /* DIR entry structure */
    char *fileName;
-   long filePos;
+   unsigned long filePos;
 } AGIFilePosType;
 
 typedef struct {          /* AGI data file structure */
@@ -27,6 +29,6 @@ extern int numLogics, numPictures, numViews, numSounds;
 
 void initfiles();
 void loadAGIDirs();
-void loadAGIFile(int resType, AGIFilePosType location, AGIFile *AGIData);
+void loadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData);
 
 #endif  /* _AGIFILES_H_ */

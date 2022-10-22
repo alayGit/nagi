@@ -99,16 +99,13 @@ void initPalette();
 void drawBigString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour);
 #endif
 
-//Parser
+//Parserf
 void pollKeyboard();
 void initEvents();
 
 //Commander
 void executeLogic(int logNum);
 void freeMenuItems();
-
-//AGI Files
-void initFiles();
 
 //Object
 void loadObjectFile();

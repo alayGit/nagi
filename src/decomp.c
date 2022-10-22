@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dir.h>
+
 
 #include "decomp.h"
 
@@ -183,7 +183,7 @@ void expand(unsigned char *input, unsigned char *output, int fileLength)
 ****************************************************************************/
 void loadGameSig(char *gameSig)
 {
-   struct ffblk ffblk;
+   /*struct ffblk ffblk;
    char dirString[10]="", volString[10]="", *end;
    int done;
 
@@ -199,5 +199,5 @@ void loadGameSig(char *gameSig)
    if ((strcmp(volString, dirString) == 0) && (volString != NULL))
       strcpy(gameSig, volString);
    else
-      strcpy(gameSig, "");
+      strcpy(gameSig, "");*/
 }

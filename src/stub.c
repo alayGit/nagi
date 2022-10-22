@@ -117,10 +117,6 @@ void freeMenuItems()
 
 }
 
-//AgiFiles
-void initFiles()
-{
-}
 
 //Object
 void loadObjectFile() {
