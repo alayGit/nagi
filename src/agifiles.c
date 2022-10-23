@@ -145,60 +145,60 @@ void loadAGIDir(int dirNum, char *fName, int *count)
 ***************************************************************************/
 void loadAGIv3Dir()
 {
-   FILE *dirFile;
-   unsigned char dirName[15], *marker, *dirData, *endPos, *dataPos;
-   int resType=0, resNum=0, dirLength;
-   AGIFilePosType tempPos;
+   //FILE *dirFile;
+   //unsigned char dirName[15], *marker, *dirData, *endPos, *dataPos;
+   //int resType=0, resNum=0, dirLength;
+   //AGIFilePosType tempPos;
 
-   sprintf(dirName, "%sDIR", gameSig);
-   if ((dirFile = fopen(dirName, "rb")) == NULL) {
-      printf("File not found : %s\n", dirName);
-      exit(1);
-   }
+   //sprintf(dirName, "%sDIR", gameSig);
+   //if ((dirFile = fopen(dirName, "rb")) == NULL) {
+   //   printf("File not found : %s\n", dirName);
+   //   exit(1);
+   //}
 
-   //fseek(dirFile, 0, SEEK_END);
-   dirLength = //ftell(dirFile);
-   //fseek(dirFile, 0, SEEK_SET);
-   dirData = (char *)malloc(sizeof(char)*dirLength);
-   fread(dirData, sizeof(char), dirLength, dirFile);
-   fclose(dirFile);
-   marker = dirData;
+   ////fseek(dirFile, 0, SEEK_END);
+   //dirLength = //ftell(dirFile);
+   ////fseek(dirFile, 0, SEEK_SET);
+   //dirData = (char *)malloc(sizeof(char)*dirLength);
+   //fread(dirData, sizeof(char), dirLength, dirFile);
+   //fclose(dirFile);
+   //marker = dirData;
 
-   for (resType=0, marker=dirData; resType<4; resType++, marker+=2) {
-      dataPos = dirData + (*marker + *(marker+1)*256);
-      endPos = ((resType<3)? (dirData + (*(marker+2) + *(marker+3)*256))
-         :(dirData+dirLength));
-      resNum = 0;
-      for (; dataPos<endPos; dataPos+=3, resNum++) {
-         tempPos.fileName = (char *)malloc(10);
-         sprintf(tempPos.fileName, "%sVOL.%d", gameSig,
-            ((dataPos[0] & 0xF0) >> 4));
-         tempPos.filePos = ((long)((dataPos[0] & 0x0F) << 16) +
-                            (long)((dataPos[1] & 0xFF) << 8) +
-                            (long)(dataPos[2] & 0xFF));
+   //for (resType=0, marker=dirData; resType<4; resType++, marker+=2) {
+   //   dataPos = dirData + (*marker + *(marker+1)*256);
+   //   endPos = ((resType<3)? (dirData + (*(marker+2) + *(marker+3)*256))
+   //      :(dirData+dirLength));
+   //   resNum = 0;
+   //   for (; dataPos<endPos; dataPos+=3, resNum++) {
+   //      tempPos.fileName = (char *)malloc(10);
+   //      sprintf(tempPos.fileName, "%sVOL.%d", gameSig,
+   //         ((dataPos[0] & 0xF0) >> 4));
+   //      tempPos.filePos = ((long)((dataPos[0] & 0x0F) << 16) +
+   //                         (long)((dataPos[1] & 0xFF) << 8) +
+   //                         (long)(dataPos[2] & 0xFF));
 
-         switch (resType) {
-            case 0: logdir[resNum] = tempPos; break;
-            case 1: picdir[resNum] = tempPos; break;
-            case 2: viewdir[resNum] = tempPos; break;
-            case 3: snddir[resNum] = tempPos; break;
-         }
-      }
-      if (resNum > 256) {
-         printf("Error loading directory file.\n");
-         printf("Too many resources.\n");
-         exit(1);
-      }
+   //      switch (resType) {
+   //         case 0: logdir[resNum] = tempPos; break;
+   //         case 1: picdir[resNum] = tempPos; break;
+   //         case 2: viewdir[resNum] = tempPos; break;
+   //         case 3: snddir[resNum] = tempPos; break;
+   //      }
+   //   }
+   //   if (resNum > 256) {
+   //      printf("Error loading directory file.\n");
+   //      printf("Too many resources.\n");
+   //      exit(1);
+   //   }
 
-      switch (resType) {
-         case 0: numLogics = resNum; break;
-         case 1: numPictures = resNum; break;
-         case 2: numViews = resNum; break;
-         case 3: numSounds = resNum; break;
-      }
-   }
+   //   switch (resType) {
+   //      case 0: numLogics = resNum; break;
+   //      case 1: numPictures = resNum; break;
+   //      case 2: numViews = resNum; break;
+   //      case 3: numSounds = resNum; break;
+   //   }
+   //}
 
-   free(dirData);
+   //free(dirData);
 }
 
 /***************************************************************************
