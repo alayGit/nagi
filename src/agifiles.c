@@ -33,9 +33,8 @@ char gameSig[10]="";
 ** the AGI files are for an AGIv3 game or for an AGIv2 game. It will also
 ** initialize the game signature in the case of a version 3 game.
 ***************************************************************************/
-void initfiles()
+void initFiles()
 {
-    DbgInit(0);
    loadGameSig(gameSig);
    if (strlen(gameSig) > 0) version3 = TRUE;
    loadAGIDirs();
@@ -96,7 +95,7 @@ void loadAGIDir(int dirNum, char *fName, int *count)
       byte3 = fgetc(fp);
 
       tempPos.fileName = (char *)malloc(10);
-      sprintf(tempPos.fileName, "VOL.%d", ((byte1 & 0xF0) >> 4));
+      sprintf(tempPos.fileName, "vol.%d", ((byte1 & 0xF0) >> 4));
       
       address[3] = 0;
       address[2] = byte1 & 0x0F;
@@ -107,33 +106,14 @@ void loadAGIDir(int dirNum, char *fName, int *count)
       memcpy(&tempPos.filePos, &address[0], 4);
 
       value = tempPos.filePos;
-
   
-
-      //printf("Value:%p\n", (void*)&value);
-
-      //printf("Address: %p Address: %p, Address: %p Address: %p\n", address[0], address[1], address[2], address[3]);
-
-      //printf("Byte1: %p Byte2: %p, Byte3: %p Value: %lu\n", byte1, byte2, byte3, tempPos.filePos);
-
-      /*tempPos.filePos = ((unsigned long)((byte1 & 0x0F) << 16) +
-          (unsigned long)((byte2 & 0xFF) << 8) +
-          (unsigned long)(byte3 & 0xFF));*/
-
-
-      //printf("Address Is %p\n", (void*)&frog);
-        
-
-
-      //printf("%s %s %lu %d \n", fName, tempPos.fileName, tempPos.filePos, *count);
-
       switch (dirNum) {
          case 0: logdir[*count] = tempPos; break;
          case 1: picdir[*count] = tempPos; break;
          case 2: viewdir[*count] = tempPos; break;
          case 3: snddir[*count] = tempPos; break;
       }
-      //printf("tempPos.filePos %lu \n", tempPos.filePos);
+
       (*count)++;
    }
 
@@ -219,7 +199,7 @@ void loadAGIDirs()
       loadAGIDir(1, "picdir", &numPictures);
       loadAGIDir(2, "viewdir", &numViews);
       loadAGIDir(3, "snddir", &numSounds);
-      printf("Index Load Complete");
+      printf("Index Load Complete\n");
    }
 }
 
@@ -296,6 +276,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData)
       printf("Make sure you are in an AGI version 2 game directory.\n");
       exit(0);
    }
+
+   exit(0);
 
    //fseek(fp, location->filePos, SEEK_SET);
    fread(&sig, 2, 1, fp);

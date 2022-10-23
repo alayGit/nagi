@@ -1,15 +1,7 @@
 #include "stub.h"
 
+//View
 ViewTable viewtab[1];
-
-//Logic
-void discardLogicFile(int logFileNum) {
-
-}
-
-void initLogics() {
-
-}
 
 void resetViews()
 {

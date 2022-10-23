@@ -27,7 +27,7 @@ typedef struct {          /* AGI data file structure */
 extern AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];
 extern int numLogics, numPictures, numViews, numSounds;
 
-void initfiles();
+void initFiles();
 void loadAGIDirs();
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData);
 

@@ -2,10 +2,6 @@
 #define _STUB_H
 #include "general.h"
 
-//Logic
-void discardLogicFile(int logFileNum);
-void initLogics();
-
 //Picture
 void discardPictureFile(int picFileNum);
 void initPicture();

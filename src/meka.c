@@ -14,7 +14,7 @@
 #include "general.h"
 #include "timer.h"
 #include "agifiles.h"
-//#include "logic.h"
+#include "logic.h"
 //#include "view.h"
 #include "stub.h"
 //#include "object.h"
@@ -192,7 +192,7 @@ void initialise()
 
     initTimer(&timing_proc);
 
-   initfiles();             /* Load resource directories */
+   initFiles();             /* Load resource directories */
    //// <<--  Determine exact version in here
    for (i=0; i<255; i++) {  /* Initialize variables and flags */
       var[i] = 0;
