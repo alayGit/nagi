@@ -15,6 +15,8 @@
 #define  FALSE   0
 #endif
 
+#define SEQUENTIAL_LFN 2
+
 typedef unsigned char byte;
 typedef unsigned short int word;
 typedef char boolean;

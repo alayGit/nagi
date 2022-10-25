@@ -19,7 +19,8 @@
 #include "agifiles.h"
 #include "decomp.h"
 
-#define  AVIS_DURGAN  "Avis Durgan"
+#define  AVIS_DURGAN  "Avis Durgan" //https://www.liquisearch.com/what_is_avis_durgan
+#define FILE_OPEN_ADDRESS 2
 
 AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];
 int numLogics, numPictures, numViews, numSounds;
@@ -40,7 +41,28 @@ void initFiles()
    loadAGIDirs();
 }
 
+byte cbm_openForSeeking(const char* filename)
+{
+    int i;
+    char s[200];
+    byte lfn = SEQUENTIAL_LFN;
+    byte dev = 8;
+    byte sec_addr = FILE_OPEN_ADDRESS;
+    byte res = cbm_open(lfn, dev, sec_addr, "vol.1,S,R");
+
+    return lfn;
+}
+
+byte cbm_getSeekedByte()
+{
+    cbm_k_chkin(2);
+
+    return cbm_k_chrin();
+}
+
 int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
+    int8_t result = 0, status = 0, chkin = 0;
+    int i;
 #define SETNAM 0xFFBD
     static struct cmd {
         char p;
@@ -48,6 +70,8 @@ int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
         uint32_t offset;
     } cmd;
 
+    printf("Attempting to seek at channel %d offset %lu\n", channel, offset);
+   
     // open command channel to DOS and send P command.
     // P u8 u32 (no spaces) u8 is LFN to seek(), and u32 = offset.
     cmd.p = 'p';
@@ -63,7 +87,9 @@ int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
     __asm__("jsr %w", SETNAM);
     cbm_k_setlfs(15, 8, 15);
     cbm_k_open(); // this sends the CMD bytes..
+ 
     cbm_k_close(15); // close the command channel
+
     return 0;
     // TODO: ERROR HANDLING!!!!!
 }
@@ -260,92 +286,131 @@ void convertPic(unsigned char *input, unsigned char *output, int dataLen)
 **************************************************************************/
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData)
 {
-   FILE *fp;
-   short int sig, compSize, startPos, endPos, numMess, avisPos=0, i;
-   unsigned char byte1, byte2, volNum, *compBuf, *fileData;
+    byte actualSig1, actualSig2;
+    byte lfn;
+    byte result;
 
-   if (location->filePos == EMPTY) {
-      printf("Could not find requested AGI file.\n");
-      printf("This could indicate problems with your game data files\n");
-      printf("or there may be something wrong with MEKA.\n");
-      exit(0);
-   }
+    const byte EXPECT_SIG_1 = 0x12;
+    const byte EXPECTED_SIG_2 = 0x34;
 
-   if ((fp = fopen(location->fileName, "rb")) == NULL) {
-      printf("Could not find file : %s.\n", location->fileName);
-      printf("Make sure you are in an AGI version 2 game directory.\n");
-      exit(0);
-   }
+    printf("----Attempting to open %s for seeking data\n", location->fileName);
+    
+    if (location->filePos == EMPTY) {
+     printf("Could not find requested AGI file.\n");
+     printf("This could indicate problems with your game data files\n");
+     printf("or there may be something wrong with MEKA.\n");
+     exit(0);
+  }
 
-   exit(0);
+    lfn = cbm_openForSeeking(location->fileName);
+
+    cx16_fseek(FILE_OPEN_ADDRESS, location->filePos);
+
+    result = cbm_getSeekedByte();
+    printf("The result is %p\n", result);
+
+    printf("The result address is %p\n", &result);
+
+    cx16_fseek(FILE_OPEN_ADDRESS, location->filePos + 1);
+
+    result = cbm_getSeekedByte();
+    printf("The result is %p\n", result);
+    printf("The result address is %p\n", &result);
+
+    cx16_fseek(FILE_OPEN_ADDRESS, location->filePos + 2);
+
+    result = cbm_getSeekedByte();
+    printf("The result is %p\n", result);
+    printf("The result address is %p\n", &result);
+
+    exit(0);
+
+   //FILE *fp;
+   //short int sig, compSize, startPos, endPos, numMess, avisPos=0, i;
+   //unsigned char byte1, byte2, volNum, *compBuf, *fileData;
+
+   //if (location->filePos == EMPTY) {
+   //   printf("Could not find requested AGI file.\n");
+   //   printf("This could indicate problems with your game data files\n");
+   //   printf("or there may be something wrong with MEKA.\n");
+   //   exit(0);
+   //}
+
+   //if ((fp = fopen(location->fileName, "rb")) == NULL) {
+   //   printf("Could not find file : %s.\n", location->fileName);
+   //   printf("Make sure you are in an AGI version 2 game directory.\n");
+   //   exit(0);
+   //}
 
    //fseek(fp, location->filePos, SEEK_SET);
-   fread(&sig, 2, 1, fp);
-   if (sig != 0x3412) {  /* All AGI data files start with 0x1234 */
-      printf("Data error reading %s.\n", location->fileName);
-      printf("The requested AGI file did not have a signature.\n");
-      printf("Check if your game files are corrupt.\n");
-      exit(0);
-   }
-   volNum = fgetc(fp);
-   byte1 = fgetc(fp);
-   byte2 = fgetc(fp);
-   AGIData->size = (unsigned int)(byte1) + (unsigned int)(byte2 << 8);
-   AGIData->data = (char *)malloc(AGIData->size);
+   //fread(&sig, 2, 1, fp);
+   ////if (sig != 0x3412) {  /* All AGI data files start with 0x1234 */
+   ////   printf("Data error reading %s.\n", location->fileName);
+   ////   printf("The requested AGI file did not have a signature.\n");
+   ////   printf("Check if your game files are corrupt.\n");
+   ////   exit(0);
+   ////}
+   //volNum = fgetc(fp);
+   //byte1 = fgetc(fp);
+   //byte2 = fgetc(fp);
+   //AGIData->size = (unsigned int)(byte1) + (unsigned int)(byte2 << 8);
+   //AGIData->data = (char *)malloc(AGIData->size);
 
-   if (version3) {
-      byte1 = fgetc(fp);
-      byte2 = fgetc(fp);
-      compSize = (unsigned int)(byte1) + (unsigned int)(byte2 << 8);
-      compBuf = (unsigned char *)malloc((compSize+10)*sizeof(char));
-      fread(compBuf, sizeof(char), compSize, fp);
+ 
 
-      //initLZW();
+   //if (version3) {
+   //   byte1 = fgetc(fp);
+   //   byte2 = fgetc(fp);
+   //   compSize = (unsigned int)(byte1) + (unsigned int)(byte2 << 8);
+   //   compBuf = (unsigned char *)malloc((compSize+10)*sizeof(char));
+   //   fread(compBuf, sizeof(char), compSize, fp);
 
-      if (volNum & 0x80) {
-         convertPic(compBuf, AGIData->data, compSize);
-      }
-      else if (AGIData->size == compSize) {  /* Not compressed */
-         memcpy(AGIData->data, compBuf, compSize);
+   //   //initLZW();
 
-         if (resType == LOGIC) {
-            /* Uncompressed AGIv3 logic files have their message sections
-               encrypted, so we decrypt it here */
-            fileData = AGIData->data;
-            startPos = *fileData + (*(fileData+1))*256 + 2;
-            numMess = fileData[startPos];
-            endPos = fileData[startPos+1] + fileData[startPos+2]*256;
-            fileData += (startPos + 3);
-            startPos = (numMess * 2) + 0;
+   //   if (volNum & 0x80) {
+   //      convertPic(compBuf, AGIData->data, compSize);
+   //   }
+   //   else if (AGIData->size == compSize) {  /* Not compressed */
+   //      memcpy(AGIData->data, compBuf, compSize);
 
-            for (i=startPos; i<endPos; i++)
-	            fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
-         }
+   //      if (resType == LOGIC) {
+   //         /* Uncompressed AGIv3 logic files have their message sections
+   //            encrypted, so we decrypt it here */
+   //         fileData = AGIData->data;
+   //         startPos = *fileData + (*(fileData+1))*256 + 2;
+   //         numMess = fileData[startPos];
+   //         endPos = fileData[startPos+1] + fileData[startPos+2]*256;
+   //         fileData += (startPos + 3);
+   //         startPos = (numMess * 2) + 0;
 
-         free(compBuf);
-      }
-      else {
-         expand(compBuf, AGIData->data, AGIData->size);
-      }
+   //         for (i=startPos; i<endPos; i++)
+	  //          fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
+   //      }
 
-      free(compBuf);
-      //closeLZW();
-   }
-   else {
-      fread(AGIData->data, AGIData->size, 1, fp);
-      if (resType == LOGIC) {
-         /* Decrypt message section */
-         fileData = AGIData->data;
-         startPos = *fileData + (*(fileData+1))*256 + 2;
-         numMess = fileData[startPos];
-         endPos = fileData[startPos+1] + fileData[startPos+2]*256;
-         fileData += (startPos + 3);
-         startPos = (numMess * 2) + 0;
+   //      free(compBuf);
+   //   }
+   //   else {
+   //      expand(compBuf, AGIData->data, AGIData->size);
+   //   }
 
-         for (i=startPos; i<endPos; i++)
-	         fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
-      }
-   }
+   //   free(compBuf);
+   //   //closeLZW();
+   //}
+   //else {
+   //   fread(AGIData->data, AGIData->size, 1, fp);
+   //   if (resType == LOGIC) {
+   //      /* Decrypt message section */
+   //      fileData = AGIData->data;
+   //      startPos = *fileData + (*(fileData+1))*256 + 2;
+   //      numMess = fileData[startPos];
+   //      endPos = fileData[startPos+1] + fileData[startPos+2]*256;
+   //      fileData += (startPos + 3);
+   //      startPos = (numMess * 2) + 0;
 
-   fclose(fp);
+   //      for (i=startPos; i<endPos; i++)
+	  //       fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
+   //   }
+   //}
+
+    cbm_close(lfn);
 }
