@@ -1,5 +1,10 @@
 #include "general.h"
+
+#ifndef _MSC_VER
 #include <cx16.h>
+#endif // !_MSC_VER
+
+
 
 #define MANAGED_START 0
 
@@ -21,5 +26,5 @@
 
 void memoryMangerInit();
 byte* alloc(int size);
-short getSearchStart(int size);
+int getSearchStart(int size);
 
