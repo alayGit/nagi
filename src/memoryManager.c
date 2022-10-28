@@ -13,7 +13,6 @@ int _allocationArrayStart;
 
 #ifdef _MSC_VER //Used for testing under windows
 byte* banked;
-#define BANKED_RAM banked
 #endif 
 
 
@@ -50,23 +49,23 @@ int getSearchStart(int size)
 	{
 		searchStart = _extraSmallStart;
 	}
-	else if (size <= _smallSmart)
+	else if (size <= SMALL_SIZE)
 	{
 		searchStart = _smallSmart;
 	}
-	else if (size <= _mediumStart)
+	else if (size <= MEDIUM_SIZE)
 	{
 		searchStart = _mediumStart;
 	}
-	else if (size <= _mediumLargeStart)
+	else if (size <= MEDIUM_LARGE_SIZE)
 	{
 		searchStart = _mediumLargeStart;
 	}
-	else if (size <= _largeStart)
+	else if (size <= LARGE_SIZE)
 	{
 		searchStart = _largeStart;
 	}
-	else if (size <= _extraLargeStart)
+	else if (size <= EXTRA_LARGE_SIZE)
 	{
 		searchStart = _extraLargeStart;
 	}
@@ -77,7 +76,6 @@ int getSearchStart(int size)
 
 	return searchStart;
 }
-
 
 byte* banked_alloc(int size)
 {
@@ -108,4 +106,25 @@ byte* banked_alloc(int size)
 		}
 	}
 	return memoryLocation;
+}
+
+byte* banked_dealloc(byte* ptr)
+{
+	short i = 0;
+	short j = 0;
+	boolean found = FALSE;
+	byte* potentialDelete = NULL;
+	
+	for (i = 0; i < _allocationArraySize && !found; i = i + sizeof(byte*))
+	{
+		memcpy(&potentialDelete, BANK_RAM + _allocationArrayStart + i, sizeof(byte*));
+		
+		if (potentialDelete == ptr)
+		{
+			for (j = 0; j < sizeof(byte*); j++)
+			{
+				BANK_RAM[_allocationArrayStart + i + j] = NULL;
+			}
+		}
+	}
 }

@@ -25,6 +25,7 @@
 #define EXTRA_LARGE_SIZE 32000
 
 void memoryMangerInit();
-byte* alloc(int size);
+byte* banked_alloc(int size);
+byte* banked_dealloc(byte* ptr);
 int getSearchStart(int size);
 
