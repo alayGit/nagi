@@ -342,24 +342,25 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte2 = currentByte;
 
 	AGIData->size = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
-	AGIData->data = (char*)malloc(AGIData->size);
+	AGIData->data = BANK_RAM;
 	//memset(AGIData->data, 0, AGIData->size);
 
 	printf("AGIData data is %p\n and the size is %d\n", AGIData->data, AGIData->size);
 
 	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
 
-	printf("Attempting to read data of size %d", AGIData->size);
+	printf("Attempting to read data of size %d\n", AGIData->size);
+
+	//printf("The address of banked ram is %p and it holds %p", BANK_RAM, *BANK_RAM);
 	
-	exit(0);
+	cbm_read(SEQUENTIAL_LFN, AGIData->data, AGIData->size);
+	printf("The address of agi data is %p and it holds %p\n", AGIData->data, *AGIData->data);
+	printf("The address of banked ram is %p and it holds %p\n", BANK_RAM, *BANK_RAM);
 
-	for (i = 0; i < AGIData->size; i++)
-	{
-		printf("Read %d\n", i);
-		cbm_read(SEQUENTIAL_LFN, &AGIData->data[i], 1);
-	}
+	printf("Size of byte pointer %d", sizeof(byte*));
 
-	printf("Passed");
+	for (i = 0; i < 1000000; i++);
+
 	exit(0);
 
 	if (resType == LOGIC) {

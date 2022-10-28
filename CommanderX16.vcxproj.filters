@@ -51,6 +51,9 @@
     <ClInclude Include="src\logic.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\memoryManager.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\COMMANDS.C">
@@ -102,6 +105,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\logic.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memoryManager.c">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

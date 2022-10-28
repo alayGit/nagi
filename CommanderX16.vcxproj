@@ -23,6 +23,7 @@
     <ClInclude Include="src\GUI.H" />
     <ClInclude Include="src\LIST.H" />
     <ClInclude Include="src\logic.h" />
+    <ClInclude Include="src\memoryManager.h" />
     <ClInclude Include="src\OBJECT.H" />
     <ClInclude Include="src\PALETTE.H" />
     <ClInclude Include="src\PARSER.H" />
@@ -40,6 +41,7 @@
     <ClCompile Include="src\GUI.C" />
     <ClCompile Include="src\logic.c" />
     <ClCompile Include="src\MEKA.C" />
+    <ClCompile Include="src\memoryManager.c" />
     <ClCompile Include="src\OBJECT.C" />
     <ClCompile Include="src\PARSER.C" />
     <ClCompile Include="src\PICTURE.C" />
