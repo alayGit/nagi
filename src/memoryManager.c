@@ -8,7 +8,6 @@ int _mediumStart;
 int _mediumLargeStart;
 int _largeStart;
 int _extraLargeStart;
-int _allocationArraySize;
 int _allocationArrayStart;
 
 #ifdef _MSC_VER //Used for testing under windows
@@ -35,41 +34,36 @@ void memoryMangerInit()
 	_extraLargeStart = _largeStart + (LARGE_SIZE * MAX_LARGE);
 	_allocationArrayStart = _extraLargeStart + (EXTRA_LARGE_SIZE * MAX_EXTRA_LARGE);
 
+	//printf("memset at %d %d\n", &BANK_RAM[_allocationArrayStart], _allocationArrayStart);
 	memset(BANK_RAM + _allocationArrayStart, NULL, _allocationArraySize * sizeof(byte*));
 }
 
 int getSearchStart(int size)
 {
 	int searchStart = 0;
-	if (size <= TINY_SIZE)
+	searchStart = MANAGED_START;
+	
+	if (size > TINY_SIZE)
 	{
-		searchStart = _tinyStart;
+		searchStart+= MAX_TINY;
 	}
-	else if (size <= EXTRA_SMALL_SIZE)
+	if (size > EXTRA_SMALL_SIZE)
 	{
-		searchStart = _extraSmallStart;
+		searchStart += MAX_EXTRA_SMALL;
 	}
-	else if (size <= SMALL_SIZE)
+	if (size >= SMALL_SIZE)
 	{
-		searchStart = _smallSmart;
+		searchStart += MAX_SMALL;
 	}
-	else if (size <= MEDIUM_SIZE)
+	if (size > MEDIUM_SIZE)
 	{
-		searchStart = _mediumStart;
+		searchStart += MAX_MEDIUM;
 	}
-	else if (size <= MEDIUM_LARGE_SIZE)
+	if (size > LARGE_SIZE)
 	{
-		searchStart = _mediumLargeStart;
+		searchStart+= MAX_LARGE;
 	}
-	else if (size <= LARGE_SIZE)
-	{
-		searchStart = _largeStart;
-	}
-	else if (size <= EXTRA_LARGE_SIZE)
-	{
-		searchStart = _extraLargeStart;
-	}
-	else {
+	if (size > EXTRA_LARGE_SIZE) {
 		printf("Attempting to allocate a string of size %d, this is bigger then allowed", size);
 		exit(0);
 	}
@@ -81,16 +75,18 @@ byte* banked_alloc(int size)
 {
 	short i,j;
 	int searchStart = getSearchStart(size);
+
 	byte potentialEmptyByte = NULL;
 	boolean found = FALSE;
 	byte* memoryLocation = NULL;
 	byte** ptrMemoryLocation;
-
-
-	for (i = searchStart; i < _allocationArraySize * sizeof(byte*) && !found; i = i + sizeof(byte*))
+	
+	for (i = searchStart * sizeof(byte*); i < _allocationArraySize * sizeof(byte*) && !found; i = i + sizeof(byte*))
 	{
+		
 		potentialEmptyByte = BANK_RAM[_allocationArrayStart + i];
 
+		printf("The byte is %d", potentialEmptyByte);
 		if (potentialEmptyByte == NULL)
 		{
 			memoryLocation = BANK_RAM + i;
@@ -115,7 +111,7 @@ byte* banked_dealloc(byte* ptr)
 	boolean found = FALSE;
 	byte* potentialDelete = NULL;
 	
-	for (i = 0; i < _allocationArraySize && !found; i = i + sizeof(byte*))
+	for (i = 0; i < _allocationArraySize * sizeof(byte*) && !found; i = i + sizeof(byte*))
 	{
 		memcpy(&potentialDelete, BANK_RAM + _allocationArrayStart + i, sizeof(byte*));
 		

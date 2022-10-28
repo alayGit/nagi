@@ -190,6 +190,8 @@ void initialise()
 {
     int i;
 
+    memoryMangerInit();
+
     initTimer(&timing_proc);
 
    initFiles();             /* Load resource directories */
