@@ -18,6 +18,7 @@
 #include "general.h"
 #include "agifiles.h"
 #include "decomp.h"
+#include "memoryManager.h"
 
 #define  AVIS_DURGAN  "Avis Durgan" //https://www.liquisearch.com/what_is_avis_durgan
 #define FILE_OPEN_ADDRESS 2
@@ -342,14 +343,12 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte2 = currentByte;
 
 	AGIData->size = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
-	//AGIData->data = banked_alloc(AGIData->size);
+	AGIData->data = banked_alloc(AGIData->size);
 	//memset(AGIData->data, 0, AGIData->size);
 
 	printf("AGIData data is %p\n and the size is %d\n", AGIData->data, AGIData->size);
 
 	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
-
-	exit(0);
 
 	printf("Attempting to read data of size %d in %p\n", AGIData->size, AGIData->data);
 
