@@ -342,6 +342,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	byte2 = currentByte;
 
+	exit(0);
+
 	AGIData->size = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
 	AGIData->data = banked_alloc(AGIData->size);
 	//memset(AGIData->data, 0, AGIData->size);

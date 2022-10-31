@@ -17,6 +17,7 @@
 #include "logic.h"
 //#include "view.h"
 #include "stub.h"
+#include "memoryManager.h"
 //#include "object.h"
 //#include "words.h"
 //#include "picture.h"
