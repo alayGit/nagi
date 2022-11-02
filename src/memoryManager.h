@@ -13,7 +13,7 @@
 #define MEDIUM_SEG_ORDER  3
 #define LARGE_SEG_ORDER  4
 
-#define TINY_NO_SEGMENTS  50
+#define TINY_NO_SEGMENTS  80
 #define EXTRA_SMALL_NO_SEGMENTS 50
 #define SMALL_NO_SEGMENTS 30
 #define MEDIUM_NO_SEGMENTS 20
@@ -26,10 +26,10 @@
 #define LARGE_SIZE 8000
 
 #define TINY_NO_BANKS  1
-#define EXTRA_SMALL_NO_BANKS 2
-#define SMALL_NO_BANKS 6
-#define MEDIUM_NO_BANKS 8
-#define LARGE_NO_BANKS 5
+#define EXTRA_SMALL_NO_BANKS 1
+#define SMALL_NO_BANKS 7
+#define MEDIUM_NO_BANKS 9
+#define LARGE_NO_BANKS 6
 
 #define NO_SIZES 5
 
@@ -37,14 +37,14 @@ typedef struct {          /* DIR entry structure */
 	byte* banks;
 	byte noBanks;
 	int segmentSize;
-	byte* allocationArray;
+	boolean* allocationArray;
 	byte noSegments;
 } Segment;
 
 void memoryMangerInit();
-byte* banked_alloc(int size);
+byte* banked_alloc(int size, byte* bank);
 byte* banked_dealloc(byte* ptr);
-void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments);
+void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte* banks);
 
 #endif
 

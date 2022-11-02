@@ -345,7 +345,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	exit(0);
 
 	AGIData->size = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
-	AGIData->data = banked_alloc(AGIData->size);
+	//AGIData->data = banked_alloc(AGIData->size);
 	//memset(AGIData->data, 0, AGIData->size);
 
 	printf("AGIData data is %p\n and the size is %d\n", AGIData->data, AGIData->size);
