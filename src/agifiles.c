@@ -297,10 +297,11 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 	short compSize, startPos, endPos, numMess, avisPos = 0, i;
 	unsigned char byte1, byte2, volNum, * compBuf, * fileData;
-	byte actualSig1, actualSig2;
+	byte actualSig1, actualSig2, bank;
 	byte lfn;
 	byte currentByte;
 	boolean signatureValidationPassed;
+	byte* memlocation;
 
 	const byte EXPECT_SIG_1 = 0x12;
 	const byte EXPECTED_SIG_2 = 0x34;
@@ -339,6 +340,10 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	byte2 = currentByte;
+
+	memlocation = banked_alloc(8000, &bank);
+
+	printf("allocated at %p on bank %d", memlocation, bank);
 
 	exit(0);
 

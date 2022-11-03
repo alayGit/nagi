@@ -37,14 +37,16 @@
 #define MEDIUM_FIRST_BANK 10
 #define LARGE_FIRST_BANK 19
 
+#define ALLOCATION_BANK 44
+
 #define NO_SIZES 5
 
+extern int _noSegments;
 
 typedef struct {          /* DIR entry structure */
 	byte firstBank;
 	byte noBanks;
 	int segmentSize;
-	boolean* allocationArray;
 	byte noSegments;
 	byte* start;
 } Segment;
