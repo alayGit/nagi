@@ -31,8 +31,8 @@
 #define MEDIUM_NO_BANKS 9
 #define LARGE_NO_BANKS 6
 
-#define TINY_FIRST_BANK  0
-#define EXTRA_SMALL_FIRST_BANK 1
+#define TINY_FIRST_BANK  1
+#define EXTRA_SMALL_FIRST_BANK 2
 #define SMALL_FIRST_BANK 3
 #define MEDIUM_FIRST_BANK 10
 #define LARGE_FIRST_BANK 19
@@ -40,6 +40,10 @@
 #define ALLOCATION_BANK 44
 
 #define NO_SIZES 5
+
+#define BANK_SIZE 8000
+
+#define ALLOCATION_ARRAY_START_INDEX 0
 
 extern int _noSegments;
 
@@ -49,11 +53,11 @@ typedef struct {          /* DIR entry structure */
 	int segmentSize;
 	byte noSegments;
 	byte* start;
-} Segment;
+} MemoryArea;
 
 void memoryMangerInit();
 byte* banked_alloc(int size, byte* bank);
-byte* banked_dealloc(byte* ptr);
+boolean banked_dealloc(byte* ptr, byte bank);
 void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte firstBank);
 
 #endif
