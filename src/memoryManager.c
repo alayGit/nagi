@@ -2,21 +2,24 @@
 
 Segment* _segments;
 
-byte _tinyBanks[] = {0};
-byte _extraSmallBanks[] = {1};
-byte _smallBanks[] = {3,4,5,6,7,8,9};
-byte _mediumBanks[] = { 10,11,12,13,14,15,16,17,19 };
-byte _largeBanks[] = { 19,20,21,22,23,24 };
 
 
 #ifdef _MSC_VER //Used for testing under windows
 byte* banked;
 #endif 
 
-void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte* banks)
+void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte firstBank)
 {
-	_segments[segOrder].banks = malloc(noBanks);
-	memcpy(_segments[segOrder].banks, banks, noBanks);
+	if (segOrder > 0)
+	{
+		_segments[segOrder].start = _segments[segOrder - 1].start + _segments[segOrder - 1].noSegments;
+		//printf("The address is %p \n", _segments[segOrder].start);
+	}
+	else {
+		_segments[segOrder].start = &BANK_RAM[0];
+	}
+
+	_segments[segOrder].firstBank = firstBank;
 	
 	_segments[segOrder].noBanks = noBanks;
 	
@@ -26,7 +29,7 @@ void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments,
 	
 	_segments[segOrder].noSegments = noSegments;
 
-	printf("Segments: banks %p, noBanks %d, segmentSize %d, allocationArray %p, noSegments %d\n", _segments[segOrder].banks, _segments[segOrder].noBanks, _segments[segOrder].segmentSize, _segments[segOrder].allocationArray, _segments[segOrder].noSegments);
+	//printf("Segments: banks %p, noBanks %d, segmentSize %d, allocationArray %p, noSegments %d\n", _segments[segOrder].banks, _segments[segOrder].noBanks, _segments[segOrder].segmentSize, _segments[segOrder].allocationArray, _segments[segOrder].noSegments);
 }
 
 void memoryMangerInit()
@@ -39,11 +42,11 @@ void memoryMangerInit()
 
 	_segments = malloc(sizeof(Segment) * NO_SIZES);
 
-	initSegments(TINY_SEG_ORDER, TINY_NO_BANKS, TINY_SIZE, TINY_NO_SEGMENTS, &_tinyBanks[0]);
-	initSegments(EXTRA_SMALL_SEG_ORDER, EXTRA_SMALL_NO_BANKS, EXTRA_SMALL_SIZE, EXTRA_SMALL_NO_SEGMENTS, &_extraSmallBanks[0]);
-	initSegments(SMALL_SEG_ORDER, SMALL_NO_BANKS, SMALL_SIZE, SMALL_NO_SEGMENTS, &_smallBanks[0]);
-	initSegments(MEDIUM_SEG_ORDER, MEDIUM_NO_BANKS, MEDIUM_SIZE, MEDIUM_NO_SEGMENTS, &_mediumBanks[0]);
-	initSegments(LARGE_SEG_ORDER, LARGE_NO_BANKS, LARGE_SIZE, LARGE_NO_SEGMENTS, &_largeBanks[0]);
+	initSegments(TINY_SEG_ORDER, TINY_NO_BANKS, TINY_SIZE, TINY_NO_SEGMENTS, TINY_FIRST_BANK);
+	initSegments(EXTRA_SMALL_SEG_ORDER, EXTRA_SMALL_NO_BANKS, EXTRA_SMALL_SIZE, EXTRA_SMALL_NO_SEGMENTS, EXTRA_SMALL_FIRST_BANK);
+	initSegments(SMALL_SEG_ORDER, SMALL_NO_BANKS, SMALL_SIZE, SMALL_NO_SEGMENTS, SMALL_FIRST_BANK);
+	initSegments(MEDIUM_SEG_ORDER, MEDIUM_NO_BANKS, MEDIUM_SIZE, MEDIUM_NO_SEGMENTS, MEDIUM_FIRST_BANK);
+	initSegments(LARGE_SEG_ORDER, LARGE_NO_BANKS, LARGE_SIZE, LARGE_NO_SEGMENTS, LARGE_FIRST_BANK);
 }
 
 byte* banked_alloc(int size, byte* bank)
@@ -59,7 +62,7 @@ byte* banked_alloc(int size, byte* bank)
 				if (!_segments[i].allocationArray[j])
 				{
 					_segments[i].allocationArray[j] == TRUE;
-					*bank = (byte) (j * _segments[i].segmentSize) / 8000 + _segments[i].banks[0];
+					*bank = (byte) (j * _segments[i].segmentSize) / 8000 + _segments[i].firstBank;
 					result = _segments[i].segmentSize * j + &BANK_RAM[0];
 				}
 			}

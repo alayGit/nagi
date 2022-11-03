@@ -31,20 +31,28 @@
 #define MEDIUM_NO_BANKS 9
 #define LARGE_NO_BANKS 6
 
+#define TINY_FIRST_BANK  0
+#define EXTRA_SMALL_FIRST_BANK 1
+#define SMALL_FIRST_BANK 3
+#define MEDIUM_FIRST_BANK 10
+#define LARGE_FIRST_BANK 19
+
 #define NO_SIZES 5
 
+
 typedef struct {          /* DIR entry structure */
-	byte* banks;
+	byte firstBank;
 	byte noBanks;
 	int segmentSize;
 	boolean* allocationArray;
 	byte noSegments;
+	byte* start;
 } Segment;
 
 void memoryMangerInit();
 byte* banked_alloc(int size, byte* bank);
 byte* banked_dealloc(byte* ptr);
-void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte* banks);
+void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte firstBank);
 
 #endif
 

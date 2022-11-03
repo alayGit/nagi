@@ -234,7 +234,7 @@ void loadAGIDirs()
 		loadAGIDir(1, "picdir", &numPictures);
 		loadAGIDir(2, "viewdir", &numViews);
 		loadAGIDir(3, "snddir", &numSounds);
-		printf("Index Load Complete\n");
+		printf("ILC\n");
 	}
 }
 
@@ -309,8 +309,6 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	if (location->filePos == EMPTY) {
 		printf("Could not find requested AGI file.\n");
-		printf("This could indicate problems with your game data files\n");
-		printf("or there may be something wrong with MEKA.\n");
 		exit(0);
 	}
 
@@ -331,7 +329,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		exit(0);
 	}
 
-	printf("Passed Signature Validation\n");
+	printf("PS\n");
 
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	volNum = currentByte;
@@ -360,7 +358,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	printf("The address of agi data is %p and it holds %p\n", AGIData->data, *AGIData->data);
 	printf("The address of banked ram is %p and it holds %p\n", BANK_RAM, *BANK_RAM);
 
-	printf("Size of byte pointer %d", sizeof(byte*));
+	//printf("Size of byte pointer %d", sizeof(byte*));
 
 	for (i = 0; i < 1000000; i++);
 
