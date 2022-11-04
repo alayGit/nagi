@@ -44,20 +44,27 @@ void initFiles()
 
 byte cbm_openForSeeking(const char* fileName)
 {
+	byte previousRamBank = RAM_BANK;
 	int i;
 	char s[200];
 	const char* OPEN_FLAGS = ",S,R";
 
 	byte lfn = SEQUENTIAL_LFN;
 	byte dev = 8;
-	byte sec_addr = FILE_OPEN_ADDRESS;
 
-	char* fileNameAndFlags = malloc(strlen(fileName) + strlen(OPEN_FLAGS) + 1);
+	byte bank;
+	
+	char* fileNameAndFlags;
+	byte sec_addr = FILE_OPEN_ADDRESS;
+	
+	RAM_BANK = ALLOCATION_BANK;
+	fileNameAndFlags = (char*)banked_alloc(strlen(fileName) + strlen(OPEN_FLAGS) + 1, &bank);
 	sprintf(fileNameAndFlags, "%s%s", fileName, OPEN_FLAGS);
 
 	cbm_open(lfn, dev, sec_addr, fileNameAndFlags);
+	RAM_BANK = previousRamBank;
 
-	free(fileNameAndFlags);
+	banked_dealloc((byte*)fileNameAndFlags, bank);
 
 	return lfn;
 }
