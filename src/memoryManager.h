@@ -21,7 +21,7 @@
 
 #define TINY_SIZE  100
 #define EXTRA_SMALL_SIZE 160
-#define SMALL_SIZE 1500
+#define SMALL_SIZE 1600
 #define MEDIUM_SIZE 3200
 #define LARGE_SIZE 8000
 
@@ -45,6 +45,11 @@
 
 #define ALLOCATION_ARRAY_START_INDEX 0
 
+#ifdef _MSC_VER //Used for testing under windows
+extern byte* banked;
+#define BANK_RAM banked
+#endif 
+
 extern int _noSegments;
 
 typedef struct {          /* DIR entry structure */
@@ -59,6 +64,7 @@ void memoryMangerInit();
 byte* banked_alloc(int size, byte* bank);
 boolean banked_dealloc(byte* ptr, byte bank);
 void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte firstBank);
+byte getFirstSegment(byte size);
 
 #endif
 

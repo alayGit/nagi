@@ -6,7 +6,6 @@ int _noSegments;
 
 #ifdef _MSC_VER //Used for testing under windows
 byte* banked;
-#define BANK_RAM banked
 #endif 
 
 void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte firstBank)
@@ -31,6 +30,29 @@ void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments,
 	//printf("Segments: banks %p, noBanks %d, segmentSize %d, allocationArray %p, noSegments %d\n", _segments[segOrder].banks, _segments[segOrder].noBanks, _segments[segOrder].segmentSize, _segments[segOrder].allocationArray, _segments[segOrder].noSegments);
 }
 
+byte getFirstSegment(byte size)
+{
+	byte i;
+	byte result = 0;
+
+#ifdef  __CX16__
+	byte previousRamBank = RAM_BANK;
+	
+	RAM_BANK = ALLOCATION_BANK;
+#endif //  __CX16__
+
+	for (i = 0; i < size; i++)
+	{
+		result += _memoryAreas[i].noSegments;
+	}
+
+	return result;
+
+#ifdef  __CX16__
+		RAM_BANK = previousRamBank;
+#endif //  __CX16__
+}
+
 void memoryMangerInit()
 {
 #ifdef _MSC_VER
@@ -41,7 +63,7 @@ void memoryMangerInit()
 	RAM_BANK = ALLOCATION_BANK;
 #endif //  __CX16__
 
-	_noSegments = TINY_NO_BANKS + EXTRA_SMALL_NO_BANKS + SMALL_NO_BANKS + MEDIUM_NO_BANKS + LARGE_NO_BANKS;
+	_noSegments = TINY_NO_SEGMENTS + EXTRA_SMALL_NO_SEGMENTS + SMALL_NO_SEGMENTS + MEDIUM_NO_SEGMENTS + LARGE_NO_SEGMENTS;
 
 	_memoryAreas = malloc(sizeof(MemoryArea) * NO_SIZES);
 
