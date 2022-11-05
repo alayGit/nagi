@@ -309,6 +309,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte currentByte;
 	boolean signatureValidationPassed;
 	byte* memlocation;
+	byte previousRamBank = RAM_BANK;
 
 	const byte EXPECT_SIG_1 = 0x12;
 	const byte EXPECTED_SIG_2 = 0x34;
@@ -348,37 +349,58 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	byte2 = currentByte;
 
-	memlocation = banked_alloc(8000, &bank);
-
-	printf("allocated at %p on bank %d", memlocation, bank);
-
-	exit(0);
-
-	AGIData->size = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
+	AGIData->totalSize = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
 	//AGIData->data = banked_alloc(AGIData->size);
 	//memset(AGIData->data, 0, AGIData->size);
 
-	printf("AGIData data is %p\n and the size is %d\n", AGIData->data, AGIData->size);
+	//printf("AGIData data is %p\n and the size is %d\n", AGIData->totalSize, AGIData->size);
 
 	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
 
-	printf("Attempting to read data of size %d in %p\n", AGIData->size, AGIData->data);
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	byte1 = currentByte;
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	byte2 = currentByte;
+    
+	AGIData->codeSize =  byte1 + byte2 * 256;
+
+	AGIData->code = banked_alloc(AGIData->codeSize, &bank);
+	
+	printf("Attempting to code data of size %d\n", AGIData->codeSize);
+
+	RAM_BANK = bank;
+	cbm_read(SEQUENTIAL_LFN, AGIData->code, AGIData->codeSize);
+
+	printf("Data is in bank %d at address %p", bank, AGIData->code);
+	
+
+	for (i = 0; i < AGIData->totalSize; i++)
+	{
+		if (i <= 5)
+		{
+			printf("Byte %d is %p", i, AGIData->code[i]);
+		}
+		if (i == 100)
+		{
+			printf("Byte 100 is %p", AGIData->code[i]);
+		}
+
+	}
+	printf("Second last byte is %p \n", AGIData->code[AGIData->codeSize - 2]);
+	printf("Last byte is %p \n", AGIData->code[AGIData->codeSize - 1]);
+
+	RAM_BANK = previousRamBank;
+	
 
 	//printf("The address of banked ram is %p and it holds %p", BANK_RAM, *BANK_RAM);
 	
-	cbm_read(SEQUENTIAL_LFN, AGIData->data, AGIData->size);
-	printf("The address of agi data is %p and it holds %p\n", AGIData->data, *AGIData->data);
-	printf("The address of banked ram is %p and it holds %p\n", BANK_RAM, *BANK_RAM);
-
-	//printf("Size of byte pointer %d", sizeof(byte*));
-
-	for (i = 0; i < 1000000; i++);
-
 	exit(0);
 
+	
 	if (resType == LOGIC) {
 		/* Decrypt message section */
-		fileData = AGIData->data;
+		//fileData = AGIData->data;
 		startPos = *fileData + (*(fileData + 1)) * 256 + 2;
 		numMess = fileData[startPos];
 		endPos = fileData[startPos + 1] + fileData[startPos + 2] * 256;

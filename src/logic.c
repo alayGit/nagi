@@ -51,25 +51,25 @@ void initLogics()
 **************************************************************************/
 void loadMessages(byte *fileData, LOGICFile *logicData)
 {
-   word startPos, messNum;
-   short int index;
-   byte *marker;
+   //word startPos, messNum;
+   //short int index;
+   //byte *marker;
 
-   /* Calculate start and end indices of message data, and
-   ** the number of messages in message data, and then allocate
-   ** memory for the array of message strings. */
-   startPos = fileData[0] + fileData[1]*256 + 2;
-   logicData->numMessages = fileData[startPos];
-   logicData->messages = (byte **)malloc(logicData->numMessages*sizeof(byte *));
-   fileData += (startPos + 3);
+   ///* Calculate start and end indices of message data, and
+   //** the number of messages in message data, and then allocate
+   //** memory for the array of message strings. */
+   //startPos = fileData[0] + fileData[1]*256 + 2;
+   //logicData->numMessages = fileData[startPos];
+   //logicData->messages = (byte **)malloc(logicData->numMessages*sizeof(byte *));
+   //fileData += (startPos + 3);
 
-   /* Step through the message data copying message strings to the
-   ** logicData struct. */
-   for (messNum=0, marker=fileData; messNum<logicData->numMessages; messNum++, marker+=2) {
-      index = marker[0] + marker[1]*256 - 2;
-      logicData->messages[messNum] = ((index<0)? strdup("")
-         : strdup(&fileData[index]));
-   }
+   ///* Step through the message data copying message strings to the
+   //** logicData struct. */
+   //for (messNum=0, marker=fileData; messNum<logicData->numMessages; messNum++, marker+=2) {
+   //   index = marker[0] + marker[1]*256 - 2;
+   //   logicData->messages[messNum] = ((index<0)? strdup("")
+   //      : strdup(&fileData[index]));
+   //}
 }
 
 /**************************************************************************
@@ -90,17 +90,17 @@ void loadLogicFile(int logFileNum)
 
    /* Load LOGIC file, calculate logic code length, and copy
    ** logic code into tempLOGIC. */
-   printf("Loading Logic %d\n", logFileNum);
+   //printf("Loading Logic %d\n", logFileNum);
    loadAGIFile(LOGIC, &logdir[logFileNum], &tempAGI);
-   logicData->codeSize = tempAGI.data[0] + tempAGI.data[1]*256;
-   logicData->logicCode = (byte *)malloc(logicData->codeSize);
-   memcpy(logicData->logicCode, &tempAGI.data[2], logicData->codeSize);
+   //logicData->codeSize = tempAGI.data[0] + tempAGI.data[1]*256;
+   //logicData->logicCode = (byte *)malloc(logicData->codeSize);
+   //memcpy(logicData->logicCode, &tempAGI.data[2], logicData->codeSize);
 
-   /* Decode message section of LOGIC file and store in tempLOGIC. */
-   loadMessages(tempAGI.data, logicData);
+   ///* Decode message section of LOGIC file and store in tempLOGIC. */
+   //loadMessages(tempAGI.data, logicData);
 
-   logics[logFileNum].loaded = TRUE;
-   free(tempAGI.data);   /* Deallocate original buffer. */
+   //logics[logFileNum].loaded = TRUE;
+   //free(tempAGI.data);   /* Deallocate original buffer. */
 }
 
 /**************************************************************************
