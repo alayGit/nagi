@@ -20,7 +20,7 @@
 #include "decomp.h"
 #include "memoryManager.h"
 
-#define  AVIS_DURGAN  "Avis Durgan" //https://www.liquisearch.com/what_is_avis_durgan
+byte avisDurgan[11] = { 0x41, 0x76, 0x69, 0x73, 0x20, 0x44, 0x75, 0x72, 0x67, 0x61, 0x6E };//https://www.liquisearch.com/what_is_avis_durgan
 #define FILE_OPEN_ADDRESS 2
 
 AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];
@@ -53,10 +53,10 @@ byte cbm_openForSeeking(const char* fileName)
 	byte dev = 8;
 
 	byte bank;
-	
+
 	char* fileNameAndFlags;
 	byte sec_addr = FILE_OPEN_ADDRESS;
-	
+
 	RAM_BANK = ALLOCATION_BANK;
 	fileNameAndFlags = (char*)banked_alloc(strlen(fileName) + strlen(OPEN_FLAGS) + 1, &bank);
 	sprintf(fileNameAndFlags, "%s%s", fileName, OPEN_FLAGS);
@@ -285,6 +285,25 @@ void convertPic(unsigned char* input, unsigned char* output, int dataLen)
 	}
 }
 
+byte* readFileContentsIntoBankedRam(int size, byte* bank)
+{
+	byte* result;
+	byte previousRamBank = RAM_BANK;
+
+	result = banked_alloc(size, bank);
+
+	printf("Attempting to code data of size %d\n", size);
+
+	RAM_BANK = *bank;
+	cbm_read(SEQUENTIAL_LFN, result, size);
+
+	printf("Data is in bank %d at address %p and the first byte is %p and the size is %d \n", *bank, result, result[0], size);
+
+	RAM_BANK = previousRamBank;
+
+	return result;
+}
+
 /**************************************************************************
 ** loadAGIFile
 **
@@ -302,13 +321,13 @@ void convertPic(unsigned char* input, unsigned char* output, int dataLen)
 **************************************************************************/
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
-	short compSize, startPos, endPos, numMess, avisPos = 0, i;
+	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i;
 	unsigned char byte1, byte2, volNum, * compBuf, * fileData;
 	byte actualSig1, actualSig2, bank;
 	byte lfn;
 	byte currentByte;
 	boolean signatureValidationPassed;
-	byte* memlocation;
+	byte* messageData;
 	byte previousRamBank = RAM_BANK;
 
 	const byte EXPECT_SIG_1 = 0x12;
@@ -362,110 +381,124 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	byte2 = currentByte;
-    
-	AGIData->codeSize =  byte1 + byte2 * 256;
 
-	AGIData->code = banked_alloc(AGIData->codeSize, &bank);
-	
-	printf("Attempting to code data of size %d\n", AGIData->codeSize);
+	AGIData->codeSize = byte1 + byte2 * 256;
 
-	RAM_BANK = bank;
-	cbm_read(SEQUENTIAL_LFN, AGIData->code, AGIData->codeSize);
+	readFileContentsIntoBankedRam(AGIData->codeSize, &bank);
 
-	printf("Data is in bank %d at address %p", bank, AGIData->code);
-	
 
-	for (i = 0; i < AGIData->totalSize; i++)
-	{
-		if (i <= 5)
-		{
-			printf("Byte %d is %p", i, AGIData->code[i]);
-		}
-		if (i == 100)
-		{
-			printf("Byte 100 is %p", AGIData->code[i]);
-		}
-
-	}
-	printf("Second last byte is %p \n", AGIData->code[AGIData->codeSize - 2]);
-	printf("Last byte is %p \n", AGIData->code[AGIData->codeSize - 1]);
-
-	RAM_BANK = previousRamBank;
-	
-
-	//printf("The address of banked ram is %p and it holds %p", BANK_RAM, *BANK_RAM);
-	
-	exit(0);
-
-	
 	if (resType == LOGIC) {
-		/* Decrypt message section */
-		//fileData = AGIData->data;
-		startPos = *fileData + (*(fileData + 1)) * 256 + 2;
-		numMess = fileData[startPos];
-		endPos = fileData[startPos + 1] + fileData[startPos + 2] * 256;
-		fileData += (startPos + 3);
-		startPos = (numMess * 2) + 0;
+		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
+		AGIData->noMessages = byte1;
 
-		for (i = startPos; i < endPos; i++)
-			fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
+		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
+		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
+
+		endPos = byte1 + byte2 * 256;
+		
+		/*AGIData->messageOffsets = (char**)readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
+		AGIData->messageData = (char*) AGIData->messageOffsets + AGIData->noMessages * 2;*/
+
+		messageData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
+		AGIData->messageBank = bank;
+
+		previousRamBank = RAM_BANK;
+		RAM_BANK = bank;
+
+		//for (i = 0; i < AGIData->noMessages; i++)
+		//{
+		//	AGIData->messageOffsets[i] += (byte) &AGIData->messageOffsets[0];
+		//}
+
+		printf("\nTrying to iterate from %d to %d\n", AGIData->noMessages * 2, AGIData->totalSize - AGIData->codeSize - 5);
+		for (i = 0; i < 10; i++) {//i < AGIData->totalSize - AGIData->codeSize - 5; i++) {
+			//printf("( %p )", avisDurgan[avisPos % 11]);
+			
+			messageData[i + AGIData->noMessages * 2] ^= avisDurgan[avisPos++ % 11];
+			//printf(" %c ",(char)97);
+			
+			if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
+			{
+				printf(" %c ", messageData[i + AGIData->noMessages * 2]);
+				//printf("|%d -- %c|", messageData[i + AGIData->noMessages * 2], messageData[i + AGIData->noMessages * 2]);
+			}
+			else if (!messageData[i + AGIData->noMessages * 2]) {
+				printf("\n");
+			}
+		}
+		printf("\n");
+		
+		RAM_BANK = previousRamBank;
+
+		///* Decrypt message section */
+		////fileData = AGIData->data;
+		//startPos = (numMess * 2) + 0;
+		//numMess = fileData[startPos];
+		//endPos = fileData[startPos + 1] + fileData[startPos + 2] * 256;
+		//fileData += (startPos + 3);
+		//startPos = (numMess * 2) + 0;
+
+		
+		exit(0);
+		/*for (i = startPos; i < endPos; i++)
+			fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];*/
 	}
 
 
 
-			//if (version3) {
-			//   byte1 = fgetc(fp);
-			//   byte2 = fgetc(fp);
-			//   compSize = (unsigned int)(byte1) + (unsigned int)(byte2 << 8);
-			//   compBuf = (unsigned char *)malloc((compSize+10)*sizeof(char));
-			//   fread(compBuf, sizeof(char), compSize, fp);
+	//if (version3) {
+	//   byte1 = fgetc(fp);
+	//   byte2 = fgetc(fp);
+	//   compSize = (unsigned int)(byte1) + (unsigned int)(byte2 << 8);
+	//   compBuf = (unsigned char *)malloc((compSize+10)*sizeof(char));
+	//   fread(compBuf, sizeof(char), compSize, fp);
 
-			//   //initLZW();
+	//   //initLZW();
 
-			//   if (volNum & 0x80) {
-			//      convertPic(compBuf, AGIData->data, compSize);
-			//   }
-			//   else if (AGIData->size == compSize) {  /* Not compressed */
-			//      memcpy(AGIData->data, compBuf, compSize);
+	//   if (volNum & 0x80) {
+	//      convertPic(compBuf, AGIData->data, compSize);
+	//   }
+	//   else if (AGIData->size == compSize) {  /* Not compressed */
+	//      memcpy(AGIData->data, compBuf, compSize);
 
-			//      if (resType == LOGIC) {
-			//         /* Uncompressed AGIv3 logic files have their message sections
-			//            encrypted, so we decrypt it here */
-			//         fileData = AGIData->data;
-			//         startPos = *fileData + (*(fileData+1))*256 + 2;
-			//         numMess = fileData[startPos];
-			//         endPos = fileData[startPos+1] + fileData[startPos+2]*256;
-			//         fileData += (startPos + 3);
-			//         startPos = (numMess * 2) + 0;
+	//      if (resType == LOGIC) {
+	//         /* Uncompressed AGIv3 logic files have their message sections
+	//            encrypted, so we decrypt it here */
+	//         fileData = AGIData->data;
+	//         startPos = *fileData + (*(fileData+1))*256 + 2;
+	//         numMess = fileData[startPos];
+	//         endPos = fileData[startPos+1] + fileData[startPos+2]*256;
+	//         fileData += (startPos + 3);
+	//         startPos = (numMess * 2) + 0;
 
-			//         for (i=startPos; i<endPos; i++)
-			   //          fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
-			//      }
+	//         for (i=startPos; i<endPos; i++)
+	   //          fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
+	//      }
 
-			//      free(compBuf);
-			//   }
-			//   else {
-			//      expand(compBuf, AGIData->data, AGIData->size);
-			//   }
+	//      free(compBuf);
+	//   }
+	//   else {
+	//      expand(compBuf, AGIData->data, AGIData->size);
+	//   }
 
-			//   free(compBuf);
-			//   //closeLZW();
-			//}
-			//else {
-			//   fread(AGIData->data, AGIData->size, 1, fp);
-			//   if (resType == LOGIC) {
-			//      /* Decrypt message section */
-			//      fileData = AGIData->data;
-			//      startPos = *fileData + (*(fileData+1))*256 + 2;
-			//      numMess = fileData[startPos];
-			//      endPos = fileData[startPos+1] + fileData[startPos+2]*256;
-			//      fileData += (startPos + 3);
-			//      startPos = (numMess * 2) + 0;
+	//   free(compBuf);
+	//   //closeLZW();
+	//}
+	//else {
+	//   fread(AGIData->data, AGIData->size, 1, fp);
+	//   if (resType == LOGIC) {
+	//      /* Decrypt message section */
+	//      fileData = AGIData->data;
+	//      startPos = *fileData + (*(fileData+1))*256 + 2;
+	//      numMess = fileData[startPos];
+	//      endPos = fileData[startPos+1] + fileData[startPos+2]*256;
+	//      fileData += (startPos + 3);
+	//      startPos = (numMess * 2) + 0;
 
-			//      for (i=startPos; i<endPos; i++)
-			   //       fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
-			//   }
-			//}
+	//      for (i=startPos; i<endPos; i++)
+	   //       fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
+	//   }
+	//}
 
-			cbm_close(lfn);
-	}
+	cbm_close(lfn);
+}

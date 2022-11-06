@@ -26,8 +26,10 @@ typedef struct {          /* AGI data file structure */
    unsigned int codeSize;
    byte* code;
    byte codeBank;
+   byte messageBank;
    unsigned int noMessages;
-   char** messages;
+   char** messageOffsets;
+   char* messageData;
 } AGIFile;
 
 extern AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];

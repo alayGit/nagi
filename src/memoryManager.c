@@ -104,10 +104,11 @@ byte* banked_alloc(int size, byte* bank)
 			for (j = 0; j < _memoryAreas[i].noSegments && !result; j++)
 			{
 				allocationByte = _memoryAreas[i].start + j;
+				
 				if (!*(allocationByte))
 				{
 					*allocationByte = TRUE;
-					*bank = (byte) (j * _memoryAreas[i].segmentSize) / BANK_SIZE + _memoryAreas[i].firstBank;
+					*bank = (byte) ((j * _memoryAreas[i].segmentSize) / BANK_SIZE + _memoryAreas[i].firstBank);
 					result = (_memoryAreas[i].segmentSize * j) % BANK_SIZE + &BANK_RAM[0];
 				}
 			}
