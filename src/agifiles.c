@@ -327,13 +327,16 @@ int getMessageSectionSize(AGIFile* AGIData)
 **************************************************************************/
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
-	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i;
+#define SEPARATOR 0
+	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, messageIndex;
 	unsigned char byte1, byte2, volNum, * compBuf, * fileData;
 	byte actualSig1, actualSig2, bank;
 	byte lfn;
 	byte currentByte;
 	boolean signatureValidationPassed;
 	byte* messageData;
+	byte* offsetPointer;
+	boolean lastCharacterSeparator = TRUE;
 	byte previousRamBank = RAM_BANK;
 
 	const byte EXPECT_SIG_1 = 0x12;
@@ -410,17 +413,31 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 
 		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
+		
+		offsetPointer = &messageData[0];
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
+			messageIndex = i + AGIData->noMessages * 2;
+
+			messageData[messageIndex] ^= avisDurgan[avisPos++ % 11];
+
+			if (lastCharacterSeparator)
+			{
+				memcpy(offsetPointer, &((&messageData[messageIndex])[0]), 2);
+				lastCharacterSeparator = FALSE;
+
+				printf("Points to % c", *offsetPointer);
+
+				offsetPointer+=2;
+			}
+			lastCharacterSeparator = messageData[messageIndex] == SEPARATOR;
 			
-			messageData[i + AGIData->noMessages * 2] ^= avisDurgan[avisPos++ % 11];
-			
-			if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
+			/*if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
 			{
 				printf("%c", messageData[i + AGIData->noMessages * 2]);
 			}
 			else if (!messageData[i + AGIData->noMessages * 2]) {
 				printf("\n");
-			}
+			}*/
 		}
 		
 		RAM_BANK = previousRamBank;
