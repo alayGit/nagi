@@ -304,6 +304,12 @@ byte* readFileContentsIntoBankedRam(int size, byte* bank)
 	return result;
 }
 
+
+int getMessageSectionSize(AGIFile* AGIData)
+{
+	return AGIData->totalSize - AGIData->codeSize - 5 - AGIData->noMessages * 2;
+}
+
 /**************************************************************************
 ** loadAGIFile
 **
@@ -396,37 +402,26 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 		endPos = byte1 + byte2 * 256;
 		
-		/*AGIData->messageOffsets = (char**)readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
-		AGIData->messageData = (char*) AGIData->messageOffsets + AGIData->noMessages * 2;*/
-
 		messageData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
 		AGIData->messageBank = bank;
 
 		previousRamBank = RAM_BANK;
 		RAM_BANK = bank;
 
-		//for (i = 0; i < AGIData->noMessages; i++)
-		//{
-		//	AGIData->messageOffsets[i] += (byte) &AGIData->messageOffsets[0];
-		//}
 
-		printf("\nTrying to iterate from %d to %d\n", AGIData->noMessages * 2, AGIData->totalSize - AGIData->codeSize - 5);
-		for (i = 0; i < 10; i++) {//i < AGIData->totalSize - AGIData->codeSize - 5; i++) {
-			//printf("( %p )", avisDurgan[avisPos % 11]);
+		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
+		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
 			
 			messageData[i + AGIData->noMessages * 2] ^= avisDurgan[avisPos++ % 11];
-			//printf(" %c ",(char)97);
 			
 			if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
 			{
-				printf(" %c ", messageData[i + AGIData->noMessages * 2]);
-				//printf("|%d -- %c|", messageData[i + AGIData->noMessages * 2], messageData[i + AGIData->noMessages * 2]);
+				printf("%c", messageData[i + AGIData->noMessages * 2]);
 			}
 			else if (!messageData[i + AGIData->noMessages * 2]) {
 				printf("\n");
 			}
 		}
-		printf("\n");
 		
 		RAM_BANK = previousRamBank;
 
