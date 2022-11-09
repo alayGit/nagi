@@ -14,11 +14,13 @@
 #include <stdint.h>
 #include <cbm.h>
 #include <dbg.h>
+#include <ctype.h>
 
 #include "general.h"
 #include "agifiles.h"
 #include "decomp.h"
 #include "memoryManager.h"
+
 
 byte avisDurgan[11] = { 0x41, 0x76, 0x69, 0x73, 0x20, 0x44, 0x75, 0x72, 0x67, 0x61, 0x6E };//https://www.liquisearch.com/what_is_avis_durgan
 #define FILE_OPEN_ADDRESS 2
@@ -328,6 +330,12 @@ int getMessageSectionSize(AGIFile* AGIData)
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 #define SEPARATOR 0
+#define ASCIIA 0xC1
+#define ASCIIZ 0xDA
+#define ASCIIa 0x41
+#define ASCIIz 0x5A
+#define DIFF_ASCII_CAP_LOW 0x80
+
 	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, messageIndex;
 	unsigned char byte1, byte2, volNum, * compBuf, * fileData;
 	byte actualSig1, actualSig2, bank;
@@ -420,26 +428,38 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 			messageData[messageIndex] ^= avisDurgan[avisPos++ % 11];
 
+			if (messageData[messageIndex] >= ASCIIA && messageData[messageIndex] <= ASCIIZ)
+			{
+				//printf("%d becomes %d \n", messageData[messageIndex], messageData[messageIndex] - DIFF_ASCII_CAP_LOW);
+				//messageData[messageIndex] = tolower(messageData[messageIndex]);
+			}
+			else if (messageData[messageIndex] >= ASCIIa && messageData[messageIndex] <= ASCIIz)
+			{
+				printf("%d becomes %d \n", messageData[messageIndex], messageData[messageIndex] + DIFF_ASCII_CAP_LOW);
+				//messageData[messageIndex] = toupper(messageData[messageIndex]);
+			}
+
 			if (lastCharacterSeparator)
 			{
 				memcpy(offsetPointer, &((&messageData[messageIndex])[0]), 2);
 				lastCharacterSeparator = FALSE;
 
-				printf("Points to % c", *offsetPointer);
+				//printf("Points to % c", *offsetPointer);
 
 				offsetPointer+=2;
 			}
 			lastCharacterSeparator = messageData[messageIndex] == SEPARATOR;
 			
-			/*if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
+			if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
 			{
 				printf("%c", messageData[i + AGIData->noMessages * 2]);
 			}
 			else if (!messageData[i + AGIData->noMessages * 2]) {
 				printf("\n");
-			}*/
+			}
 		}
-		
+		printf("A a %d %d Z z %d %d", 'A', 'a', 'Z', 'z');
+
 		RAM_BANK = previousRamBank;
 
 		///* Decrypt message section */
