@@ -379,6 +379,13 @@ byte seekAndReadResourceIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
 	return bank;
 }
 
+//https://www.liquisearch.com/what_is_avis_durgan
+void xOrAvisDurgan(byte* toXOR, unsigned int* avisPos)
+{
+	*toXOR ^= avisDurgan[*avisPos];
+	*avisPos = (*avisPos + 1) % 11;
+}
+
 /**************************************************************************
 ** loadAGIFile
 **
@@ -397,21 +404,6 @@ byte seekAndReadResourceIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 #define SEPARATOR 0
-#define ASCIIA 65
-#define ASCIIZ 90
-#define ASCIIa 97
-#define ASCIIz 122
-
-
-#define PETSCIIA 193
-#define PETSCIIZ 218
-#define PETSCIIa 65
-#define PETSCIIz 90
-#define PETSCIISpace 32
-#define	PETSCIIPercent 37
-
-#define DIFF_ASCII_PETSCII_CAPS -128
-#define DIFF_ASCII_PETSCII_LOWER -32
 
 	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, messageIndex;
 	unsigned char byte1, byte2, * compBuf, * fileData;
@@ -436,7 +428,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
 
 		endPos = byte1 + byte2 * 256;
-		
+
 		messageData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
 		AGIData->messageBank = bank;
 
@@ -446,21 +438,13 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #ifdef VERBOSE
 		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
 #endif
-		
+
 		offsetPointer = &messageData[0];
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
 			messageIndex = i + AGIData->noMessages * 2;
 
-			messageData[messageIndex] ^= avisDurgan[avisPos++ % 11];
-
-			if (messageData[messageIndex] >= ASCIIA && messageData[messageIndex] <= ASCIIZ)
-			{
-				messageData[messageIndex] = messageData[messageIndex] + DIFF_ASCII_PETSCII_CAPS;
-			}
-			else if (messageData[messageIndex] >= ASCIIa && messageData[messageIndex] <= ASCIIz)
-			{
-				messageData[messageIndex] = messageData[messageIndex] + DIFF_ASCII_PETSCII_LOWER;
-			}
+			xOrAvisDurgan(&messageData[messageIndex], &avisPos);
+			convertAsciiByteToPetsciiByte(&messageData[messageIndex]);
 
 			if (lastCharacterSeparator)
 			{
@@ -488,7 +472,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		}
 
 		RAM_BANK = previousRamBank;
-		
+
 		exit(0);
 	}
 

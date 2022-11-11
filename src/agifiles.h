@@ -8,6 +8,7 @@
 #include <string.h>
 #include <cx16.h>
 #include "memoryManager.h"
+#include "helpers.h"
 
 #define  LOGIC    0
 #define  PICTURE  1
