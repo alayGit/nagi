@@ -8,7 +8,7 @@
 **
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
-
+#define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -311,6 +311,42 @@ int getMessageSectionSize(AGIFile* AGIData)
 	return AGIData->totalSize - AGIData->codeSize - 5 - AGIData->noMessages * 2;
 }
 
+boolean seekAndCheckSignature(AGIFilePosType* location)
+{
+	boolean result = TRUE, signatureValidationPassed;
+	const byte EXPECT_SIG_1 = 0x12;
+	const byte EXPECTED_SIG_2 = 0x34;
+
+	byte currentByte;
+
+#ifdef VERBOSE
+	printf("----Attempting to open %s for seeking data\n", location->fileName);
+#endif // VERBOSE
+
+	if (location->filePos == EMPTY) {
+		printf("Could not find requested AGI file.\n");
+		result = FALSE;
+	}
+	else {
+		cx16_fseek(FILE_OPEN_ADDRESS, location->filePos);
+
+		cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+		signatureValidationPassed = currentByte == 0x12;
+
+		cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+		signatureValidationPassed = signatureValidationPassed & currentByte == 0x34;
+
+		if (!signatureValidationPassed) {  /* All AGI data files start with 0x1234 */
+			printf("Fail Sig. Validation %s.\n", location->fileName);
+			result = FALSE;
+		}
+
+		printf("PS\n");
+	}
+
+	return result;
+}
+
 /**************************************************************************
 ** loadAGIFile
 **
@@ -350,40 +386,14 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte actualSig1, actualSig2, bank;
 	byte lfn;
 	byte currentByte;
-	boolean signatureValidationPassed;
 	byte* messageData;
 	byte* offsetPointer;
 	boolean lastCharacterSeparator = TRUE;
 	byte previousRamBank = RAM_BANK;
 
-	const byte EXPECT_SIG_1 = 0x12;
-	const byte EXPECTED_SIG_2 = 0x34;
-
-	printf("----Attempting to open %s for seeking data\n", location->fileName);
-
-	if (location->filePos == EMPTY) {
-		printf("Could not find requested AGI file.\n");
-		exit(0);
-	}
-
 	lfn = cbm_openForSeeking(location->fileName);
 
-	cx16_fseek(FILE_OPEN_ADDRESS, location->filePos);
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	signatureValidationPassed = currentByte == 0x12;
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	signatureValidationPassed = signatureValidationPassed & currentByte == 0x34;
-
-	if (!signatureValidationPassed) {  /* All AGI data files start with 0x1234 */
-		printf("Data error reading %s.\n", location->fileName);
-		printf("The requested AGI file did not have a signature.\n");
-		printf("Check if your game files are corrupt.\n");
-		exit(0);
-	}
-
-	printf("PS\n");
+	seekAndCheckSignature(location);
 
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	volNum = currentByte;
