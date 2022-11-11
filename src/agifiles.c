@@ -347,6 +347,38 @@ boolean seekAndCheckSignature(AGIFilePosType* location)
 	return result;
 }
 
+byte seekAndReadResourceIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
+{
+	byte currentByte, bank;
+	unsigned char byte1, byte2, volNum;
+
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	volNum = currentByte;
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	byte1 = currentByte;
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	byte2 = currentByte;
+
+	AGIData->totalSize = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
+
+	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	byte1 = currentByte;
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	byte2 = currentByte;
+
+	AGIData->codeSize = byte1 + byte2 * 256;
+
+	readFileContentsIntoBankedRam(AGIData->codeSize, &bank);
+
+	return bank;
+}
+
 /**************************************************************************
 ** loadAGIFile
 **
@@ -382,7 +414,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #define DIFF_ASCII_PETSCII_LOWER -32
 
 	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, messageIndex;
-	unsigned char byte1, byte2, volNum, * compBuf, * fileData;
+	unsigned char byte1, byte2, * compBuf, * fileData;
 	byte actualSig1, actualSig2, bank;
 	byte lfn;
 	byte currentByte;
@@ -394,30 +426,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	lfn = cbm_openForSeeking(location->fileName);
 
 	seekAndCheckSignature(location);
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	volNum = currentByte;
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	byte1 = currentByte;
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	byte2 = currentByte;
-
-	AGIData->totalSize = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
-
-	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	byte1 = currentByte;
-
-	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-	byte2 = currentByte;
-
-	AGIData->codeSize = byte1 + byte2 * 256;
-
-	readFileContentsIntoBankedRam(AGIData->codeSize, &bank);
-
+	bank = seekAndReadResourceIntoMemory(location, AGIData);
 
 	if (resType == LOGIC) {
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
