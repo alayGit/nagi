@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <cbm.h>
 #include <dbg.h>
-#include <ctype.h>
 
 #include "general.h"
 #include "agifiles.h"
@@ -330,11 +329,21 @@ int getMessageSectionSize(AGIFile* AGIData)
 void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 #define SEPARATOR 0
-#define ASCIIA 0xC1
-#define ASCIIZ 0xDA
-#define ASCIIa 0x41
-#define ASCIIz 0x5A
-#define DIFF_ASCII_CAP_LOW 0x80
+#define ASCIIA 65
+#define ASCIIZ 90
+#define ASCIIa 97
+#define ASCIIz 122
+
+
+#define PETSCIIA 193
+#define PETSCIIZ 218
+#define PETSCIIa 65
+#define PETSCIIz 90
+#define PETSCIISpace 32
+#define	PETSCIIPercent 37
+
+#define DIFF_ASCII_PETSCII_CAPS -128
+#define DIFF_ASCII_PETSCII_LOWER -32
 
 	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, messageIndex;
 	unsigned char byte1, byte2, volNum, * compBuf, * fileData;
@@ -386,10 +395,6 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte2 = currentByte;
 
 	AGIData->totalSize = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
-	//AGIData->data = banked_alloc(AGIData->size);
-	//memset(AGIData->data, 0, AGIData->size);
-
-	//printf("AGIData data is %p\n and the size is %d\n", AGIData->totalSize, AGIData->size);
 
 	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
 
@@ -419,8 +424,9 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		previousRamBank = RAM_BANK;
 		RAM_BANK = bank;
 
-
+#ifdef VERBOSE
 		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
+#endif
 		
 		offsetPointer = &messageData[0];
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
@@ -430,13 +436,11 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 			if (messageData[messageIndex] >= ASCIIA && messageData[messageIndex] <= ASCIIZ)
 			{
-				//printf("%d becomes %d \n", messageData[messageIndex], messageData[messageIndex] - DIFF_ASCII_CAP_LOW);
-				//messageData[messageIndex] = tolower(messageData[messageIndex]);
+				messageData[messageIndex] = messageData[messageIndex] + DIFF_ASCII_PETSCII_CAPS;
 			}
 			else if (messageData[messageIndex] >= ASCIIa && messageData[messageIndex] <= ASCIIz)
 			{
-				printf("%d becomes %d \n", messageData[messageIndex], messageData[messageIndex] + DIFF_ASCII_CAP_LOW);
-				//messageData[messageIndex] = toupper(messageData[messageIndex]);
+				messageData[messageIndex] = messageData[messageIndex] + DIFF_ASCII_PETSCII_LOWER;
 			}
 
 			if (lastCharacterSeparator)
@@ -444,36 +448,29 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 				memcpy(offsetPointer, &((&messageData[messageIndex])[0]), 2);
 				lastCharacterSeparator = FALSE;
 
-				//printf("Points to % c", *offsetPointer);
-
-				offsetPointer+=2;
+				offsetPointer += 2;
 			}
 			lastCharacterSeparator = messageData[messageIndex] == SEPARATOR;
-			
-			if (messageData[i + AGIData->noMessages * 2] >= 32 && messageData[i + AGIData->noMessages * 2] <= 125)
+
+#ifdef VERBOSE
+			if (messageData[i + AGIData->noMessages * 2] >= PETSCIIA && messageData[i + AGIData->noMessages * 2] <= PETSCIIZ
+				|| messageData[i + AGIData->noMessages * 2] >= PETSCIIa && messageData[i + AGIData->noMessages * 2] <= PETSCIIz
+				|| messageData[i + AGIData->noMessages * 2] == PETSCIISpace
+				|| messageData[i + AGIData->noMessages * 2] == PETSCIIPercent
+				)
 			{
-				printf("%c", messageData[i + AGIData->noMessages * 2]);
+				printf("%c", messageData[i + AGIData->noMessages * 2], messageData[i + AGIData->noMessages * 2]);
 			}
 			else if (!messageData[i + AGIData->noMessages * 2]) {
 				printf("\n");
 			}
+
+#endif 
 		}
-		printf("A a %d %d Z z %d %d", 'A', 'a', 'Z', 'z');
 
 		RAM_BANK = previousRamBank;
-
-		///* Decrypt message section */
-		////fileData = AGIData->data;
-		//startPos = (numMess * 2) + 0;
-		//numMess = fileData[startPos];
-		//endPos = fileData[startPos + 1] + fileData[startPos + 2] * 256;
-		//fileData += (startPos + 3);
-		//startPos = (numMess * 2) + 0;
-
 		
 		exit(0);
-		/*for (i = startPos; i < endPos; i++)
-			fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];*/
 	}
 
 
