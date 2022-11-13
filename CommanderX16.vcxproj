@@ -21,6 +21,7 @@
     <ClInclude Include="src\DECOMP.H" />
     <ClInclude Include="src\GENERAL.H" />
     <ClInclude Include="src\GUI.H" />
+    <ClInclude Include="src\helpers.h" />
     <ClInclude Include="src\LIST.H" />
     <ClInclude Include="src\logic.h" />
     <ClInclude Include="src\memoryManager.h" />
@@ -39,6 +40,7 @@
     <ClCompile Include="src\DECOMP.C" />
     <ClCompile Include="src\GRAPHICS.C" />
     <ClCompile Include="src\GUI.C" />
+    <ClCompile Include="src\helpers.c" />
     <ClCompile Include="src\logic.c" />
     <ClCompile Include="src\MEKA.C" />
     <ClCompile Include="src\memoryManager.c" />

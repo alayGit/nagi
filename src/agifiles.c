@@ -8,8 +8,8 @@
 **
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
-//#define VERBOSE_DISPLAY_MESSAGES
-#define VERBOSE_DISPLAY_OFFSETS
+#define VERBOSE_DISPLAY_MESSAGES
+//#define VERBOSE_DISPLAY_OFFSETS
 #define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +25,7 @@
 
 byte avisDurgan[11] = { 0x41, 0x76, 0x69, 0x73, 0x20, 0x44, 0x75, 0x72, 0x67, 0x61, 0x6E };//https://www.liquisearch.com/what_is_avis_durgan
 #define FILE_OPEN_ADDRESS 2
+#define NO_BYTES_PER_MESSAGE 2
 
 AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];
 int numLogics, numPictures, numViews, numSounds;
@@ -313,6 +314,11 @@ int getMessageSectionSize(AGIFile* AGIData)
 	return AGIData->totalSize - AGIData->codeSize - 5 - AGIData->noMessages * 2;
 }
 
+unsigned int getPositionOfFirstMessage(AGIFile* AGIData)
+{
+	return AGIData->noMessages * NO_BYTES_PER_MESSAGE;
+}
+
 boolean seekAndCheckSignature(AGIFilePosType* location)
 {
 	boolean result = TRUE, signatureValidationPassed;
@@ -428,11 +434,11 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
-
 		endPos = byte1 + byte2 * 256;
 
 		messageData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
 		AGIData->messagePointers = (char**) & messageData[0];
+		AGIData->messageData = &messageData[getPositionOfFirstMessage(AGIData)];
 		AGIData->messageBank = bank;
 
 		previousRamBank = RAM_BANK;
@@ -442,18 +448,15 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
 #endif
 		offsetPointer = AGIData->messagePointers;
-		printf("The address is %p \n", &messageData[21 * 2]);
 
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
 			
-			messageIndex = i + AGIData->noMessages * 2;
-
-			xOrAvisDurgan(&messageData[messageIndex], &avisPos);
-			convertAsciiByteToPetsciiByte(&messageData[messageIndex]);
+			xOrAvisDurgan(&AGIData->messageData[i], &avisPos);
+			convertAsciiByteToPetsciiByte(&AGIData->messageData[i]);
 
 			if (lastCharacterSeparator)
 			{
-				*offsetPointer = (char*) &messageData[messageIndex];
+				*offsetPointer = (char*) &AGIData->messageData[i];
 				
 				//printf("-------Data %c Length: %d %p\n", **offsetPointer, strlen(*offsetPointer), &*offsetPointer);
 
@@ -467,21 +470,14 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #endif // VERBOSE_DISPLAY_OFFSETS
 					offsetPointer++;
 
-				} while (*offsetPointer == 0 && offsetPointer < (char**) & messageData[AGIData->noMessages * 2]); //So that null message offsets are skipped
+				} while (*offsetPointer == 0 && offsetPointer < (char**) & AGIData->messageData[0]); //So that null message offsets are skipped
 			}
 
-			lastCharacterSeparator = messageData[messageIndex] == SEPARATOR;
+			lastCharacterSeparator = AGIData->messageData[i] == SEPARATOR;
 
 #ifdef VERBOSE_DISPLAY_MESSAGES
-			if (messageData[i + AGIData->noMessages * 2] >= PETSCIIA && messageData[i + AGIData->noMessages * 2] <= PETSCIIZ
-				|| messageData[i + AGIData->noMessages * 2] >= PETSCIIa && messageData[i + AGIData->noMessages * 2] <= PETSCIIz
-				|| messageData[i + AGIData->noMessages * 2] == PETSCIISpace
-				|| messageData[i + AGIData->noMessages * 2] == PETSCIIPercent
-				)
-			{
-				printf("%c", messageData[i + AGIData->noMessages * 2], messageData[i + AGIData->noMessages * 2]);
-			}
-			else if (!messageData[i + AGIData->noMessages * 2]) {
+			printf("%c", AGIData->messageData[i], AGIData->messageData[i]);
+			if (!AGIData->messageData[i]) {
 				printf("\n");
 			}
 
