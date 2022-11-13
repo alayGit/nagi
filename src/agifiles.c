@@ -8,6 +8,8 @@
 **
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
+//#define VERBOSE_DISPLAY_MESSAGES
+#define VERBOSE_DISPLAY_OFFSETS
 #define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
@@ -319,9 +321,9 @@ boolean seekAndCheckSignature(AGIFilePosType* location)
 
 	byte currentByte;
 
-#ifdef VERBOSE
+#ifdef VERBOSE_DISPLAY_MESSAGES
 	printf("----Attempting to open %s for seeking data\n", location->fileName);
-#endif // VERBOSE
+#endif // VERBOSE_DISPLAY_MESSAGES
 
 	if (location->filePos == EMPTY) {
 		printf("Could not find requested AGI file.\n");
@@ -347,7 +349,7 @@ boolean seekAndCheckSignature(AGIFilePosType* location)
 	return result;
 }
 
-byte seekAndReadResourceIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
+byte seekAndReadLogicIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
 {
 	byte currentByte, bank;
 	unsigned char byte1, byte2, volNum;
@@ -405,20 +407,20 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 #define SEPARATOR 0
 
-	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, messageIndex;
+	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, j = 1, messageIndex;
 	unsigned char byte1, byte2, * compBuf, * fileData;
 	byte actualSig1, actualSig2, bank;
 	byte lfn;
 	byte currentByte;
 	byte* messageData;
-	byte* offsetPointer;
+	char** offsetPointer;
 	boolean lastCharacterSeparator = TRUE;
 	byte previousRamBank = RAM_BANK;
 
 	lfn = cbm_openForSeeking(location->fileName);
 
 	seekAndCheckSignature(location);
-	bank = seekAndReadResourceIntoMemory(location, AGIData);
+	bank = seekAndReadLogicIntoMemory(location, AGIData);
 
 	if (resType == LOGIC) {
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
@@ -430,6 +432,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		endPos = byte1 + byte2 * 256;
 
 		messageData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
+		AGIData->messagePointers = (char**) & messageData[0];
 		AGIData->messageBank = bank;
 
 		previousRamBank = RAM_BANK;
@@ -438,9 +441,11 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #ifdef VERBOSE
 		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
 #endif
+		offsetPointer = AGIData->messagePointers;
+		printf("The address is %p \n", &messageData[21 * 2]);
 
-		offsetPointer = &messageData[0];
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
+			
 			messageIndex = i + AGIData->noMessages * 2;
 
 			xOrAvisDurgan(&messageData[messageIndex], &avisPos);
@@ -448,14 +453,26 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 			if (lastCharacterSeparator)
 			{
-				memcpy(offsetPointer, &((&messageData[messageIndex])[0]), 2);
+				*offsetPointer = (char*) &messageData[messageIndex];
+				
+				//printf("-------Data %c Length: %d %p\n", **offsetPointer, strlen(*offsetPointer), &*offsetPointer);
+
 				lastCharacterSeparator = FALSE;
 
-				offsetPointer += 2;
+				do
+				{
+#ifdef VERBOSE_DISPLAY_OFFSETS
+					printf("%d offsetPointer is %p and offsetPointer == true is %d \n", j, *offsetPointer, *offsetPointer > 0 == TRUE);
+					j++;
+#endif // VERBOSE_DISPLAY_OFFSETS
+					offsetPointer++;
+
+				} while (*offsetPointer == 0 && offsetPointer < (char**) & messageData[AGIData->noMessages * 2]); //So that null message offsets are skipped
 			}
+
 			lastCharacterSeparator = messageData[messageIndex] == SEPARATOR;
 
-#ifdef VERBOSE
+#ifdef VERBOSE_DISPLAY_MESSAGES
 			if (messageData[i + AGIData->noMessages * 2] >= PETSCIIA && messageData[i + AGIData->noMessages * 2] <= PETSCIIZ
 				|| messageData[i + AGIData->noMessages * 2] >= PETSCIIa && messageData[i + AGIData->noMessages * 2] <= PETSCIIz
 				|| messageData[i + AGIData->noMessages * 2] == PETSCIISpace
@@ -471,6 +488,20 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #endif 
 		}
 
+#ifdef VERBOSE_DISPLAY_OFFSETS
+		for (i = 0; i < AGIData->noMessages; i++)
+		{
+			if (AGIData->messagePointers[i] > 0)
+			{
+				printf("%d Data Length: %d Address %p Bank %d, Message %s\n", i + 1, strlen(AGIData->messagePointers[i]), AGIData->messagePointers[i], bank, AGIData->messagePointers[i]);
+			}
+			else
+			{
+				printf("%d is skipped\n", i + 1);
+			}
+		}
+		printf("\nYou have %d message", AGIData->noMessages);
+#endif
 		RAM_BANK = previousRamBank;
 
 		exit(0);

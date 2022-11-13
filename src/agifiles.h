@@ -29,7 +29,7 @@ typedef struct {          /* AGI data file structure */
    byte codeBank;
    byte messageBank;
    unsigned int noMessages;
-   char** messageOffsets;
+   char** messagePointers;
    char* messageData;
 } AGIFile;
 
