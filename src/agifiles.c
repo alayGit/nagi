@@ -8,9 +8,9 @@
 **
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
-#define VERBOSE_DISPLAY_MESSAGES
+//#define VERBOSE_DISPLAY_MESSAGES
 //#define VERBOSE_DISPLAY_OFFSETS
-#define VERBOSE
+//#define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -49,8 +49,6 @@ void initFiles()
 byte cbm_openForSeeking(const char* fileName)
 {
 	byte previousRamBank = RAM_BANK;
-	int i;
-	char s[200];
 	const char* OPEN_FLAGS = ",S,R";
 
 	byte lfn = SEQUENTIAL_LFN;
@@ -82,7 +80,6 @@ byte cbm_getSeekedByte()
 
 int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
 	int8_t result = 0, status = 0, chkin = 0;
-	int i;
 #define SETNAM 0xFFBD
 	static struct cmd {
 		char p;
@@ -90,7 +87,11 @@ int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
 		uint32_t offset;
 	} cmd;
 
+#ifdef VERBOSE
+
 	printf("Attempting to seek at channel %d offset %lu\n", channel, offset);
+
+#endif
 
 	// open command channel to DOS and send P command.
 	// P u8 u32 (no spaces) u8 is LFN to seek(), and u32 = offset.
@@ -245,7 +246,9 @@ void loadAGIDirs()
 		loadAGIDir(1, "picdir", &numPictures);
 		loadAGIDir(2, "viewdir", &numViews);
 		loadAGIDir(3, "snddir", &numSounds);
-		printf("ILC\n");
+#ifdef VERBOSE
+		printf("Indexs Loaded\n");
+#endif
 	}
 }
 
@@ -296,12 +299,15 @@ byte* readFileContentsIntoBankedRam(int size, byte* bank)
 
 	result = banked_alloc(size, bank);
 
+#ifdef VERBOSE
 	printf("Attempting to code data of size %d\n", size);
-
+#endif
 	RAM_BANK = *bank;
 	cbm_read(SEQUENTIAL_LFN, result, size);
 
+#ifdef VERBOSE
 	printf("Data is in bank %d at address %p and the first byte is %p and the size is %d \n", *bank, result, result[0], size);
+#endif // VERBOSE
 
 	RAM_BANK = previousRamBank;
 
@@ -349,13 +355,15 @@ boolean seekAndCheckSignature(AGIFilePosType* location)
 			result = FALSE;
 		}
 
-		printf("PS\n");
+#ifdef VERBOSE
+	printf("PS\n");
+#endif // VERBOSE
 	}
 
 	return result;
 }
 
-byte seekAndReadLogicIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
+byte seekAndReadLogicIntoMemory(AGIFile* AGIData)
 {
 	byte currentByte, bank;
 	unsigned char byte1, byte2, volNum;
@@ -372,8 +380,9 @@ byte seekAndReadLogicIntoMemory(AGIFilePosType* location, AGIFile* AGIData)
 
 	AGIData->totalSize = (unsigned int)(byte1)+(unsigned int)(byte2 << 8);
 
+#ifdef VERBOSE
 	printf("volNum:%d byte1:%p, byte2:%p, size:%d\n", volNum, byte1, byte2, (unsigned int)(byte1)+(unsigned int)(byte2 << 8));
-
+#endif // VERBOSE
 	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
 	byte1 = currentByte;
 
@@ -413,12 +422,11 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 #define SEPARATOR 0
 
-	unsigned int compSize, startPos, endPos, numMess, avisPos = 0, i, j = 1, messageIndex;
-	unsigned char byte1, byte2, * compBuf, * fileData;
-	byte actualSig1, actualSig2, bank;
+	unsigned int avisPos = 0, i, j = 1;
+	unsigned char byte1, byte2;
+	byte bank;
 	byte lfn;
-	byte currentByte;
-	byte* messageData;
+	byte* wholeMessageSectionData;
 	char** offsetPointer;
 	boolean lastCharacterSeparator = TRUE;
 	byte previousRamBank = RAM_BANK;
@@ -426,7 +434,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	lfn = cbm_openForSeeking(location->fileName);
 
 	seekAndCheckSignature(location);
-	bank = seekAndReadLogicIntoMemory(location, AGIData);
+	bank = seekAndReadLogicIntoMemory(AGIData);
 
 	if (resType == LOGIC) {
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
@@ -434,11 +442,10 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
-		endPos = byte1 + byte2 * 256;
 
-		messageData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
-		AGIData->messagePointers = (char**) & messageData[0];
-		AGIData->messageData = &messageData[getPositionOfFirstMessage(AGIData)];
+		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
+		AGIData->messagePointers = (char**) & wholeMessageSectionData[0];
+		AGIData->messageData = (char*) & wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
 		AGIData->messageBank = bank;
 
 		previousRamBank = RAM_BANK;
@@ -451,15 +458,13 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
 			
-			xOrAvisDurgan(&AGIData->messageData[i], &avisPos);
+			xOrAvisDurgan((byte*) & AGIData->messageData[i], &avisPos);
 			convertAsciiByteToPetsciiByte(&AGIData->messageData[i]);
 
 			if (lastCharacterSeparator)
 			{
 				*offsetPointer = (char*) &AGIData->messageData[i];
 				
-				//printf("-------Data %c Length: %d %p\n", **offsetPointer, strlen(*offsetPointer), &*offsetPointer);
-
 				lastCharacterSeparator = FALSE;
 
 				do
