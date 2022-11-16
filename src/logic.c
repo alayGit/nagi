@@ -8,12 +8,13 @@
 ** (c) 1997 Lance Ewing - Original code (2 July 97)
 **                        Changed (26 Aug 97)
 **************************************************************************/
-
+#define VERBOSE
 #include <string.h>
 
 #include "agifiles.h"
 #include "general.h"
 #include "logic.h"
+#include "memoryManager.h"
 
 /* The logics array is the array that holds all the information about the
 ** logic files. A boolean flag determines whether the logic is loaded or
@@ -42,35 +43,6 @@ void initLogics()
    loadLogicFile(0);
 }
 
-/**************************************************************************
-** loadMessages
-**
-** Purpose: Since message decryption is done when the LOGIC is loaded, this
-** function simply reads the message section and stores the messages in an
-** array.
-**************************************************************************/
-void loadMessages(byte *fileData, LOGICFile *logicData)
-{
-   //word startPos, messNum;
-   //short int index;
-   //byte *marker;
-
-   ///* Calculate start and end indices of message data, and
-   //** the number of messages in message data, and then allocate
-   //** memory for the array of message strings. */
-   //startPos = fileData[0] + fileData[1]*256 + 2;
-   //logicData->numMessages = fileData[startPos];
-   //logicData->messages = (byte **)malloc(logicData->numMessages*sizeof(byte *));
-   //fileData += (startPos + 3);
-
-   ///* Step through the message data copying message strings to the
-   //** logicData struct. */
-   //for (messNum=0, marker=fileData; messNum<logicData->numMessages; messNum++, marker+=2) {
-   //   index = marker[0] + marker[1]*256 - 2;
-   //   logicData->messages[messNum] = ((index<0)? strdup("")
-   //      : strdup(&fileData[index]));
-   //}
-}
 
 /**************************************************************************
 ** loadLogicFile
@@ -83,24 +55,40 @@ void loadLogicFile(int logFileNum)
    AGIFile tempAGI;
    LOGICFile *logicData;
    int dummy;
-
+   byte previousRamBank = RAM_BANK;
+  
    discardLogicFile(logFileNum);
-   logics[logFileNum].data = (LOGICFile *)malloc(sizeof(LOGICFile));
+   logics[logFileNum].data = (LOGICFile *)banked_alloc(sizeof(LOGICFile), &logics[logFileNum].dataBank);
    logicData = logics[logFileNum].data;
-
    /* Load LOGIC file, calculate logic code length, and copy
    ** logic code into tempLOGIC. */
-   //printf("Loading Logic %d\n", logFileNum);
+
+#ifdef VERBOSE
+   printf("Loading Logic %d\n", logFileNum);
+#endif // VERBOSE
+
    loadAGIFile(LOGIC, &logdir[logFileNum], &tempAGI);
-   //logicData->codeSize = tempAGI.data[0] + tempAGI.data[1]*256;
-   //logicData->logicCode = (byte *)malloc(logicData->codeSize);
-   //memcpy(logicData->logicCode, &tempAGI.data[2], logicData->codeSize);
 
-   ///* Decode message section of LOGIC file and store in tempLOGIC. */
-   //loadMessages(tempAGI.data, logicData);
+   RAM_BANK = logics[logFileNum].dataBank;
 
-   //logics[logFileNum].loaded = TRUE;
-   //free(tempAGI.data);   /* Deallocate original buffer. */
+   logicData->codeBank = tempAGI.codeBank;
+   logicData->codeSize = tempAGI.codeSize;
+   logicData->logicCode = tempAGI.code;
+   logicData->messageBank = tempAGI.messageBank;
+   logicData->messages = (byte**) tempAGI.messagePointers;
+   logicData->numMessages = tempAGI.noMessages;
+
+#ifdef VERBOSE
+   printf("The codebank is %d, the code size is %d, the messageBank is %d, \n and the number of messages is %d, the code pointer is non zero and matched against temp agi %d the message pointer is non zero and matches temp agi %d ", 
+       logicData->codeBank, logicData->codeSize, logicData->messageBank, logicData->numMessages
+       ,logicData->logicCode == tempAGI.code && logicData->logicCode
+       , logicData->messages == (byte**) tempAGI.messagePointers && logicData->messages
+       );
+#endif // VERBOSE
+
+   RAM_BANK = previousRamBank;
+
+   logics[logFileNum].loaded = TRUE;
 }
 
 /**************************************************************************
@@ -117,13 +105,16 @@ void discardLogicFile(int logFileNum)
 
    if (logics[logFileNum].loaded) {
       logicData = logics[logFileNum].data;
+      if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->messages, logicData->messageBank))
+      {
+          printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+      }
 
-      for (messNum=0; messNum<logicData->numMessages; messNum++)
-         free(logicData->messages[messNum]);
+      if (logics[logFileNum].loaded  && !banked_dealloc((byte*)logicData->logicCode, logicData->codeBank))
+      {
+          printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+      }
 
-      free(logicData->messages);
-      free(logicData->logicCode);
-      free(logicData);
       logics[logFileNum].loaded = FALSE;
    }
 }

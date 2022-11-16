@@ -424,7 +424,6 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	unsigned int avisPos = 0, i, j = 1;
 	unsigned char byte1, byte2;
-	byte bank;
 	byte lfn;
 	byte* wholeMessageSectionData;
 	char** offsetPointer;
@@ -434,7 +433,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	lfn = cbm_openForSeeking(location->fileName);
 
 	seekAndCheckSignature(location);
-	bank = seekAndReadLogicIntoMemory(AGIData);
+	AGIData->codeBank = seekAndReadLogicIntoMemory(AGIData);
 
 	if (resType == LOGIC) {
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
@@ -443,13 +442,12 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
 
-		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &bank);
+		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &AGIData->messageBank);
 		AGIData->messagePointers = (char**) & wholeMessageSectionData[0];
 		AGIData->messageData = (char*) & wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
-		AGIData->messageBank = bank;
 
 		previousRamBank = RAM_BANK;
-		RAM_BANK = bank;
+		RAM_BANK = AGIData->messageBank;
 
 #ifdef VERBOSE
 		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
@@ -494,7 +492,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		{
 			if (AGIData->messagePointers[i] > 0)
 			{
-				printf("%d Data Length: %d Address %p Bank %d, Message %s\n", i + 1, strlen(AGIData->messagePointers[i]), AGIData->messagePointers[i], bank, AGIData->messagePointers[i]);
+				printf("%d Data Length: %d Address %p Bank %d, Message %s\n", i + 1, strlen(AGIData->messagePointers[i]), AGIData->messagePointers[i], AGIData->messageBank, AGIData->messagePointers[i]);
 			}
 			else
 			{
@@ -504,8 +502,6 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		printf("\nYou have %d message", AGIData->noMessages);
 #endif
 		RAM_BANK = previousRamBank;
-
-		exit(0);
 	}
 
 
@@ -563,6 +559,14 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	   //       fileData[i] ^= AVIS_DURGAN[avisPos++ % 11];
 	//   }
 	//}
+#ifdef VERBOSE
+	printf("Now closing the file");
+#endif // VERBOSE
 
 	cbm_close(lfn);
+
+#ifdef VERBOSE
+	printf("File closed");
+#endif // VERBOSE
+
 }

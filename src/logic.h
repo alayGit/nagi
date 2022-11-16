@@ -13,6 +13,9 @@ typedef struct {
    byte *logicCode;
    byte numMessages;
    byte **messages;
+   byte codeBank;
+   byte messageBank;
+
 } LOGICFile;
 
 typedef struct {
@@ -20,6 +23,7 @@ typedef struct {
    word entryPoint;
    word currentPoint;
    LOGICFile *data;
+   byte dataBank;
 } LOGICEntry;
 
 extern LOGICEntry logics[];
