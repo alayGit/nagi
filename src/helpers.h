@@ -17,7 +17,7 @@
 #define DIFF_ASCII_PETSCII_CAPS -128
 #define DIFF_ASCII_PETSCII_LOWER -32
 
-byte convertAsciiByteToPetsciiByte(char* toConvert);
+byte convertAsciiByteToPetsciiByte(byte* toConvert);
 
 
 #endif

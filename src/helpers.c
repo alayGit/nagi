@@ -1,6 +1,6 @@
 #include "helpers.h"
 
-byte convertAsciiByteToPetsciiByte(char* toConvert)
+byte convertAsciiByteToPetsciiByte(byte* toConvert)
 {
 	if (*toConvert >= ASCIIA && *toConvert <= ASCIIZ)
 	{

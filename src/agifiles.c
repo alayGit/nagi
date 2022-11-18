@@ -9,8 +9,8 @@
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
 //#define VERBOSE_DISPLAY_MESSAGES
-//#define VERBOSE_DISPLAY_OFFSETS
-//#define VERBOSE
+#define VERBOSE_DISPLAY_OFFSETS
+#define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -426,7 +426,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	unsigned char byte1, byte2;
 	byte lfn;
 	byte* wholeMessageSectionData;
-	char** offsetPointer;
+	byte** offsetPointer;
 	boolean lastCharacterSeparator = TRUE;
 	byte previousRamBank = RAM_BANK;
 
@@ -443,8 +443,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
 
 		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &AGIData->messageBank);
-		AGIData->messagePointers = (char**) & wholeMessageSectionData[0];
-		AGIData->messageData = (char*) & wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
+		AGIData->messagePointers = (byte**) & wholeMessageSectionData[0];
+		AGIData->messageData = & wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
 
 		previousRamBank = RAM_BANK;
 		RAM_BANK = AGIData->messageBank;
@@ -461,7 +461,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 			if (lastCharacterSeparator)
 			{
-				*offsetPointer = (char*) &AGIData->messageData[i];
+				*offsetPointer = &AGIData->messageData[i];
 				
 				lastCharacterSeparator = FALSE;
 
@@ -473,7 +473,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #endif // VERBOSE_DISPLAY_OFFSETS
 					offsetPointer++;
 
-				} while (*offsetPointer == 0 && offsetPointer < (char**) & AGIData->messageData[0]); //So that null message offsets are skipped
+				} while (*offsetPointer == 0 && offsetPointer < (byte**) & AGIData->messageData[0]); //So that null message offsets are skipped
 			}
 
 			lastCharacterSeparator = AGIData->messageData[i] == SEPARATOR;
