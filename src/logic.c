@@ -53,9 +53,20 @@ void initLogics()
 void loadLogicFile(int logFileNum)
 {
    AGIFile tempAGI;
+   AGIFilePosType agiFilePosType;
    LOGICFile *logicData;
    int dummy;
    byte previousRamBank = RAM_BANK;
+
+   RAM_BANK = DIRECTORY_BANK;
+   agiFilePosType = logdir[logFileNum];
+
+#ifdef VERBOSE
+   printf("\n%d Retrieved file num %d, Offset %lu\n",logFileNum, agiFilePosType.filePos);
+#endif // VERBOSE
+
+
+   RAM_BANK = previousRamBank;
   
    discardLogicFile(logFileNum);
    logics[logFileNum].data = (LOGICFile *)banked_alloc(sizeof(LOGICFile), &logics[logFileNum].dataBank);
@@ -67,7 +78,7 @@ void loadLogicFile(int logFileNum)
    printf("Loading Logic %d\n", logFileNum);
 #endif // VERBOSE
 
-   loadAGIFile(LOGIC, &logdir[logFileNum], &tempAGI);
+   loadAGIFile(LOGIC, &agiFilePosType, &tempAGI);
 
    RAM_BANK = logics[logFileNum].dataBank;
 

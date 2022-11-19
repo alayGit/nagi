@@ -8,6 +8,7 @@
 **
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
+//#define VERBOSE_DISPLAY_FILEOFFSETS
 //#define VERBOSE_DISPLAY_MESSAGES
 #define VERBOSE_DISPLAY_OFFSETS
 #define VERBOSE
@@ -27,10 +28,13 @@ byte avisDurgan[11] = { 0x41, 0x76, 0x69, 0x73, 0x20, 0x44, 0x75, 0x72, 0x67, 0x
 #define FILE_OPEN_ADDRESS 2
 #define NO_BYTES_PER_MESSAGE 2
 
-AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];
+AGIFilePosType* logdir = (AGIFilePosType*)&BANK_RAM[LOGDIR_START];
+AGIFilePosType* picdir = (AGIFilePosType*)&BANK_RAM[PICDIR_START];
+AGIFilePosType* viewdir = (AGIFilePosType*)&BANK_RAM[VIEWDIR_START];
+AGIFilePosType* snddir = (AGIFilePosType*)&BANK_RAM[SOUNDDIR_START];
+
 int numLogics, numPictures, numViews, numSounds;
 boolean version3 = FALSE;
-char gameSig[10] = "";
 
 /***************************************************************************
 ** initFiles
@@ -41,8 +45,8 @@ char gameSig[10] = "";
 ***************************************************************************/
 void initFiles()
 {
-	loadGameSig(gameSig);
-	if (strlen(gameSig) > 0) version3 = TRUE;
+	//loadGameSig(gameSig);
+	//if (strlen(gameSig) > 0) version3 = TRUE;
 	loadAGIDirs();
 }
 
@@ -133,7 +137,9 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 	unsigned char address[4] = { 0,0,0,0 };
 	AGIFilePosType tempPos;
 	int value;
+	byte previousBank = RAM_BANK;
 
+	RAM_BANK = DIRECTORY_BANK;
 
 	if ((fp = fopen(fName, "rb")) == NULL) {
 		printf("Could not find file : %s.\n", fName);
@@ -159,16 +165,46 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 		value = tempPos.filePos;
 
 		switch (dirNum) {
-		case 0: logdir[*count] = tempPos; break;
-		case 1: picdir[*count] = tempPos; break;
-		case 2: viewdir[*count] = tempPos; break;
-		case 3: snddir[*count] = tempPos; break;
+		case 0:
+		{
+			logdir[*count] = tempPos;
+#ifdef VERBOSE_DISPLAY_FILEOFFSETS
+			printf("\n%d Logic File Name %s, Offset %lu\n", *count, logdir[*count].fileName, logdir[*count].filePos);
+#endif // VERBOSE_DISPLAY_FILEOFFSETS
+
+
+			break;
+		}
+		case 1:
+		{
+			picdir[*count] = tempPos;
+#ifdef VERBOSE_DISPLAY_FILEOFFSETS
+			printf("\n%d Pic File Name %s, Offset %lu\n", *count, picdir[*count].fileName, picdir[*count].filePos);
+#endif // VERBOSE_DISPLAY_FILEOFFSETS
+		}
+		break;
+		case 2:
+		{
+			viewdir[*count] = tempPos;
+#ifdef VERBOSE_DISPLAY_FILEOFFSETS
+			printf("\n%d View File Name %s, Offset %lu\n", *count, viewdir[*count].fileName, viewdir[*count].filePos);
+#endif // VERBOSE_DISPLAY_FILEOFFSETS
+			break;
+		}
+		case 3:
+			snddir[*count] = tempPos;
+
+#ifdef VERBOSE_DISPLAY_FILEOFFSETS
+			printf("\n%d sound File Name %s, Offset %lu\n", *count, snddir[*count].fileName, snddir[*count].filePos);
+#endif // VERBOSE_DISPLAY_FILEOFFSETS
+			break;
 		}
 
 		(*count)++;
 	}
 
 	fclose(fp);
+	RAM_BANK = previousBank;
 }
 
 /***************************************************************************
@@ -356,7 +392,7 @@ boolean seekAndCheckSignature(char* fileName, AGIFilePosType* location)
 	}
 
 #ifdef VERBOSE
-	printf("PS\n");
+		printf("PS\n");
 #endif // VERBOSE
 
 	return result;
@@ -514,7 +550,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		printf("\nYou have %d message", AGIData->noMessages);
 #endif
 		RAM_BANK = previousRamBank;
-	}
+		}
 
 
 
@@ -581,4 +617,4 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	printf("File closed");
 #endif // VERBOSE
 
-}
+	}

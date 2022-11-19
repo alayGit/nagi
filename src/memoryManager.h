@@ -44,6 +44,13 @@
 #define BANK_SIZE 8000
 
 #define ALLOCATION_ARRAY_START_INDEX 0
+#define LOGDIR_START 186
+#define PICDIR_START 1717
+#define SOUNDDIR_START 3248
+#define VIEWDIR_START 4779
+#define SIZE_OF_DIR 1530
+
+#define DIRECTORY_BANK 60
 
 #ifdef _MSC_VER //Used for testing under windows
 extern byte* banked;

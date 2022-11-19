@@ -33,7 +33,11 @@ typedef struct {          /* AGI data file structure */
    byte* messageData;
 } AGIFile;
 
-extern AGIFilePosType logdir[256], picdir[256], viewdir[256], snddir[256];
+extern AGIFilePosType* logdir;
+extern AGIFilePosType* picdir; 
+extern AGIFilePosType* viewdir;
+extern AGIFilePosType* snddir;
+
 extern int numLogics, numPictures, numViews, numSounds;
 
 void initFiles();
