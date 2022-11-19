@@ -46,7 +46,7 @@ void initFiles()
 	loadAGIDirs();
 }
 
-byte cbm_openForSeeking(const char* fileName)
+byte cbm_openForSeeking(char* fileName)
 {
 	byte previousRamBank = RAM_BANK;
 	const char* OPEN_FLAGS = ",S,R";
@@ -60,8 +60,13 @@ byte cbm_openForSeeking(const char* fileName)
 	byte sec_addr = FILE_OPEN_ADDRESS;
 
 	RAM_BANK = ALLOCATION_BANK;
-	fileNameAndFlags = (char*)banked_alloc(strlen(fileName) + strlen(OPEN_FLAGS) + 1, &bank);
-	sprintf(fileNameAndFlags, "%s%s", fileName, OPEN_FLAGS);
+	fileNameAndFlags = (char*)banked_alloc(strlen(&fileName[0]) + strlen(OPEN_FLAGS) + 1, &bank);
+	sprintf(fileNameAndFlags, "%s%s", &fileName[0], OPEN_FLAGS);
+
+#ifdef VERBOSE
+	printf("Attempting to load file %s", fileNameAndFlags);
+#endif // VERBOSE
+
 
 	cbm_open(lfn, dev, sec_addr, fileNameAndFlags);
 	RAM_BANK = previousRamBank;
@@ -141,8 +146,7 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 		byte2 = fgetc(fp);
 		byte3 = fgetc(fp);
 
-		tempPos.fileName = (char*)malloc(10);
-		sprintf(tempPos.fileName, "vol.%d", ((byte1 & 0xF0) >> 4));
+		tempPos.fileNum = ((byte1 & 0xF0) >> 4);
 
 		address[3] = 0;
 		address[2] = byte1 & 0x0F;
@@ -242,6 +246,7 @@ void loadAGIDirs()
 		loadAGIv3Dir();
 	}
 	else {
+		printf("Loading Indexes");
 		loadAGIDir(0, "logdir", &numLogics);
 		loadAGIDir(1, "picdir", &numPictures);
 		loadAGIDir(2, "viewdir", &numViews);
@@ -325,7 +330,7 @@ unsigned int getPositionOfFirstMessage(AGIFile* AGIData)
 	return AGIData->noMessages * NO_BYTES_PER_MESSAGE;
 }
 
-boolean seekAndCheckSignature(AGIFilePosType* location)
+boolean seekAndCheckSignature(char* fileName, AGIFilePosType* location)
 {
 	boolean result = TRUE, signatureValidationPassed;
 	const byte EXPECT_SIG_1 = 0x12;
@@ -334,31 +339,25 @@ boolean seekAndCheckSignature(AGIFilePosType* location)
 	byte currentByte;
 
 #ifdef VERBOSE_DISPLAY_MESSAGES
-	printf("----Attempting to open %s for seeking data\n", location->fileName);
+	printf("----Attempting to open %s for seeking data\n", fileName);
 #endif // VERBOSE_DISPLAY_MESSAGES
 
-	if (location->filePos == EMPTY) {
-		printf("Could not find requested AGI file.\n");
+	cx16_fseek(FILE_OPEN_ADDRESS, location->filePos);
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	signatureValidationPassed = currentByte == 0x12;
+
+	cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
+	signatureValidationPassed = signatureValidationPassed & currentByte == 0x34;
+
+	if (!signatureValidationPassed) {  /* All AGI data files start with 0x1234 */
+		printf("Fail Sig. Validation %s.\n", location->fileNum);
 		result = FALSE;
 	}
-	else {
-		cx16_fseek(FILE_OPEN_ADDRESS, location->filePos);
-
-		cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-		signatureValidationPassed = currentByte == 0x12;
-
-		cbm_read(SEQUENTIAL_LFN, &currentByte, 1);
-		signatureValidationPassed = signatureValidationPassed & currentByte == 0x34;
-
-		if (!signatureValidationPassed) {  /* All AGI data files start with 0x1234 */
-			printf("Fail Sig. Validation %s.\n", location->fileName);
-			result = FALSE;
-		}
 
 #ifdef VERBOSE
 	printf("PS\n");
 #endif // VERBOSE
-	}
 
 	return result;
 }
@@ -429,10 +428,23 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte** offsetPointer;
 	boolean lastCharacterSeparator = TRUE;
 	byte previousRamBank = RAM_BANK;
+	char fileName[10];
 
-	lfn = cbm_openForSeeking(location->fileName);
+	if (location->filePos == EMPTY) {
+		printf("Could not find requested AGI file, as the filePos is empty.\n");
+		exit(0);
+	}
 
-	seekAndCheckSignature(location);
+	sprintf(&fileName[0], "vol.%d", location->fileNum);
+
+#ifdef VERBOSE
+	printf("The file name is %s", &fileName[0]);
+#endif // VERBOSE
+
+
+	lfn = cbm_openForSeeking(&fileName[0]);
+
+	seekAndCheckSignature(&fileName[0], location);
 	AGIData->codeBank = seekAndReadLogicIntoMemory(AGIData);
 
 	if (resType == LOGIC) {
@@ -443,8 +455,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
 
 		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &AGIData->messageBank);
-		AGIData->messagePointers = (byte**) & wholeMessageSectionData[0];
-		AGIData->messageData = & wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
+		AGIData->messagePointers = (byte**)&wholeMessageSectionData[0];
+		AGIData->messageData = &wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
 
 		previousRamBank = RAM_BANK;
 		RAM_BANK = AGIData->messageBank;
@@ -455,14 +467,14 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		offsetPointer = AGIData->messagePointers;
 
 		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
-			
-			xOrAvisDurgan((byte*) & AGIData->messageData[i], &avisPos);
+
+			xOrAvisDurgan((byte*)&AGIData->messageData[i], &avisPos);
 			convertAsciiByteToPetsciiByte(&AGIData->messageData[i]);
 
 			if (lastCharacterSeparator)
 			{
 				*offsetPointer = &AGIData->messageData[i];
-				
+
 				lastCharacterSeparator = FALSE;
 
 				do
@@ -473,7 +485,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #endif // VERBOSE_DISPLAY_OFFSETS
 					offsetPointer++;
 
-				} while (*offsetPointer == 0 && offsetPointer < (byte**) & AGIData->messageData[0]); //So that null message offsets are skipped
+				} while (*offsetPointer == 0 && offsetPointer < (byte**)&AGIData->messageData[0]); //So that null message offsets are skipped
 			}
 
 			lastCharacterSeparator = AGIData->messageData[i] == SEPARATOR;
@@ -492,7 +504,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		{
 			if (AGIData->messagePointers[i] > 0)
 			{
-				printf("%d Data Length: %d Address %p Bank %d, Message %s\n", i + 1, strlen(AGIData->messagePointers[i]), AGIData->messagePointers[i], AGIData->messageBank, AGIData->messagePointers[i]);
+				printf("%d Data Length: %d Address %p Bank %d, Message %s\n", i + 1, strlen((char*)AGIData->messagePointers[i]), AGIData->messagePointers[i], AGIData->messageBank, AGIData->messagePointers[i]);
 			}
 			else
 			{

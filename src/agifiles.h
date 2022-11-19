@@ -18,7 +18,7 @@
 #define  EMPTY  0xFFFFF   /* Empty DIR entry */
 
 typedef struct {          /* DIR entry structure */
-   char *fileName;
+   byte fileNum;
    unsigned long filePos;
 } AGIFilePosType;
 
