@@ -19,7 +19,7 @@
 /* The logics array is the array that holds all the information about the
 ** logic files. A boolean flag determines whether the logic is loaded or
 ** not. If it isn't loaded, then the data is not in memory. */
-LOGICEntry logics[256];
+LOGICEntry* logics = (LOGICEntry*)&BANK_RAM[LOGIC_ENTRY_START];
 
 /***************************************************************************
 ** initLogics
@@ -31,16 +31,16 @@ LOGICEntry logics[256];
 ***************************************************************************/
 void initLogics()
 {
-   int i;
+	int i;
 
-   for (i=0; i<256; i++) {
-      logics[i].loaded = FALSE;
-      logics[i].entryPoint = 0;
-      logics[i].currentPoint = 0;
-      logics[i].data = NULL;
-   }
+	for (i = 0; i < 256; i++) {
+		logics[i].loaded = FALSE;
+		logics[i].entryPoint = 0;
+		logics[i].currentPoint = 0;
+		logics[i].data = NULL;
+	}
 
-   loadLogicFile(0);
+	loadLogicFile(0);
 }
 
 
@@ -52,54 +52,57 @@ void initLogics()
 **************************************************************************/
 void loadLogicFile(int logFileNum)
 {
-   AGIFile tempAGI;
-   AGIFilePosType agiFilePosType;
-   LOGICFile *logicData;
-   int dummy;
-   byte previousRamBank = RAM_BANK;
+	AGIFile tempAGI;
+	AGIFilePosType agiFilePosType;
+	LOGICEntry logicEntry;
+	LOGICFile* logicData;
 
-   RAM_BANK = DIRECTORY_BANK;
-   agiFilePosType = logdir[logFileNum];
+	int dummy;
+	byte previousRamBank = RAM_BANK;
 
-#ifdef VERBOSE
-   printf("\n%d Retrieved file num %d, Offset %lu\n",logFileNum, agiFilePosType.filePos);
-#endif // VERBOSE
-
-
-   RAM_BANK = previousRamBank;
-  
-   discardLogicFile(logFileNum);
-   logics[logFileNum].data = (LOGICFile *)banked_alloc(sizeof(LOGICFile), &logics[logFileNum].dataBank);
-   logicData = logics[logFileNum].data;
-   /* Load LOGIC file, calculate logic code length, and copy
-   ** logic code into tempLOGIC. */
+	RAM_BANK = DIRECTORY_BANK;
+	agiFilePosType = logdir[logFileNum];
+	RAM_BANK = previousRamBank;
 
 #ifdef VERBOSE
-   printf("Loading Logic %d\n", logFileNum);
+	printf("\n%d Retrieved file num %d, Offset %lu\n", logFileNum, agiFilePosType.filePos);
 #endif // VERBOSE
 
-   loadAGIFile(LOGIC, &agiFilePosType, &tempAGI);
+	discardLogicFile(logFileNum);
+	/* Load LOGIC file, calculate logic code length, and copy
+	** logic code into tempLOGIC. */
 
-   RAM_BANK = logics[logFileNum].dataBank;
-
-   logicData->codeBank = tempAGI.codeBank;
-   logicData->codeSize = tempAGI.codeSize;
-   logicData->logicCode = tempAGI.code;
-   logicData->messageBank = tempAGI.messageBank;
-   logicData->messages = (byte**) tempAGI.messagePointers;
-   logicData->numMessages = tempAGI.noMessages;
 
 #ifdef VERBOSE
-   printf("The codebank is %d, the code size is %d, the messageBank is %d, \n and the number of messages is %d, the code pointer is non zero and matched against temp agi %d the message pointer is non zero and matches temp agi %d ", 
-       logicData->codeBank, logicData->codeSize, logicData->messageBank, logicData->numMessages
-       ,logicData->logicCode == tempAGI.code && logicData->logicCode
-       , logicData->messages == (byte**) tempAGI.messagePointers && logicData->messages
-       );
+	printf("Loading Logic %d\n", logFileNum);
 #endif // VERBOSE
 
-   RAM_BANK = previousRamBank;
+	loadAGIFile(LOGIC, &agiFilePosType, &tempAGI);
 
-   logics[logFileNum].loaded = TRUE;
+	RAM_BANK = LOGIC_FILE_BANK;
+	logicData = &((LOGICFile*)&BANK_RAM[LOGIC_FILE_BANK])[logFileNum];
+	logicData->codeBank = tempAGI.codeBank;
+	logicData->codeSize = tempAGI.codeSize;
+	logicData->logicCode = tempAGI.code;
+	logicData->messageBank = tempAGI.messageBank;
+	logicData->messages = (byte**)tempAGI.messagePointers;
+	logicData->numMessages = tempAGI.noMessages;
+
+#ifdef VERBOSE
+	printf("The codebank is %d, the code size is %d, the messageBank is %d, \n and the number of messages is %d, the code pointer is non zero and matched against temp agi %d the message pointer is non zero and matches temp agi %d \n",
+		logicData->codeBank, logicData->codeSize, logicData->messageBank, logicData->numMessages
+		, logicData->logicCode == tempAGI.code && logicData->logicCode
+		, logicData->messages == (byte**)tempAGI.messagePointers && logicData->messages
+	);
+#endif // VERBOSE
+	RAM_BANK = LOGIC_ENTRY_BANK;
+
+	logics[logFileNum].data = logicData;
+	logicEntry = logics[logFileNum];
+
+	logics[logFileNum].loaded = TRUE;
+
+	RAM_BANK = previousRamBank;
 }
 
 /**************************************************************************
@@ -111,29 +114,32 @@ void loadLogicFile(int logFileNum)
 **************************************************************************/
 void discardLogicFile(int logFileNum)
 {
-   int messNum;
-   LOGICFile *logicData;
+	byte previousRamBank = RAM_BANK;
+	int messNum;
+	LOGICFile* logicData;
 
-   if (logics[logFileNum].loaded) {
-      logicData = logics[logFileNum].data;
-      if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->messages, logicData->messageBank))
-      {
-          printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
-      }
+	RAM_BANK = LOGIC_ENTRY_BANK;
+	if (logics[logFileNum].loaded) {
+		logicData = logics[logFileNum].data;
+		if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->messages, logicData->messageBank))
+		{
+			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+		}
 
-      if (logics[logFileNum].loaded  && !banked_dealloc((byte*)logicData->logicCode, logicData->codeBank))
-      {
-          printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
-      }
+		if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->logicCode, logicData->codeBank))
+		{
+			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+		}
 
-      logics[logFileNum].loaded = FALSE;
-   }
+		logics[logFileNum].loaded = FALSE;
+	}
+	RAM_BANK = previousRamBank;
 }
 
 void testLogic()
 {
-   initFiles();
-   initLogics();
-   loadLogicFile(0);
-   discardLogicFile(0);
+	initFiles();
+	initLogics();
+	loadLogicFile(0);
+	discardLogicFile(0);
 }

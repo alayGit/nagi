@@ -26,7 +26,7 @@ typedef struct {
    byte dataBank;
 } LOGICEntry;
 
-extern LOGICEntry logics[];
+extern LOGICEntry* logics;
 
 void initLogics();
 void loadLogicFile(int logFileNum);
