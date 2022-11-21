@@ -15,6 +15,7 @@
 #include "timer.h"
 #include "agifiles.h"
 #include "logic.h"
+#include "commands.h"
 //#include "view.h"
 #include "stub.h"
 #include "memoryManager.h"
@@ -253,7 +254,7 @@ void main()
    while (TRUE) {
       /* Cycle initiator. Controlled by delay variable (var[10). */
       if (counter >= var[10]) {
-          //printf("Interpret Runs");
+          printf("Interpret Runs");
           interpret();
         counter=0;
       }
