@@ -15,11 +15,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <cx16.h>
 
 #include "commands.h"
 #include "general.h"
 #include "logic.h"
+#include "memoryManager.h"
 #include "stub.h"
+
 
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
@@ -131,6 +134,9 @@ boolean lessv(byte** data) // 2, 0xC0
 boolean greatern(byte** data) // 2, 0x80 
 {
     int varVal, value;
+
+    printf("Hello from bank");
+    exit(0);
 
     varVal = var[*(*data)++];
     value = *(*data)++;
@@ -2082,6 +2088,7 @@ void ifHandler(byte** data)
     byte b1, b2;
     short int disp, dummy;
     char debugString[80];
+    byte previousBank = RAM_BANK;
 
     while (stillProcessing) {
         ch = *(*data)++;
@@ -2120,7 +2127,11 @@ void ifHandler(byte** data)
             case 2: testVal = equalv(data); break;
             case 3: testVal = lessn(data); break;
             case 4: testVal = lessv(data); break;
-            case 5: testVal = greatern(data); break;
+            case 5: { 
+                RAM_BANK = 1;
+                testVal = greatern(data); 
+                break; 
+            }
             case 6: testVal = greaterv(data); break;
             case 7: testVal = isset(data); break;
             case 8: testVal = issetv(data); break;
@@ -2140,6 +2151,7 @@ void ifHandler(byte** data)
                 testVal = FALSE;
                 break; /* Should never happen */
             }
+            
             if (notMode) testVal = (testVal ? FALSE : TRUE);
             notMode = 0;
             if (testVal) {
@@ -2167,6 +2179,8 @@ void ifHandler(byte** data)
             }
             break;
         }
+
+        RAM_BANK = previousBank;
     }
 
 #ifdef DEBUG
@@ -2202,48 +2216,62 @@ void ifHandler(byte** data)
 ***************************************************************************/
 void executeLogic(int logNum)
 {
+    byte previousRamBank = RAM_BANK;
     boolean discardAfterward = FALSE, stillExecuting = TRUE;
     byte* code, * endPos, * startPos, b1, b2;
+    LOGICEntry currentLogic;
+    LOGICFile currentLogicFile;
+
+
     short int disp;
     char debugString[80];
     int i, dummy;
 
     currentLog = logNum;
+
+    RAM_BANK = LOGIC_ENTRY_BANK;
+    currentLogic = logics[logNum];
+    
+    RAM_BANK = LOGIC_FILE_BANK;
+    currentLogicFile = *currentLogic.data;
+
 #ifdef DEBUG
     sprintf(debugString, "LOGIC.%d:       ", currentLog);
     drawBigString(screen, debugString, 0, 384, 0, 7);
 #endif
     /* Load logic file temporarily in order to execute it if the logic is
     ** not already in memory. */
-    if (!logics[logNum].loaded) {
+    if (!currentLogic.loaded) {
         discardAfterward = TRUE;
         loadLogicFile(logNum);
     }
 #ifdef DEBUG
     debugString[0] = 0;
     for (i = 0; i < 10; i++)
-        sprintf(debugString, "%s %x", debugString, logics[logNum].data->logicCode[i]);
+        sprintf(debugString, "%s %x", debugString, currentLogicFile->logicCode[i]);
     drawBigString(screen, debugString, 0, 416, 0, 7);
 #endif
     /* Set up position to start executing code from. */
-    //logics[logNum].currentPoint = logics[logNum].entryPoint;
-    startPos = logics[logNum].data->logicCode;
-    code = startPos + logics[logNum].entryPoint;
-    endPos = startPos + logics[logNum].data->codeSize;
+    //currentLogic.currentPoint = currentLogic.entryPoint;
+    startPos = currentLogicFile.logicCode;
+    code = startPos + currentLogic.entryPoint;
+    endPos = startPos + currentLogicFile.codeSize;
 
 #ifdef DEBUG
     drawBigString(screen, "Push a key to advance a step", 0, 400, 0, 7);
     if ((readkey() & 0xff) == 'q') closedown();
 #endif
+
+
     while ((code < endPos) && stillExecuting) {
         /* Emergency exit */
         if (key[KEY_F12]) {
             ////lprintf("info: Exiting MEKA due to F12, logic: %d, posn: %d",
-                //logNum, logics[logNum].currentPoint);
+                //logNum, currentLogic.currentPoint);
             exit(0);
         }
 
-        logics[logNum].currentPoint = (code - startPos);
+        currentLogic.currentPoint = (code - startPos);
 #ifdef DEBUG
         debugString[0] = 0;
         for (i = 0; i < 10; i++)
@@ -2251,13 +2279,14 @@ void executeLogic(int logNum)
         drawBigString(screen, debugString, 0, 416, 0, 7);
 
         if (*code < 0xfc) {
-            sprintf(debugString, "(%d) %s [%x]           ", logics[logNum].currentPoint, agiCommands[*code].commandName, *code);
+            sprintf(debugString, "(%d) %s [%x]           ", currentLogic.currentPoint, agiCommands[*code].commandName, *code);
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
         }
-#endif
-        printf("\n Now exiting");
-        exit(0);
+#endif       
+        RAM_BANK = currentLogicFile.codeBank;
+        printf("\n The code is %d, on bank %d address, %p", *code, RAM_BANK, code);
+
         switch (*code++) {
         case 0: /* return */
             stillExecuting = FALSE;
@@ -2472,7 +2501,7 @@ void executeLogic(int logNum)
 
         case 0xfe: /* Unconditional branch: else, goto. */
 #ifdef DEBUG
-            sprintf(debugString, "(%d) else                           ", logics[logNum].currentPoint);
+            sprintf(debugString, "(%d) else                           ", currentLogic.currentPoint);
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
 #endif
@@ -2484,7 +2513,7 @@ void executeLogic(int logNum)
 
         case 0xff: /* Conditional branch: if */
 #ifdef DEBUG
-            sprintf(debugString, "(%d) if                             ", logics[logNum].currentPoint);
+            sprintf(debugString, "(%d) if                             ", currentLogic.currentPoint);
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
 #endif
@@ -2493,11 +2522,13 @@ void executeLogic(int logNum)
 
         default:    /* Error has occurred */
             ////lprintf("catastrophe: Illegal action [%d], logic %d, posn %d.",
-                //*(code - 1), logNum, logics[logNum].currentPoint);
+                //*(code - 1), logNum, currentLogic.currentPoint);
             break;
         }
     }
 
     if (discardAfterward) discardLogicFile(logNum);
+
+    RAM_BANK = previousRamBank;
 }
 

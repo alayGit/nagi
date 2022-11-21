@@ -129,6 +129,7 @@ void bankedRamInit()
 			printf("Cannot find file");
 		}
 	}
+	RAM_BANK = previousRamBank;
 }
 
 void memoryMangerInit()

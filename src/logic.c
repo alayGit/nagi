@@ -94,6 +94,7 @@ void loadLogicFile(int logFileNum)
 		, logicData->logicCode == tempAGI.code && logicData->logicCode
 		, logicData->messages == (byte**)tempAGI.messagePointers && logicData->messages
 	);
+
 #endif // VERBOSE
 	RAM_BANK = LOGIC_ENTRY_BANK;
 

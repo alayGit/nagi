@@ -10,7 +10,7 @@
 ***************************************************************************/
 //#define VERBOSE_DISPLAY_FILEOFFSETS
 //#define VERBOSE_DISPLAY_MESSAGES
-#define VERBOSE_DISPLAY_OFFSETS
+//#define VERBOSE_DISPLAY_OFFSETS
 #define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
@@ -426,7 +426,7 @@ byte seekAndReadLogicIntoMemory(AGIFile* AGIData)
 
 	AGIData->codeSize = byte1 + byte2 * 256;
 
-	readFileContentsIntoBankedRam(AGIData->codeSize, &bank);
+	AGIData->code = readFileContentsIntoBankedRam(AGIData->codeSize, &bank);
 
 	return bank;
 }
