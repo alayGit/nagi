@@ -1,5 +1,5 @@
 #include "memoryManager.h"
-
+#define VERBOSE
 MemoryArea* _memoryAreas;
 int _noSegments;
 
@@ -53,10 +53,10 @@ byte getFirstSegment(byte size)
 #endif //  __CX16__
 }
 
-void memoryMangerInit()
+void initDynamicMemory()
 {
 #ifdef _MSC_VER
-	banked = (byte*) malloc(512000);
+	banked = (byte*)malloc(512000);
 #endif // _MSC_VER
 #ifdef  __CX16__
 	byte previousRamBank = RAM_BANK;
@@ -78,13 +78,66 @@ void memoryMangerInit()
 #ifdef  __CX16__
 	RAM_BANK = previousRamBank;
 #endif //  __CX16__
-
 }
 
-//int getMemoryAreaAllocationStartIndex(int memoryArea)
-//{
-//	return _memoryAreas[memoryArea].start - &BANK_RAM[ALLOCATION_ARRAY_START_INDEX]
-//}
+void bankedRamInit()
+{
+#define FILE_NAME_LENGTH 13
+	int i, j = 0;
+	FILE* fp;
+	char fileName[FILE_NAME_LENGTH];
+	byte previousRamBank = RAM_BANK;
+
+	unsigned char fileByte;
+	int bankRamSizes[NO_CODE_BANKS] = {
+		(int) _BANKRAM01_SIZE__,
+		(int) _BANKRAM02_SIZE__,
+		(int)_BANKRAM03_SIZE__,
+		(int)_BANKRAM04_SIZE__
+	};
+
+
+	for (i = 0; i < NO_CODE_BANKS; i++)
+	{
+		sprintf(fileName, "agi.cx16.0%d", i + 1);
+
+		RAM_BANK = i + 1;
+		if ((fp = fopen(fileName, "rb")) != NULL) {
+
+#ifdef VERBOSE
+			printf("Loading file %s\n", fileName);
+#endif // VERBOSE
+			fgetc(fp);
+			fgetc(fp);
+
+			for (j = 0; j < bankRamSizes[i]; j++) {
+				fileByte = (byte) fgetc(fp);
+						
+
+				BANK_RAM[j] = fileByte;
+				
+#ifdef VERBOSE
+				if (j < 5)
+				{
+					printf("%d Bank ram [%d] is now %p. The file byte is %p \n", i + 1, j, *(BANK_RAM + j), fileByte);
+				}
+#endif // VERBOSE
+			}
+			fclose(fp);
+		}
+		else {
+			printf("Cannot find file");
+		}
+	}
+}
+
+void memoryMangerInit()
+{
+	initDynamicMemory();
+	bankedRamInit();
+}
+
+
 
 byte* banked_alloc(int size, byte* bank)
 {
@@ -104,7 +157,7 @@ byte* banked_alloc(int size, byte* bank)
 			for (j = 0; j < _memoryAreas[i].noSegments && !result; j++)
 			{
 				allocationByte = _memoryAreas[i].start + j;
-				
+
 				if (!*(allocationByte))
 				{
 					*allocationByte = TRUE;
@@ -140,14 +193,14 @@ boolean banked_dealloc(byte* ptr, byte bank)
 		}
 	}
 
-  segment = ((ptr - &BANK_RAM[0]) / _memoryAreas[i].segmentSize);
+	segment = ((ptr - &BANK_RAM[0]) / _memoryAreas[i].segmentSize);
 
-  if (BANK_RAM[segment])
-  {
-	  BANK_RAM[segment] = FALSE;
+	if (BANK_RAM[segment])
+	{
+		BANK_RAM[segment] = FALSE;
 
-	  result = TRUE;
-  }
+		result = TRUE;
+	}
 
 #ifdef  __CX16__
 	RAM_BANK = previousRamBank;

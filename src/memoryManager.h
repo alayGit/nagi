@@ -1,6 +1,7 @@
 #ifndef _MEMORYMANAGER_H_
 #define _MEMORYMANAGER_H_
 
+#include <cx16.h>
 #include "general.h"
 
 #ifndef _MSC_VER
@@ -63,12 +64,18 @@
 #define LOGIC_ENTRY_BANK 60
 #define LOGIC_FILE_BANK 60
 
+#define FIRST_CODE_BANK 1
+#define LAST_CODE_BANK 4
+#define NO_CODE_BANKS 4
+
 #ifdef _MSC_VER //Used for testing under windows
 extern byte* banked;
-#define BANK_RAM banked
+#define  banked
 #endif 
 
 extern int _noSegments;
+
+extern void _BANKRAM01_SIZE__[], _BANKRAM02_SIZE__[], _BANKRAM03_SIZE__[], _BANKRAM04_SIZE__[];
 
 typedef struct {          /* DIR entry structure */
 	byte firstBank;
@@ -77,6 +84,8 @@ typedef struct {          /* DIR entry structure */
 	byte noSegments;
 	byte* start;
 } MemoryArea;
+
+void initDynamicMemory();
 
 void memoryMangerInit();
 byte* banked_alloc(int size, byte* bank);
