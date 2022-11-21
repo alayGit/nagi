@@ -86,7 +86,7 @@ void bankedRamInit()
 	int i, j = 0;
 	FILE* fp;
 	char fileName[FILE_NAME_LENGTH];
-	byte previousRamBank = RAM_BANK;
+	byte previousBank = RAM_BANK;
 
 	unsigned char fileByte;
 	int bankRamSizes[NO_CODE_BANKS] = {
@@ -129,7 +129,7 @@ void bankedRamInit()
 			printf("Cannot find file");
 		}
 	}
-	RAM_BANK = previousRamBank;
+	RAM_BANK = previousBank;
 }
 
 void memoryMangerInit()
@@ -138,7 +138,10 @@ void memoryMangerInit()
 	bankedRamInit();
 }
 
-
+//int getMemoryAreaAllocationStartIndex(int memoryArea)
+//{
+//	return _memoryAreas[memoryArea].start - &[ALLOCATION_ARRAY_START_INDEX]
+//}
 
 byte* banked_alloc(int size, byte* bank)
 {
