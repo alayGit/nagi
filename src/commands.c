@@ -23,6 +23,8 @@
 #include "memoryManager.h"
 #include "stub.h"
 
+#define HIGHEST_BANK1_FUNC 40
+
 
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
@@ -59,7 +61,7 @@ void freeMenuItems();
 /****************************************************************************
 ** addLogLine
 ****************************************************************************/
-void addLogLine(char* message)
+void b1AddLogLine(char* message)
 {
     FILE* fp;
 
@@ -79,7 +81,7 @@ void addLogLine(char* message)
 ** This function behaves exactly the same as printf except that it writes
 ** the output to the log file using addLogLine().
 ***************************************************************************/
-int lprintf(char* fmt, ...)
+int b1Lprintf(char* fmt, ...)
 {
     /*va_list args;
     char tempStr[10];
@@ -97,7 +99,7 @@ int lprintf(char* fmt, ...)
 
 /* TEST COMMANDS */
 
-boolean equaln(byte** data) // 2, 0x80 
+boolean b1Equaln(byte** data) // 2, 0x80 
 {
     int varVal, value;
 
@@ -106,7 +108,7 @@ boolean equaln(byte** data) // 2, 0x80
     return (varVal == value);
 }
 
-boolean equalv(byte** data) // 2, 0xC0 
+boolean b1Equalv(byte** data) // 2, 0xC0 
 {
     int varVal1, varVal2;
 
@@ -115,7 +117,7 @@ boolean equalv(byte** data) // 2, 0xC0
     return (varVal1 == varVal2);
 }
 
-boolean lessn(byte** data) // 2, 0x80 
+boolean b1Lessn(byte** data) // 2, 0x80 
 {
     int varVal, value;
 
@@ -124,7 +126,7 @@ boolean lessn(byte** data) // 2, 0x80
     return (varVal < value);
 }
 
-boolean lessv(byte** data) // 2, 0xC0 
+boolean b1Lessv(byte** data) // 2, 0xC0 
 {
     int varVal1, varVal2;
 
@@ -133,19 +135,17 @@ boolean lessv(byte** data) // 2, 0xC0
     return (varVal1 < varVal2);
 }
 
-boolean greatern(byte** data) // 2, 0x80 
+boolean b1Greatern(byte** data) // 2, 0x80 
 {
     int varVal, value;
 
     varVal = var[*(*data)++];
     value = *(*data)++;
-    
-    printf("Checking that %d > %d", varVal, value);
-    
+        
     return (varVal > value);
 }
 
-boolean greaterv(byte** data) // 2, 0xC0 
+boolean b1Greaterv(byte** data) // 2, 0xC0 
 {
     int varVal1, varVal2;
 
@@ -154,22 +154,22 @@ boolean greaterv(byte** data) // 2, 0xC0
     return (varVal1 > varVal2);
 }
 
-boolean isset(byte** data) // 1, 0x00 
+boolean b1Isset(byte** data) // 1, 0x00 
 {
     return (flag[*(*data)++]);
 }
 
-boolean issetv(byte** data) // 1, 0x80 
+boolean b1Issetv(byte** data) // 1, 0x80 
 {
     return (flag[var[*(*data)++]]);
 }
 
-boolean has(byte** data) // 1, 0x00 
+boolean b1Has(byte** data) // 1, 0x00 
 {
     return (objects[*(*data)++].roomNum == 255);
 }
 
-boolean obj_in_room(byte** data) // 2, 0x40 
+boolean b1Obj_in_room(byte** data) // 2, 0x40 
 {
     int objNum, varNum;
 
@@ -178,7 +178,7 @@ boolean obj_in_room(byte** data) // 2, 0x40
     return (objects[objNum].roomNum == varNum);
 }
 
-boolean posn(byte** data) // 5, 0x00 
+boolean b1Posn(byte** data) // 5, 0x00 
 {
     int objNum, x1, y1, x2, y2;
 
@@ -192,7 +192,7 @@ boolean posn(byte** data) // 5, 0x00
         && (viewtab[objNum].xPos <= x2) && (viewtab[objNum].yPos <= y2));
 }
 
-boolean controller(byte** data) // 1, 0x00 
+boolean b1Controller(byte** data) // 1, 0x00 
 {
     int eventNum = *(*data)++, retVal = 0;
 
@@ -223,7 +223,7 @@ boolean controller(byte** data) // 1, 0x00
     }
 }
 
-boolean have_key() // 0, 0x00
+boolean b1Have_key() // 0, 0x00
 {
     /* return (TRUE); */
     /* return (haveKey); */
@@ -239,7 +239,7 @@ boolean said(byte **data)
 }
 */
 
-boolean compare_strings(byte** data) // 2, 0x00 
+boolean b1Compare_strings(byte** data) // 2, 0x00 
 {
     int s1, s2;
 
@@ -249,7 +249,7 @@ boolean compare_strings(byte** data) // 2, 0x00
     return FALSE;
 }
 
-boolean obj_in_box(byte** data) // 5, 0x00 
+boolean b1Obj_in_box(byte** data) // 5, 0x00 
 {
     int objNum, x1, y1, x2, y2;
 
@@ -265,7 +265,7 @@ boolean obj_in_box(byte** data) // 5, 0x00
         (viewtab[objNum].yPos <= y2));
 }
 
-boolean center_posn(byte** data) // 5, 0x00 }
+boolean b1Center_posn(byte** data) // 5, 0x00 }
 {
     int objNum, x1, y1, x2, y2;
 
@@ -281,7 +281,7 @@ boolean center_posn(byte** data) // 5, 0x00 }
         (viewtab[objNum].yPos <= y2));
 }
 
-boolean right_posn(byte** data) // 5, 0x00
+boolean b1Right_posn(byte** data) // 5, 0x00
 {
     int objNum, x1, y1, x2, y2;
 
@@ -301,7 +301,7 @@ boolean right_posn(byte** data) // 5, 0x00
 
 /* ACTION COMMANDS */
 
-void increment(byte** data) // 1, 0x80 
+void b1Increment(byte** data) // 1, 0x80 
 {
     if (var[*(*data)] < 0xFF)
         var[*(*data)]++;
@@ -310,7 +310,7 @@ void increment(byte** data) // 1, 0x80
     /* var[*(*data)++]++;  This one doesn't check bounds */
 }
 
-void decrement(byte** data) // 1, 0x80 
+void b1Decrement(byte** data) // 1, 0x80 
 {
     if (var[*(*data)] > 0)
         var[*(*data)]--;
@@ -319,7 +319,7 @@ void decrement(byte** data) // 1, 0x80
     /* var[*(*data)++]--;  This one doesn't check bounds */
 }
 
-void assignn(byte** data) // 2, 0x80 
+void b1Assignn(byte** data) // 2, 0x80 
 {
     int varNum, value;
 
@@ -328,7 +328,7 @@ void assignn(byte** data) // 2, 0x80
     var[varNum] = value;
 }
 
-void assignv(byte** data) // 2, 0xC0 
+void b1Assignv(byte** data) // 2, 0xC0 
 {
     int var1, var2;
 
@@ -337,7 +337,7 @@ void assignv(byte** data) // 2, 0xC0
     var[var1] = var[var2];
 }
 
-void addn(byte** data) // 2, 0x80 
+void b1Addn(byte** data) // 2, 0x80 
 {
     int varNum, value;
 
@@ -346,7 +346,7 @@ void addn(byte** data) // 2, 0x80
     var[varNum] += value;
 }
 
-void addv(byte** data) // 2, 0xC0 
+void b1Addv(byte** data) // 2, 0xC0 
 {
     int var1, var2;
 
@@ -355,7 +355,7 @@ void addv(byte** data) // 2, 0xC0
     var[var1] += var[var2];
 }
 
-void subn(byte** data) // 2, 0x80 
+void b1Subn(byte** data) // 2, 0x80 
 {
     int varNum, value;
 
@@ -364,7 +364,7 @@ void subn(byte** data) // 2, 0x80
     var[varNum] -= value;
 }
 
-void subv(byte** data) // 2, 0xC0 
+void b1Subv(byte** data) // 2, 0xC0 
 {
     int var1, var2;
 
@@ -373,7 +373,7 @@ void subv(byte** data) // 2, 0xC0
     var[var1] -= var[var2];
 }
 
-void lindirectv(byte** data) // 2, 0xC0 
+void b1Lindirectv(byte** data) // 2, 0xC0 
 {
     int var1, var2;
 
@@ -382,7 +382,7 @@ void lindirectv(byte** data) // 2, 0xC0
     var[var[var1]] = var[var2];
 }
 
-void rindirect(byte** data) // 2, 0xC0 
+void b1Rindirect(byte** data) // 2, 0xC0 
 {
     int var1, var2;
 
@@ -391,7 +391,7 @@ void rindirect(byte** data) // 2, 0xC0
     var[var1] = var[var[var2]];
 }
 
-void lindirectn(byte** data) // 2, 0x80 
+void b1Lindirectn(byte** data) // 2, 0x80 
 {
     int varNum, value;
 
@@ -400,80 +400,80 @@ void lindirectn(byte** data) // 2, 0x80
     var[var[varNum]] = value;
 }
 
-void set(byte** data) // 1, 0x00 
+void b1Set(byte** data) // 1, 0x00 
 {
     flag[*(*data)++] = TRUE;
 }
 
-void reset(byte** data) // 1, 0x00 
+void b1Reset(byte** data) // 1, 0x00 
 {
     flag[*(*data)++] = FALSE;
 }
 
-void toggle(byte** data) // 1, 0x00 
+void b1Toggle(byte** data) // 1, 0x00 
 {
     int f = *(*data)++;
 
     flag[f] = (flag[f] ? FALSE : TRUE);
 }
 
-void set_v(byte** data) // 1, 0x80 
+void b1Set_v(byte** data) // 1, 0x80 
 {
     flag[var[*(*data)++]] = TRUE;
 }
 
-void reset_v(byte** data) // 1, 0x80 
+void b1Reset_v(byte** data) // 1, 0x80 
 {
     flag[var[*(*data)++]] = FALSE;
 }
 
-void toggle_v(byte** data) // 1, 0x80 
+void b1Toggle_v(byte** data) // 1, 0x80 
 {
     int f = var[*(*data)++];
 
     flag[f] = (flag[f] ? FALSE : TRUE);
 }
 
-void new_room(byte** data) // 1, 0x00 
+void b1New_room(byte** data) // 1, 0x00 
 {
     /* This function is handled in meka.c */
     newRoomNum = *(*data)++;
     hasEnteredNewRoom = TRUE;
 }
 
-void new_room_v(byte** data) // 1, 0x80 
+void b1New_room_v(byte** data) // 1, 0x80 
 {
     /* This function is handled in meka.c */
     newRoomNum = var[*(*data)++];
     hasEnteredNewRoom = TRUE;
 }
 
-void load_logics(byte** data) // 1, 0x00 
+void b1Load_logics(byte** data) // 1, 0x00 
 {
     loadLogicFile(*(*data)++);
 }
 
-void load_logics_v(byte** data) // 1, 0x80 
+void b1Load_logics_v(byte** data) // 1, 0x80 
 {
     loadLogicFile(var[*(*data)++]);
 }
 
-void call(byte** data) // 1, 0x00 
+void b1Call(byte** data) // 1, 0x00 
 {
     executeLogic(*(*data)++);
 }
 
-void call_v(byte** data) // 1, 0x80 
+void b1Call_v(byte** data) // 1, 0x80 
 {
     executeLogic(var[*(*data)++]);
 }
 
-void load_pic(byte** data) // 1, 0x80 
+void b1Load_pic(byte** data) // 1, 0x80 
 {
     loadPictureFile(var[*(*data)++]);
 }
 
-void draw_pic(byte** data) // 1, 0x80 
+void b1Draw_pic(byte** data) // 1, 0x80 
 {
     int pNum;
 
@@ -482,19 +482,19 @@ void draw_pic(byte** data) // 1, 0x80
     drawPic(loadedPictures[pNum].data, loadedPictures[pNum].size, TRUE);
 }
 
-void show_pic(byte** data) // 0, 0x00 
+void b1Show_pic(byte** data) // 0, 0x00 
 {
     okToShowPic = TRUE;   /* Says draw picture with next object update */
     /*stretch_blit(picture, working_screen, 0, 0, 160, 168, 0, 20, 640, 336);*/
     showPicture();
 }
 
-void discard_pic(byte** data) // 1, 0x80 
+void b1Discard_pic(byte** data) // 1, 0x80 
 {
     discardPictureFile(var[*(*data)++]);
 }
 
-void overlay_pic(byte** data) // 1, 0x80 
+void b1Overlay_pic(byte** data) // 1, 0x80 
 {
     int pNum;
 
@@ -502,7 +502,7 @@ void overlay_pic(byte** data) // 1, 0x80
     drawPic(loadedPictures[pNum].data, loadedPictures[pNum].size, FALSE);
 }
 
-void show_pri_screen(byte** data) // 0, 0x00 
+void b1Show_pri_screen(byte** data) // 0, 0x00 
 {
     //showPriority();
     showDebugPri();
@@ -512,22 +512,22 @@ void show_pri_screen(byte** data) // 0, 0x00
 
 /************************** VIEW ACTION COMMANDS **************************/
 
-void load_view(byte** data) // 1, 0x00 
+void b1Load_view(byte** data) // 1, 0x00 
 {
     loadViewFile(*(*data)++);
 }
 
-void load_view_v(byte** data) // 1, 0x80 
+void b1Load_view_v(byte** data) // 1, 0x80 
 {
     loadViewFile(var[*(*data)++]);
 }
 
-void discard_view(byte** data) // 1, 0x00 
+void b1Discard_view(byte** data) // 1, 0x00 
 {
     discardView(*(*data)++);
 }
 
-void animate_obj(byte** data) // 1, 0x00 
+void b1Animate_obj(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -542,7 +542,7 @@ void animate_obj(byte** data) // 1, 0x00
     if (entryNum != 0) viewtab[entryNum].direction = 0;
 }
 
-void unanimate_all(byte** data) // 0, 0x00 
+void b1Unanimate_all(byte** data) // 0, 0x00 
 {
     int entryNum;
 
@@ -551,7 +551,7 @@ void unanimate_all(byte** data) // 0, 0x00
         viewtab[entryNum].flags &= ~(ANIMATED | DRAWN);
 }
 
-void draw(byte** data) // 1, 0x00 
+void b1Draw(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -561,7 +561,7 @@ void draw(byte** data) // 1, 0x00
     drawObject(entryNum);
 }
 
-void erase(byte** data) // 1, 0x00 
+void b1Erase(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -569,7 +569,7 @@ void erase(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~DRAWN;
 }
 
-void position(byte** data) // 3, 0x00 
+void b1Position(byte** data) // 3, 0x00 
 {
     int entryNum;
 
@@ -579,7 +579,7 @@ void position(byte** data) // 3, 0x00
     /* Need to check that it hasn't been draw()n yet. */
 }
 
-void position_v(byte** data) // 3, 0x60 
+void b1Position_v(byte** data) // 3, 0x60 
 {
     int entryNum;
 
@@ -589,7 +589,7 @@ void position_v(byte** data) // 3, 0x60
     /* Need to check that it hasn't been draw()n yet. */
 }
 
-void get_posn(byte** data) // 3, 0x60 
+void b1Get_posn(byte** data) // 3, 0x60 
 {
     int entryNum;
 
@@ -598,7 +598,7 @@ void get_posn(byte** data) // 3, 0x60
     var[*(*data)++] = viewtab[entryNum].yPos;
 }
 
-void reposition(byte** data) // 3, 0x60 
+void b1Reposition(byte** data) // 3, 0x60 
 {
     int entryNum, dx, dy;
 
@@ -1996,10 +1996,20 @@ void close_window(byte** data) // 0, 0x00
 }
 
 #pragma code-name (pop)
+
+byte getBankBasedOnCode(byte code)
+{
+    if (code <= HIGHEST_BANK1_FUNC)
+    {
+        return 1;
+    }
+    return RAM_BANK;
+}
+
 /***************************************************************************
 ** ifHandler
 ***************************************************************************/
-void ifHandler(byte** data)
+void ifHandler(byte** data, byte codeBank)
 {
     int ch;
     boolean stillProcessing = TRUE, testVal, notMode = FALSE, orMode = FALSE;
@@ -2013,6 +2023,7 @@ void ifHandler(byte** data)
 
     ppCodeWindowAddress = &codeWindowAddress;
 
+    RAM_BANK = codeBank;
     while (stillProcessing) {
         ch = *(*data)++;
 
@@ -2023,6 +2034,7 @@ void ifHandler(byte** data)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif
+        RAM_BANK = getBankBasedOnCode(ch);
         switch (ch) {
         case 0xff: /* Closing if bracket. Expression must be true. */
 #ifdef DEBUG
@@ -2050,39 +2062,31 @@ void ifHandler(byte** data)
 
             switch (ch) {
             case 0: testVal = FALSE; break; /* Should never happen */
-            case 1: testVal = equaln(ppCodeWindowAddress); break;
-            case 2: testVal = equalv(ppCodeWindowAddress); break;
-            case 3: testVal = lessn(ppCodeWindowAddress); break;
-            case 4: testVal = lessv(ppCodeWindowAddress); break;
-            case 5: { 
-                RAM_BANK = 1;
-                testVal = greatern(ppCodeWindowAddress);
-                break; 
-            }
-            case 6: testVal = greaterv(ppCodeWindowAddress); break;
-            case 7: 
-            {
-                RAM_BANK = 1;
-                testVal = isset(ppCodeWindowAddress);
-                break;
-            }
-            case 8: testVal = issetv(ppCodeWindowAddress); break;
-            case 9: testVal = has(ppCodeWindowAddress); break;
-            case 10: testVal = obj_in_room(ppCodeWindowAddress); break;
-            case 11: testVal = posn(ppCodeWindowAddress); break;
-            case 12: testVal = controller(ppCodeWindowAddress); break;
-            case 13: testVal = have_key(); break;
+            case 1: testVal = b1Equaln(ppCodeWindowAddress); break;
+            case 2: testVal = b1Equalv(ppCodeWindowAddress); break;
+            case 3: testVal = b1Lessn(ppCodeWindowAddress); break;
+            case 4: testVal = b1Lessv(ppCodeWindowAddress); break;
+            case 5: testVal = b1Greatern(ppCodeWindowAddress); break;
+            case 6: testVal = b1Greaterv(ppCodeWindowAddress); break;
+            case 7: testVal = b1Isset(ppCodeWindowAddress); break;
+            case 8: testVal = b1Issetv(ppCodeWindowAddress); break;
+            case 9: testVal = b1Has(ppCodeWindowAddress); break;
+            case 10: testVal = b1Obj_in_room(ppCodeWindowAddress); break;
+            case 11: testVal = b1Posn(ppCodeWindowAddress); break;
+            case 12: testVal = b1Controller(ppCodeWindowAddress); break;
+            case 13: testVal = b1Have_key(); break;
             case 14: testVal = said(ppCodeWindowAddress); break;
-            case 15: testVal = compare_strings(ppCodeWindowAddress); break;
-            case 16: testVal = obj_in_box(ppCodeWindowAddress); break;
-            case 17: testVal = center_posn(ppCodeWindowAddress); break;
-            case 18: testVal = right_posn(ppCodeWindowAddress); break;
+            case 15: testVal = b1Compare_strings(ppCodeWindowAddress); break;
+            case 16: testVal = b1Obj_in_box(ppCodeWindowAddress); break;
+            case 17: testVal = b1Center_posn(ppCodeWindowAddress); break;
+            case 18: testVal = b1Right_posn(ppCodeWindowAddress); break;
             default:
                 ////lprintf("catastrophe: Illegal test [%d], logic %d, posn %d.",
                     //ch, currentLog, logics[currentLog].currentPoint);
                 testVal = FALSE;
                 break; /* Should never happen */
             }
+            RAM_BANK = previousBank;
 #ifdef VERBOSE
 
             printf("Data was %p trying to add %p ", data, codeWindowAddress - &codeWindow[0]);
@@ -2160,12 +2164,13 @@ void executeLogic(int logNum)
     byte previousRamBank = RAM_BANK;
     boolean discardAfterward = FALSE, stillExecuting = TRUE;
     byte* code, * endPos, * startPos, b1, b2;
+    byte codeAtTimeOfLastBankSwitch;
     LOGICEntry currentLogic;
     LOGICFile currentLogicFile;
     byte codeWindow[CODE_WINDOW_SIZE];
     byte* codeWindowAddress;
     byte** ppCodeWindowAddress;
-    boolean lastCodeWasConditonalIf = FALSE;
+    boolean lastCodeWasNonWindow = FALSE;
     
     //Temp
     int counter = 0;
@@ -2217,8 +2222,8 @@ void executeLogic(int logNum)
         {
 #ifdef VERBOSE
             printf("The code is now %u and the address is %p", *code, code);
-#endif // VERBOSE
             exit(0);
+#endif // VERBOSE
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
@@ -2247,47 +2252,48 @@ void executeLogic(int logNum)
         }
 #endif       
         printf("\n The code is %d, on bank %d address, %p", *code, RAM_BANK, code);
+        codeAtTimeOfLastBankSwitch = *code;
+        RAM_BANK = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
+#ifdef VERBOSE
+        printf("Bank is now %d to execute code %d", RAM_BANK, *code);
+#endif // VERBOSE
 
-        switch (*code++) {
+        code++;
+        switch (codeAtTimeOfLastBankSwitch) {
         case 0: /* return */
             stillExecuting = FALSE;
             break;
-        case 1: increment(&code); break;
-        case 2: decrement(&code); break;
-        case 3: assignn(&code); break;
-        case 4: assignv(&code); break;
-        case 5: addn(&code); break;
-        case 6: addv(&code); break;
-        case 7: subn(&code); break;
-        case 8: subv(&code); break;
-        case 9: lindirectv(&code); break;
-        case 10: rindirect(&code); break;
-        case 11: lindirectn(&code); break;
-        case 12:
-        {
-            RAM_BANK = 1;
-            set(ppCodeWindowAddress); 
-            break;
-        }
-        case 13: reset(&code); break;
-        case 14: toggle(&code); break;
-        case 15: set_v(&code); break;
-        case 16: reset_v(&code); break;
-        case 17: toggle_v(&code); break;
+        case 1: b1Increment(ppCodeWindowAddress); break;
+        case 2: b1Decrement(ppCodeWindowAddress); break;
+        case 3: b1Assignn(ppCodeWindowAddress); break;
+        case 4: b1Assignv(ppCodeWindowAddress); break;
+        case 5: b1Addn(ppCodeWindowAddress); break;
+        case 6: b1Addv(ppCodeWindowAddress); break;
+        case 7: b1Subn(ppCodeWindowAddress); break;
+        case 8: b1Subv(ppCodeWindowAddress); break;
+        case 9: b1Lindirectv(ppCodeWindowAddress); break;
+        case 10: b1Rindirect(ppCodeWindowAddress); break;
+        case 11: b1Lindirectn(ppCodeWindowAddress); break;
+        case 12: b1Set(ppCodeWindowAddress); break;
+        case 13: b1Reset(ppCodeWindowAddress); break;
+        case 14: b1Toggle(ppCodeWindowAddress); break;
+        case 15: b1Set_v(ppCodeWindowAddress); break;
+        case 16: b1Reset_v(ppCodeWindowAddress); break;
+        case 17: b1Toggle_v(ppCodeWindowAddress); break;
         case 18:
-            new_room(&code);
+            b1New_room(ppCodeWindowAddress);
             exitAllLogics = TRUE;
             stillExecuting = FALSE;
             break;
         case 19:
-            new_room_v(&code);
+            b1New_room_v(ppCodeWindowAddress);
             exitAllLogics = TRUE;
             stillExecuting = FALSE;
             break;
-        case 20: load_logics(&code); break;
-        case 21: load_logics_v(&code); break;
+        case 20: b1Load_logics(ppCodeWindowAddress); break;
+        case 21: b1Load_logics_v(ppCodeWindowAddress); break;
         case 22:
-            call(&code);
+            b1Call(ppCodeWindowAddress);
             /* The currentLog variable needs to be restored */
             currentLog = logNum;
             if (exitAllLogics) stillExecuting = FALSE;
@@ -2297,7 +2303,7 @@ void executeLogic(int logNum)
 #endif
             break;
         case 23:
-            call_v(&code);
+            b1Call_v(ppCodeWindowAddress);
             /* The currentLog variable needs to be restored */
             currentLog = logNum;
             if (exitAllLogics) stillExecuting = FALSE;
@@ -2306,152 +2312,152 @@ void executeLogic(int logNum)
             drawBigString(screen, debugString, 0, 384, 0, 7);
 #endif
             break;
-        case 24: load_pic(&code); break;
-        case 25: draw_pic(&code); break;
-        case 26: show_pic(&code); break;
-        case 27: discard_pic(&code); break;
-        case 28: overlay_pic(&code); break;
-        case 29: show_pri_screen(&code); break;
-        case 30: load_view(&code); break;
-        case 31: load_view_v(&code); break;
-        case 32: discard_view(&code); break;
-        case 33: animate_obj(&code); break;
-        case 34: unanimate_all(&code); break;
-        case 35: draw(&code); break;
-        case 36: erase(&code); break;
-        case 37: position(&code); break;
-        case 38: position_v(&code); break;
-        case 39: get_posn(&code); break;
-        case 40: reposition(&code); break;
-        case 41: set_view(&code); break;
-        case 42: set_view_v(&code); break;
-        case 43: set_loop(&code); break;
-        case 44: set_loop_v(&code); break;
-        case 45: fix_loop(&code); break;
-        case 46: release_loop(&code); break;
-        case 47: set_cel(&code); break;
-        case 48: set_cel_v(&code); break;
-        case 49: last_cel(&code); break;
-        case 50: current_cel(&code); break;
-        case 51: current_loop(&code); break;
-        case 52: current_view(&code); break;
-        case 53: number_of_loops(&code); break;
-        case 54: set_priority(&code); break;
-        case 55: set_priority_v(&code); break;
-        case 56: release_priority(&code); break;
-        case 57: get_priority(&code); break;
-        case 58: stop_update(&code); break;
-        case 59: start_update(&code); break;
-        case 60: force_update(&code); break;
-        case 61: ignore_horizon(&code); break;
-        case 62: observe_horizon(&code); break;
-        case 63: set_horizon(&code); break;
-        case 64: object_on_water(&code); break;
-        case 65: object_on_land(&code); break;
-        case 66: object_on_anything(&code); break;
-        case 67: ignore_objs(&code); break;
-        case 68: observe_objs(&code); break;
-        case 69: distance(&code); break;
-        case 70: stop_cycling(&code); break;
-        case 71: start_cycling(&code); break;
-        case 72: normal_cycle(&code); break;
-        case 73: end_of_loop(&code); break;
-        case 74: reverse_cycle(&code); break;
-        case 75: reverse_loop(&code); break;
-        case 76: cycle_time(&code); break;
-        case 77: stop_motion(&code); break;
-        case 78: start_motion(&code); break;
-        case 79: step_size(&code); break;
-        case 80: step_time(&code); break;
-        case 81: move_obj(&code); break;
-        case 82: move_obj_v(&code); break;
-        case 83: follow_ego(&code); break;
-        case 84: wander(&code); break;
-        case 85: normal_motion(&code); break;
-        case 86: set_dir(&code); break;
-        case 87: get_dir(&code); break;
-        case 88: ignore_blocks(&code); break;
-        case 89: observe_blocks(&code); break;
-        case 90: block(&code); break;
-        case 91: unblock(&code); break;
-        case 92: get(&code); break;
-        case 93: get_v(&code); break;
-        case 94: drop(&code); break;
-        case 95: put(&code); break;
-        case 96: put_v(&code); break;
-        case 97: get_room_v(&code); break;
-        case 98: load_sound(&code); break;
-        case 99: play_sound(&code); break;
-        case 100: stop_sound(&code); break;
-        case 101: print(&code); break;
-        case 102: print_v(&code); break;
-        case 103: display(&code); break;
-        case 104: display_v(&code); break;
-        case 105: clear_lines(&code); break;
-        case 106: text_screen(&code); break;
-        case 107: graphics(&code); break;
-        case 108: set_cursor_char(&code); break;
-        case 109: set_text_attribute(&code); break;
-        case 110: shake_screen(&code); break;
-        case 111: configure_screen(&code); break;
-        case 112: status_line_on(&code); break;
-        case 113: status_line_off(&code); break;
-        case 114: set_string(&code); break;
-        case 115: get_string(&code); break;
-        case 116: word_to_string(&code); break;
-        case 117: parse(&code); break;
-        case 118: get_num(&code); break;
-        case 119: prevent_input(&code); break;
-        case 120: accept_input(&code); break;
-        case 121: set_key(&code); break;
-        case 122: add_to_pic(&code); break;
-        case 123: add_to_pic_v(&code); break;
-        case 124: status(&code); break;
-        case 125: save_game(&code); break;
-        case 126: restore_game(&code); break;
-        case 127: init_disk(&code); break;
-        case 128: restart_game(&code); break;
-        case 129: show_obj(&code); break;
-        case 130: random_num(&code); break;
-        case 131: program_control(&code); break;
-        case 132: player_control(&code); break;
-        case 133: obj_status_v(&code); break;
-        case 134: quit(&code); break;
-        case 135: show_mem(&code); break;
-        case 136: pause(&code); break;
-        case 137: echo_line(&code); break;
-        case 138: cancel_line(&code); break;
-        case 139: init_joy(&code); break;
-        case 140: toggle_monitor(&code); break;
-        case 141: version(&code); break;
-        case 142: script_size(&code); break;
-        case 143: set_game_id(&code); break;
-        case 144: log(&code); break;
-        case 145: set_scan_start(&code); break;
-        case 146: reset_scan_start(&code); break;
-        case 147: reposition_to(&code); break;
-        case 148: reposition_to_v(&code); break;
-        case 149: trace_on(&code); break;
-        case 150: trace_info(&code); break;
-        case 151: print_at(&code); break;
-        case 152: print_at_v(&code); break;
-        case 153: discard_view_v(&code); break;
-        case 154: clear_text_rect(&code); break;
-        case 155: set_upper_left(&code); break;
-        case 156: set_menu(&code); break;
-        case 157: set_menu_item(&code); break;
-        case 158: submit_menu(&code); break;
-        case 159: enable_item(&code); break;
-        case 160: disable_item(&code); break;
-        case 161: menu_input(&code); break;
-        case 162: show_obj_v(&code); break;
-        case 163: open_dialogue(&code); break;
-        case 164: close_dialogue(&code); break;
-        case 165: mul_n(&code); break;
-        case 166: mul_v(&code); break;
-        case 167: div_n(&code); break;
-        case 168: div_v(&code); break;
-        case 169: close_window(&code); break;
+        case 24: b1Load_pic(ppCodeWindowAddress); break;
+        case 25: b1Draw_pic(ppCodeWindowAddress); break;
+        case 26: b1Show_pic(ppCodeWindowAddress); break;
+        case 27: b1Discard_pic(ppCodeWindowAddress); break;
+        case 28: b1Overlay_pic(ppCodeWindowAddress); break;
+        case 29: b1Show_pri_screen(ppCodeWindowAddress); break;
+        case 30: b1Load_view(ppCodeWindowAddress); break;
+        case 31: b1Load_view_v(ppCodeWindowAddress); break;
+        case 32: b1Discard_view(ppCodeWindowAddress); break;
+        case 33: b1Animate_obj(ppCodeWindowAddress); break;
+        case 34: b1Unanimate_all(ppCodeWindowAddress); break;
+        case 35: b1Draw(ppCodeWindowAddress); break;
+        case 36: b1Erase(ppCodeWindowAddress); break;
+        case 37: b1Position(ppCodeWindowAddress); break;
+        case 38: b1Position_v(ppCodeWindowAddress); break;
+        case 39: b1Get_posn(ppCodeWindowAddress); break;
+        case 40: b1Reposition(ppCodeWindowAddress); break;
+        case 41: set_view(ppCodeWindowAddress); break;
+        case 42: set_view_v(ppCodeWindowAddress); break;
+        case 43: set_loop(ppCodeWindowAddress); break;
+        case 44: set_loop_v(ppCodeWindowAddress); break;
+        case 45: fix_loop(ppCodeWindowAddress); break;
+        case 46: release_loop(ppCodeWindowAddress); break;
+        case 47: set_cel(ppCodeWindowAddress); break;
+        case 48: set_cel_v(ppCodeWindowAddress); break;
+        case 49: last_cel(ppCodeWindowAddress); break;
+        case 50: current_cel(ppCodeWindowAddress); break;
+        case 51: current_loop(ppCodeWindowAddress); break;
+        case 52: current_view(ppCodeWindowAddress); break;
+        case 53: number_of_loops(ppCodeWindowAddress); break;
+        case 54: set_priority(ppCodeWindowAddress); break;
+        case 55: set_priority_v(ppCodeWindowAddress); break;
+        case 56: release_priority(ppCodeWindowAddress); break;
+        case 57: get_priority(ppCodeWindowAddress); break;
+        case 58: stop_update(ppCodeWindowAddress); break;
+        case 59: start_update(ppCodeWindowAddress); break;
+        case 60: force_update(ppCodeWindowAddress); break;
+        case 61: ignore_horizon(ppCodeWindowAddress); break;
+        case 62: observe_horizon(ppCodeWindowAddress); break;
+        case 63: set_horizon(ppCodeWindowAddress); break;
+        case 64: object_on_water(ppCodeWindowAddress); break;
+        case 65: object_on_land(ppCodeWindowAddress); break;
+        case 66: object_on_anything(ppCodeWindowAddress); break;
+        case 67: ignore_objs(ppCodeWindowAddress); break;
+        case 68: observe_objs(ppCodeWindowAddress); break;
+        case 69: distance(ppCodeWindowAddress); break;
+        case 70: stop_cycling(ppCodeWindowAddress); break;
+        case 71: start_cycling(ppCodeWindowAddress); break;
+        case 72: normal_cycle(ppCodeWindowAddress); break;
+        case 73: end_of_loop(ppCodeWindowAddress); break;
+        case 74: reverse_cycle(ppCodeWindowAddress); break;
+        case 75: reverse_loop(ppCodeWindowAddress); break;
+        case 76: cycle_time(ppCodeWindowAddress); break;
+        case 77: stop_motion(ppCodeWindowAddress); break;
+        case 78: start_motion(ppCodeWindowAddress); break;
+        case 79: step_size(ppCodeWindowAddress); break;
+        case 80: step_time(ppCodeWindowAddress); break;
+        case 81: move_obj(ppCodeWindowAddress); break;
+        case 82: move_obj_v(ppCodeWindowAddress); break;
+        case 83: follow_ego(ppCodeWindowAddress); break;
+        case 84: wander(ppCodeWindowAddress); break;
+        case 85: normal_motion(ppCodeWindowAddress); break;
+        case 86: set_dir(ppCodeWindowAddress); break;
+        case 87: get_dir(ppCodeWindowAddress); break;
+        case 88: ignore_blocks(ppCodeWindowAddress); break;
+        case 89: observe_blocks(ppCodeWindowAddress); break;
+        case 90: block(ppCodeWindowAddress); break;
+        case 91: unblock(ppCodeWindowAddress); break;
+        case 92: get(ppCodeWindowAddress); break;
+        case 93: get_v(ppCodeWindowAddress); break;
+        case 94: drop(ppCodeWindowAddress); break;
+        case 95: put(ppCodeWindowAddress); break;
+        case 96: put_v(ppCodeWindowAddress); break;
+        case 97: get_room_v(ppCodeWindowAddress); break;
+        case 98: load_sound(ppCodeWindowAddress); break;
+        case 99: play_sound(ppCodeWindowAddress); break;
+        case 100: stop_sound(ppCodeWindowAddress); break;
+        case 101: print(ppCodeWindowAddress); break;
+        case 102: print_v(ppCodeWindowAddress); break;
+        case 103: display(ppCodeWindowAddress); break;
+        case 104: display_v(ppCodeWindowAddress); break;
+        case 105: clear_lines(ppCodeWindowAddress); break;
+        case 106: text_screen(ppCodeWindowAddress); break;
+        case 107: graphics(ppCodeWindowAddress); break;
+        case 108: set_cursor_char(ppCodeWindowAddress); break;
+        case 109: set_text_attribute(ppCodeWindowAddress); break;
+        case 110: shake_screen(ppCodeWindowAddress); break;
+        case 111: configure_screen(ppCodeWindowAddress); break;
+        case 112: status_line_on(ppCodeWindowAddress); break;
+        case 113: status_line_off(ppCodeWindowAddress); break;
+        case 114: set_string(ppCodeWindowAddress); break;
+        case 115: get_string(ppCodeWindowAddress); break;
+        case 116: word_to_string(ppCodeWindowAddress); break;
+        case 117: parse(ppCodeWindowAddress); break;
+        case 118: get_num(ppCodeWindowAddress); break;
+        case 119: prevent_input(ppCodeWindowAddress); break;
+        case 120: accept_input(ppCodeWindowAddress); break;
+        case 121: set_key(ppCodeWindowAddress); break;
+        case 122: add_to_pic(ppCodeWindowAddress); break;
+        case 123: add_to_pic_v(ppCodeWindowAddress); break;
+        case 124: status(ppCodeWindowAddress); break;
+        case 125: save_game(ppCodeWindowAddress); break;
+        case 126: restore_game(ppCodeWindowAddress); break;
+        case 127: init_disk(ppCodeWindowAddress); break;
+        case 128: restart_game(ppCodeWindowAddress); break;
+        case 129: show_obj(ppCodeWindowAddress); break;
+        case 130: random_num(ppCodeWindowAddress); break;
+        case 131: program_control(ppCodeWindowAddress); break;
+        case 132: player_control(ppCodeWindowAddress); break;
+        case 133: obj_status_v(ppCodeWindowAddress); break;
+        case 134: quit(ppCodeWindowAddress); break;
+        case 135: show_mem(ppCodeWindowAddress); break;
+        case 136: pause(ppCodeWindowAddress); break;
+        case 137: echo_line(ppCodeWindowAddress); break;
+        case 138: cancel_line(ppCodeWindowAddress); break;
+        case 139: init_joy(ppCodeWindowAddress); break;
+        case 140: toggle_monitor(ppCodeWindowAddress); break;
+        case 141: version(ppCodeWindowAddress); break;
+        case 142: script_size(ppCodeWindowAddress); break;
+        case 143: set_game_id(ppCodeWindowAddress); break;
+        case 144: log(ppCodeWindowAddress); break;
+        case 145: set_scan_start(ppCodeWindowAddress); break;
+        case 146: reset_scan_start(ppCodeWindowAddress); break;
+        case 147: reposition_to(ppCodeWindowAddress); break;
+        case 148: reposition_to_v(ppCodeWindowAddress); break;
+        case 149: trace_on(ppCodeWindowAddress); break;
+        case 150: trace_info(ppCodeWindowAddress); break;
+        case 151: print_at(ppCodeWindowAddress); break;
+        case 152: print_at_v(ppCodeWindowAddress); break;
+        case 153: discard_view_v(ppCodeWindowAddress); break;
+        case 154: clear_text_rect(ppCodeWindowAddress); break;
+        case 155: set_upper_left(ppCodeWindowAddress); break;
+        case 156: set_menu(ppCodeWindowAddress); break;
+        case 157: set_menu_item(ppCodeWindowAddress); break;
+        case 158: submit_menu(ppCodeWindowAddress); break;
+        case 159: enable_item(ppCodeWindowAddress); break;
+        case 160: disable_item(ppCodeWindowAddress); break;
+        case 161: menu_input(ppCodeWindowAddress); break;
+        case 162: show_obj_v(ppCodeWindowAddress); break;
+        case 163: open_dialogue(ppCodeWindowAddress); break;
+        case 164: close_dialogue(ppCodeWindowAddress); break;
+        case 165: mul_n(ppCodeWindowAddress); break;
+        case 166: mul_v(ppCodeWindowAddress); break;
+        case 167: div_n(ppCodeWindowAddress); break;
+        case 168: div_v(ppCodeWindowAddress); break;
+        case 169: close_window(ppCodeWindowAddress); break;
         case 170:  break;
         case 171:  break;
         case 172:  break;
@@ -2471,6 +2477,7 @@ void executeLogic(int logNum)
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
 #endif
+            lastCodeWasNonWindow = TRUE;
             b1 = *code++;
             b2 = *code++;
             disp = (b2 << 8) | b1;  /* Should be signed 16 bit */
@@ -2483,8 +2490,8 @@ void executeLogic(int logNum)
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
 #endif
-            lastCodeWasConditonalIf = TRUE;
-            ifHandler(&code);
+            lastCodeWasNonWindow = TRUE;
+            ifHandler(&code, currentLogicFile.codeBank);
             break;
 
         default:    /* Error has occurred */
@@ -2492,12 +2499,13 @@ void executeLogic(int logNum)
                 //*(code - 1), logNum, currentLogic.currentPoint);
             break;
         }
+        RAM_BANK = currentLogicFile.codeBank;
 
-        if (!lastCodeWasConditonalIf)
+        if (!lastCodeWasNonWindow)
         {
             code += (codeWindowAddress - &codeWindow[0] + 1);
         }
-        lastCodeWasConditonalIf = FALSE;
+        lastCodeWasNonWindow = FALSE;
 
         counter++;
     }
