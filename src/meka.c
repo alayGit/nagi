@@ -241,7 +241,6 @@ void closedown()
 void main()
 {
    int ret, oldCount=0;
-
    //chdir("..\\KQ1-2917");
    //chdir("..\\COMPILER\\NEW\\SAMPLE\\TEMPLATE");
    //chdir("\\GAMES\\SIERRA\\MH2");

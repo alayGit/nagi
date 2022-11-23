@@ -26,6 +26,8 @@
 
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
+#define CODE_WINDOW_SIZE 10
+#define VERBOSE
 
 //#define  DEBUG
 
@@ -135,11 +137,11 @@ boolean greatern(byte** data) // 2, 0x80
 {
     int varVal, value;
 
-    printf("Hello from bank");
-    exit(0);
-
     varVal = var[*(*data)++];
     value = *(*data)++;
+    
+    printf("Checking that %d > %d", varVal, value);
+    
     return (varVal > value);
 }
 
@@ -607,6 +609,9 @@ void reposition(byte** data) // 3, 0x60
     viewtab[entryNum].yPos += dy;
 }
 
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM02")
+
 void set_view(byte** data) // 2, 0x00 
 {
     int entryNum, viewNum;
@@ -615,9 +620,6 @@ void set_view(byte** data) // 2, 0x00
     viewNum = *(*data)++;
     addViewToTable(entryNum, viewNum);
 }
-
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM02")
 
 void set_view_v(byte** data) // 2, 0x40 
 {
@@ -1139,6 +1141,9 @@ void stop_sound(byte** data) // 0, 0x00
     stop_midi();
 }
 
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM03")
+
 int getNum(char* inputString, int* i)
 {
     char tempString[80], strPos = 0;
@@ -1153,9 +1158,6 @@ int getNum(char* inputString, int* i)
     (*i)--;
     return (atoi(tempString));
 }
-
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM03")
 
 boolean charIsIn(char testChar, char* testString)
 {
@@ -1421,6 +1423,9 @@ void parse(byte** data) // 1, 0x00
     lookupWords(string[stringNum]);
 }
 
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM04")
+
 void get_num(byte** data) // 2, 0x40 
 {
     int messNum, varNum;
@@ -1432,8 +1437,6 @@ void get_num(byte** data) // 2, 0x40
     var[varNum] = atoi(temp);
 }
 
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM04")
 void prevent_input(byte** data) // 0, 0x00 
 {
     inputLineDisplayed = FALSE;
@@ -1992,91 +1995,6 @@ void close_window(byte** data) // 0, 0x00
 
 }
 
-/* THE UNKNOWN COMMANDS ARE IGNORED AT THIS STAGE */
-
-void unknown170(byte** data)  // 1
-{
-    //lprintf("info: Unknown command 170, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-
-    (*data)++;
-}
-
-void unknown171(byte** data)  // 0
-{
-    //lprintf("info: Unknown command 171, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-}
-
-void unknown172(byte** data)  // 0
-{
-    //lprintf("info: Unknown command 172, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-}
-
-void unknown173(byte** data)  // 0
-{
-    //lprintf("info: Unknown command 173, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-}
-
-void unknown174(byte** data)  // 1
-{
-    //lprintf("info: Unknown command 174, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-
-    (*data)++;
-}
-
-void unknown175(byte** data)  // 1
-{
-    //lprintf("info: Unknown command 175, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-
-    (*data)++;
-}
-
-void unknown176(byte** data)  // 0         1 for 3.002.086
-{
-    //lprintf("info: Unknown command 176, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-}
-
-void unknown177(byte** data)  // 1
-{
-    //lprintf("info: Unknown command 177, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-
-    (*data)++;
-}
-
-void unknown178(byte** data)  // 0
-{
-    //lprintf("info: Unknown command 178, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-}
-
-void unknown179(byte** data)  // 4
-{
-    //lprintf("info: Unknown command 179, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-
-    *data += 4;
-}
-
-void unknown180(byte** data)  // 2
-{
-    ////lprintf("info: Unknown command 180, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-
-    *data += 2;
-}
-
-void unknown181(byte** data)  // 0
-{
-    ////lprintf("info: Unknown command 181, logic %d, posn %d.",
-        //currentLog, logics[currentLog].currentPoint);
-}
 #pragma code-name (pop)
 /***************************************************************************
 ** ifHandler
@@ -2089,9 +2007,15 @@ void ifHandler(byte** data)
     short int disp, dummy;
     char debugString[80];
     byte previousBank = RAM_BANK;
+    byte codeWindow[CODE_WINDOW_SIZE];
+    byte* codeWindowAddress;
+    byte** ppCodeWindowAddress;
+
+    ppCodeWindowAddress = &codeWindowAddress;
 
     while (stillProcessing) {
         ch = *(*data)++;
+
 #ifdef DEBUG
         if (ch <= 18) {
             sprintf(debugString, "%s [%x]           ", testCommands[ch].commandName, ch);
@@ -2121,37 +2045,53 @@ void ifHandler(byte** data)
             }
             break;
         default:
+            memcpy(&codeWindow[0], *data, CODE_WINDOW_SIZE);
+            codeWindowAddress = &codeWindow[0];
+
             switch (ch) {
             case 0: testVal = FALSE; break; /* Should never happen */
-            case 1: testVal = equaln(data); break;
-            case 2: testVal = equalv(data); break;
-            case 3: testVal = lessn(data); break;
-            case 4: testVal = lessv(data); break;
+            case 1: testVal = equaln(ppCodeWindowAddress); break;
+            case 2: testVal = equalv(ppCodeWindowAddress); break;
+            case 3: testVal = lessn(ppCodeWindowAddress); break;
+            case 4: testVal = lessv(ppCodeWindowAddress); break;
             case 5: { 
                 RAM_BANK = 1;
-                testVal = greatern(data); 
+                testVal = greatern(ppCodeWindowAddress);
                 break; 
             }
-            case 6: testVal = greaterv(data); break;
-            case 7: testVal = isset(data); break;
-            case 8: testVal = issetv(data); break;
-            case 9: testVal = has(data); break;
-            case 10: testVal = obj_in_room(data); break;
-            case 11: testVal = posn(data); break;
-            case 12: testVal = controller(data); break;
+            case 6: testVal = greaterv(ppCodeWindowAddress); break;
+            case 7: 
+            {
+                RAM_BANK = 1;
+                testVal = isset(ppCodeWindowAddress);
+                break;
+            }
+            case 8: testVal = issetv(ppCodeWindowAddress); break;
+            case 9: testVal = has(ppCodeWindowAddress); break;
+            case 10: testVal = obj_in_room(ppCodeWindowAddress); break;
+            case 11: testVal = posn(ppCodeWindowAddress); break;
+            case 12: testVal = controller(ppCodeWindowAddress); break;
             case 13: testVal = have_key(); break;
-            case 14: testVal = said(data); break;
-            case 15: testVal = compare_strings(data); break;
-            case 16: testVal = obj_in_box(data); break;
-            case 17: testVal = center_posn(data); break;
-            case 18: testVal = right_posn(data); break;
+            case 14: testVal = said(ppCodeWindowAddress); break;
+            case 15: testVal = compare_strings(ppCodeWindowAddress); break;
+            case 16: testVal = obj_in_box(ppCodeWindowAddress); break;
+            case 17: testVal = center_posn(ppCodeWindowAddress); break;
+            case 18: testVal = right_posn(ppCodeWindowAddress); break;
             default:
                 ////lprintf("catastrophe: Illegal test [%d], logic %d, posn %d.",
                     //ch, currentLog, logics[currentLog].currentPoint);
                 testVal = FALSE;
                 break; /* Should never happen */
             }
+#ifdef VERBOSE
+
+            printf("Data was %p trying to add %p ", data, codeWindowAddress - &codeWindow[0]);
+#endif // VERBOSE
+            *data += (codeWindowAddress - &codeWindow[0]);
             
+#ifdef VERBOSE
+            printf("Data is %p %u \n", data, *data);
+#endif
             if (notMode) testVal = (testVal ? FALSE : TRUE);
             notMode = 0;
             if (testVal) {
@@ -2166,6 +2106,7 @@ void ifHandler(byte** data)
                         if (ch > 0xfc) continue;
                         if (ch == 0x0e) { /* said() has variable number of args */
                             ch = *(*data)++;
+     
                             *data += (ch << 1);
                         }
                         else {
@@ -2221,7 +2162,13 @@ void executeLogic(int logNum)
     byte* code, * endPos, * startPos, b1, b2;
     LOGICEntry currentLogic;
     LOGICFile currentLogicFile;
-
+    byte codeWindow[CODE_WINDOW_SIZE];
+    byte* codeWindowAddress;
+    byte** ppCodeWindowAddress;
+    boolean lastCodeWasConditonalIf = FALSE;
+    
+    //Temp
+    int counter = 0;
 
     short int disp;
     char debugString[80];
@@ -2262,8 +2209,23 @@ void executeLogic(int logNum)
     if ((readkey() & 0xff) == 'q') closedown();
 #endif
 
+    RAM_BANK = currentLogicFile.codeBank;
 
     while ((code < endPos) && stillExecuting) {
+        
+        if (counter == 2)
+        {
+#ifdef VERBOSE
+            printf("The code is now %u and the address is %p", *code, code);
+#endif // VERBOSE
+            exit(0);
+        }
+
+        memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
+
+        codeWindowAddress = &codeWindow[0] + 1;
+        ppCodeWindowAddress = &codeWindowAddress;
+
         /* Emergency exit */
         if (key[KEY_F12]) {
             ////lprintf("info: Exiting MEKA due to F12, logic: %d, posn: %d",
@@ -2284,7 +2246,6 @@ void executeLogic(int logNum)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif       
-        RAM_BANK = currentLogicFile.codeBank;
         printf("\n The code is %d, on bank %d address, %p", *code, RAM_BANK, code);
 
         switch (*code++) {
@@ -2302,7 +2263,12 @@ void executeLogic(int logNum)
         case 9: lindirectv(&code); break;
         case 10: rindirect(&code); break;
         case 11: lindirectn(&code); break;
-        case 12: set(&code); break;
+        case 12:
+        {
+            RAM_BANK = 1;
+            set(ppCodeWindowAddress); 
+            break;
+        }
         case 13: reset(&code); break;
         case 14: toggle(&code); break;
         case 15: set_v(&code); break;
@@ -2486,18 +2452,18 @@ void executeLogic(int logNum)
         case 167: div_n(&code); break;
         case 168: div_v(&code); break;
         case 169: close_window(&code); break;
-        case 170: unknown170(&code); break;
-        case 171: unknown171(&code); break;
-        case 172: unknown172(&code); break;
-        case 173: unknown173(&code); break;
-        case 174: unknown174(&code); break;
-        case 175: unknown175(&code); break;
-        case 176: unknown176(&code); break;
-        case 177: unknown177(&code); break;
-        case 178: unknown178(&code); break;
-        case 179: unknown179(&code); break;
-        case 180: unknown180(&code); break;
-        case 181: unknown181(&code); break;
+        case 170:  break;
+        case 171:  break;
+        case 172:  break;
+        case 173:  break;
+        case 174:  break;
+        case 175:  break;
+        case 176:  break;
+        case 177:  break;
+        case 178:  break;
+        case 179:  break;
+        case 180:  break;
+        case 181:  break;
 
         case 0xfe: /* Unconditional branch: else, goto. */
 #ifdef DEBUG
@@ -2517,6 +2483,7 @@ void executeLogic(int logNum)
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
 #endif
+            lastCodeWasConditonalIf = TRUE;
             ifHandler(&code);
             break;
 
@@ -2525,6 +2492,14 @@ void executeLogic(int logNum)
                 //*(code - 1), logNum, currentLogic.currentPoint);
             break;
         }
+
+        if (!lastCodeWasConditonalIf)
+        {
+            code += (codeWindowAddress - &codeWindow[0] + 1);
+        }
+        lastCodeWasConditonalIf = FALSE;
+
+        counter++;
     }
 
     if (discardAfterward) discardLogicFile(logNum);
