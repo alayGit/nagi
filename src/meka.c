@@ -191,9 +191,7 @@ void timing_proc()
 void initialise()
 {
     int i;
-
     memoryMangerInit();
-
     initTimer(&timing_proc);
 
    initFiles();             /* Load resource directories */
@@ -223,6 +221,7 @@ void initialise()
     loadObjectFile();
     loadWords();
     initEvents();
+
     horizon = 36;
 
    ///* Set up timer. The timer controls the interpreter speed. */
@@ -231,10 +230,15 @@ void initialise()
 
 void closedown()
 {
-   freeMenuItems();
+    byte previousRamBank = RAM_BANK;
+
+    RAM_BANK = 4;
+   b4FreeMenuItems();
    discardObjects();
    discardWords();
    closePicture();
+
+   RAM_BANK = previousRamBank;
    exit(0);
 }
 

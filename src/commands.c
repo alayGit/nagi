@@ -24,6 +24,9 @@
 #include "stub.h"
 
 #define HIGHEST_BANK1_FUNC 40
+#define HIGHEST_BANK2_FUNC 100
+#define HIGHEST_BANK3_FUNC 117
+#define HIGHEST_BANK4_FUNC 181
 
 
 #define  PLAYER_CONTROL   0
@@ -55,7 +58,7 @@ MENU the_menu[MAX_MENU_SIZE] = {
 };
 
 void executeLogic(int logNum);
-void freeMenuItems();
+void b4FreeMenuItems();
 
 #pragma code-name (push, "BANKRAM01");
 /****************************************************************************
@@ -141,7 +144,7 @@ boolean b1Greatern(byte** data) // 2, 0x80
 
     varVal = var[*(*data)++];
     value = *(*data)++;
-        
+
     return (varVal > value);
 }
 
@@ -612,7 +615,7 @@ void b1Reposition(byte** data) // 3, 0x60
 #pragma code-name (pop)
 #pragma code-name (push, "BANKRAM02")
 
-void set_view(byte** data) // 2, 0x00 
+void b2Set_view(byte** data) // 2, 0x00 
 {
     int entryNum, viewNum;
 
@@ -621,7 +624,7 @@ void set_view(byte** data) // 2, 0x00
     addViewToTable(entryNum, viewNum);
 }
 
-void set_view_v(byte** data) // 2, 0x40 
+void b2Set_view_v(byte** data) // 2, 0x40 
 {
     int entryNum, viewNum;
 
@@ -630,7 +633,7 @@ void set_view_v(byte** data) // 2, 0x40
     addViewToTable(entryNum, viewNum);
 }
 
-void set_loop(byte** data) // 2, 0x00 
+void b2Set_loop(byte** data) // 2, 0x00 
 {
     int entryNum, loopNum;
 
@@ -640,7 +643,7 @@ void set_loop(byte** data) // 2, 0x00
     setCel(entryNum, 0);
 }
 
-void set_loop_v(byte** data) // 2, 0x40 
+void b2Set_loop_v(byte** data) // 2, 0x40 
 {
     int entryNum, loopNum;
 
@@ -650,7 +653,7 @@ void set_loop_v(byte** data) // 2, 0x40
     setCel(entryNum, 0);
 }
 
-void fix_loop(byte** data) // 1, 0x00 
+void b2Fix_loop(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -658,7 +661,7 @@ void fix_loop(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= FIXLOOP;
 }
 
-void release_loop(byte** data) // 1, 0x00 
+void b2Release_loop(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -666,7 +669,7 @@ void release_loop(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~FIXLOOP;
 }
 
-void set_cel(byte** data) // 2, 0x00 
+void b2Set_cel(byte** data) // 2, 0x00 
 {
     int entryNum, celNum;
 
@@ -675,7 +678,7 @@ void set_cel(byte** data) // 2, 0x00
     setCel(entryNum, celNum);
 }
 
-void set_cel_v(byte** data) // 2, 0x40 
+void b2Set_cel_v(byte** data) // 2, 0x40 
 {
     int entryNum, celNum;
 
@@ -684,7 +687,7 @@ void set_cel_v(byte** data) // 2, 0x40
     setCel(entryNum, celNum);
 }
 
-void last_cel(byte** data) // 2, 0x40 
+void b2Last_cel(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
 
@@ -693,7 +696,7 @@ void last_cel(byte** data) // 2, 0x40
     var[varNum] = viewtab[entryNum].numberOfCels - 1;
 }
 
-void current_cel(byte** data) // 2, 0x40 
+void b2Current_cel(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
 
@@ -702,7 +705,7 @@ void current_cel(byte** data) // 2, 0x40
     var[varNum] = viewtab[entryNum].currentCel;
 }
 
-void current_loop(byte** data) // 2, 0x40 
+void b2Current_loop(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
 
@@ -711,7 +714,7 @@ void current_loop(byte** data) // 2, 0x40
     var[varNum] = viewtab[entryNum].currentLoop;
 }
 
-void current_view(byte** data) // 2, 0x40 
+void b2Current_view(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
 
@@ -720,7 +723,7 @@ void current_view(byte** data) // 2, 0x40
     var[varNum] = viewtab[entryNum].currentView;
 }
 
-void number_of_loops(byte** data) // 2, 0x40 
+void b2Number_of_loops(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
 
@@ -729,7 +732,7 @@ void number_of_loops(byte** data) // 2, 0x40
     var[varNum] = viewtab[entryNum].numberOfLoops;
 }
 
-void set_priority(byte** data) // 2, 0x00 
+void b2Set_priority(byte** data) // 2, 0x00 
 {
     int entryNum;
 
@@ -738,7 +741,7 @@ void set_priority(byte** data) // 2, 0x00
     viewtab[entryNum].flags |= FIXEDPRIORITY;
 }
 
-void set_priority_v(byte** data) // 2, 0x40 
+void b2Set_priority_v(byte** data) // 2, 0x40 
 {
     int entryNum;
 
@@ -747,7 +750,7 @@ void set_priority_v(byte** data) // 2, 0x40
     viewtab[entryNum].flags |= FIXEDPRIORITY;
 }
 
-void release_priority(byte** data) // 1, 0x00 
+void b2Release_priority(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -755,7 +758,7 @@ void release_priority(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~FIXEDPRIORITY;
 }
 
-void get_priority(byte** data) // 2, 0x40 
+void b2Get_priority(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
 
@@ -764,7 +767,7 @@ void get_priority(byte** data) // 2, 0x40
     var[varNum] = viewtab[entryNum].priority;
 }
 
-void stop_update(byte** data) // 1, 0x00 
+void b2Stop_update(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -772,7 +775,7 @@ void stop_update(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~UPDATE;
 }
 
-void start_update(byte** data) // 1, 0x00 
+void b2Start_update(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -780,7 +783,7 @@ void start_update(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= UPDATE;
 }
 
-void force_update(byte** data) // 1, 0x00 
+void b2Force_update(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -789,7 +792,7 @@ void force_update(byte** data) // 1, 0x00
     updateObj(entryNum);
 }
 
-void ignore_horizon(byte** data) // 1, 0x00 
+void b2Ignore_horizon(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -797,7 +800,7 @@ void ignore_horizon(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= IGNOREHORIZON;
 }
 
-void observe_horizon(byte** data) // 1, 0x00 
+void b2Observe_horizon(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -805,12 +808,12 @@ void observe_horizon(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~IGNOREHORIZON;
 }
 
-void set_horizon(byte** data) // 1, 0x00 
+void b2Set_horizon(byte** data) // 1, 0x00 
 {
     horizon = *(*data)++;
 }
 
-void object_on_water(byte** data) // 1, 0x00 
+void b2Object_on_water(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -818,7 +821,7 @@ void object_on_water(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= ONWATER;
 }
 
-void object_on_land(byte** data) // 1, 0x00 
+void b2Object_on_land(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -826,7 +829,7 @@ void object_on_land(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= ONLAND;
 }
 
-void object_on_anything(byte** data) // 1, 0x00 
+void b2Object_on_anything(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -834,7 +837,7 @@ void object_on_anything(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~(ONWATER | ONLAND);
 }
 
-void ignore_objs(byte** data) // 1, 0x00 
+void b2Ignore_objs(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -842,7 +845,7 @@ void ignore_objs(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= IGNOREOBJECTS;
 }
 
-void observe_objs(byte** data) // 1, 0x00 
+void b2Observe_objs(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -851,7 +854,7 @@ void observe_objs(byte** data) // 1, 0x00
 }
 
 
-void distance(byte** data) // 3, 0x20 
+void b2Distance(byte** data) // 3, 0x20 
 {
     int o1, o2, varNum, x1, y1, x2, y2;
 
@@ -871,7 +874,7 @@ void distance(byte** data) // 3, 0x20
     var[varNum] = abs(x1 - x2) + abs(y1 - y2);
 }
 
-void stop_cycling(byte** data) // 1, 0x00 
+void b2Stop_cycling(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -879,7 +882,7 @@ void stop_cycling(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~CYCLING;
 }
 
-void start_cycling(byte** data) // 1, 0x00 
+void b2Start_cycling(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -887,7 +890,7 @@ void start_cycling(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= CYCLING;
 }
 
-void normal_cycle(byte** data) // 1, 0x00 
+void b2Normal_cycle(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -895,7 +898,7 @@ void normal_cycle(byte** data) // 1, 0x00
     viewtab[entryNum].cycleStatus = 0;
 }
 
-void end_of_loop(byte** data) // 2, 0x00 
+void b2End_of_loop(byte** data) // 2, 0x00 
 {
     int entryNum;
 
@@ -905,7 +908,7 @@ void end_of_loop(byte** data) // 2, 0x00
     viewtab[entryNum].flags |= (UPDATE | CYCLING);
 }
 
-void reverse_cycle(byte** data) // 1, 0x00
+void b2Reverse_cycle(byte** data) // 1, 0x00
 {
     int entryNum;
 
@@ -915,7 +918,7 @@ void reverse_cycle(byte** data) // 1, 0x00
     viewtab[entryNum].cycleStatus = 3;
 }
 
-void reverse_loop(byte** data) // 2, 0x00 
+void b2Reverse_loop(byte** data) // 2, 0x00 
 {
     int entryNum;
 
@@ -925,7 +928,7 @@ void reverse_loop(byte** data) // 2, 0x00
     viewtab[entryNum].flags |= (UPDATE | CYCLING);
 }
 
-void cycle_time(byte** data) // 2, 0x40 
+void b2Cycle_time(byte** data) // 2, 0x40 
 {
     int entryNum;
 
@@ -933,7 +936,7 @@ void cycle_time(byte** data) // 2, 0x40
     viewtab[entryNum].cycleTime = var[*(*data)++];
 }
 
-void stop_motion(byte** data) // 1, 0x00 
+void b2Stop_motion(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -943,7 +946,7 @@ void stop_motion(byte** data) // 1, 0x00
     viewtab[entryNum].motion = 0;
 }
 
-void start_motion(byte** data) // 1, 0x00 
+void b2Start_motion(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -952,7 +955,7 @@ void start_motion(byte** data) // 1, 0x00
     viewtab[entryNum].motion = 0;        /* Not sure about this */
 }
 
-void step_size(byte** data) // 2, 0x40 
+void b2Step_size(byte** data) // 2, 0x40 
 {
     int entryNum;
 
@@ -960,7 +963,7 @@ void step_size(byte** data) // 2, 0x40
     viewtab[entryNum].stepSize = var[*(*data)++];
 }
 
-void step_time(byte** data) // 2, 0x40 
+void b2Step_time(byte** data) // 2, 0x40 
 {
     int entryNum;
 
@@ -968,7 +971,7 @@ void step_time(byte** data) // 2, 0x40
     viewtab[entryNum].stepTime = var[*(*data)++];
 }
 
-void move_obj(byte** data) // 5, 0x00 
+void b2Move_obj(byte** data) // 5, 0x00 
 {
     int entryNum;
     byte stepVal;
@@ -984,7 +987,7 @@ void move_obj(byte** data) // 5, 0x00
     viewtab[entryNum].flags |= MOTION;
 }
 
-void move_obj_v(byte** data) // 5, 0x70 
+void b2Move_obj_v(byte** data) // 5, 0x70 
 {
     int entryNum;
     byte stepVal;
@@ -1000,7 +1003,7 @@ void move_obj_v(byte** data) // 5, 0x70
     viewtab[entryNum].flags |= MOTION;
 }
 
-void follow_ego(byte** data) // 3, 0x00 
+void b2Follow_ego(byte** data) // 3, 0x00 
 {
     int entryNum, stepVal, flagNum;
 
@@ -1015,7 +1018,7 @@ void follow_ego(byte** data) // 3, 0x00
     viewtab[entryNum].flags |= MOTION;
 }
 
-void wander(byte** data) // 1, 0x00 
+void b2Wander(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -1024,7 +1027,7 @@ void wander(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= MOTION;
 }
 
-void normal_motion(byte** data) // 1, 0x00 
+void b2Normal_motion(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -1033,7 +1036,7 @@ void normal_motion(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= MOTION;
 }
 
-void set_dir(byte** data) // 2, 0x40 
+void b2Set_dir(byte** data) // 2, 0x40 
 {
     int entryNum;
 
@@ -1041,7 +1044,7 @@ void set_dir(byte** data) // 2, 0x40
     viewtab[entryNum].direction = var[*(*data)++];
 }
 
-void get_dir(byte** data) // 2, 0x40 
+void b2Get_dir(byte** data) // 2, 0x40 
 {
     int entryNum;
 
@@ -1049,7 +1052,7 @@ void get_dir(byte** data) // 2, 0x40
     var[*(*data)++] = viewtab[entryNum].direction;
 }
 
-void ignore_blocks(byte** data) // 1, 0x00 
+void b2Ignore_blocks(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -1057,7 +1060,7 @@ void ignore_blocks(byte** data) // 1, 0x00
     viewtab[entryNum].flags |= IGNOREBLOCKS;
 }
 
-void observe_blocks(byte** data) // 1, 0x00 
+void b2Observe_blocks(byte** data) // 1, 0x00 
 {
     int entryNum;
 
@@ -1065,33 +1068,33 @@ void observe_blocks(byte** data) // 1, 0x00
     viewtab[entryNum].flags &= ~IGNOREBLOCKS;
 }
 
-void block(byte** data) // 4, 0x00 
+void b2Block(byte** data) // 4, 0x00 
 {
     /* Is this used anywhere? - Not implemented at this stage */
     *data += 4;
 }
 
-void unblock(byte** data) // 0, 0x00 
+void b2Unblock(byte** data) // 0, 0x00 
 {
 
 }
 
-void get(byte** data) // 1, 00 
+void b2Get(byte** data) // 1, 00 
 {
     objects[*(*data)++].roomNum = 255;
 }
 
-void get_v(byte** data) // 1, 0x80 
+void b2Get_v(byte** data) // 1, 0x80 
 {
     objects[var[*(*data)++]].roomNum = 255;
 }
 
-void drop(byte** data) // 1, 0x00 
+void b2Drop(byte** data) // 1, 0x00 
 {
     objects[*(*data)++].roomNum = 0;
 }
 
-void put(byte** data) // 2, 0x00 
+void b2Put(byte** data) // 2, 0x00 
 {
     int objNum, room;
 
@@ -1100,7 +1103,7 @@ void put(byte** data) // 2, 0x00
     objects[objNum].roomNum = room;
 }
 
-void put_v(byte** data) // 2, 0x40 
+void b2Put_v(byte** data) // 2, 0x40 
 {
     int objNum, room;
 
@@ -1109,7 +1112,7 @@ void put_v(byte** data) // 2, 0x40
     objects[objNum].roomNum = room;
 }
 
-void get_room_v(byte** data) // 2, 0xC0 
+void b2Get_room_v(byte** data) // 2, 0xC0 
 {
     int objNum, room;
 
@@ -1117,7 +1120,7 @@ void get_room_v(byte** data) // 2, 0xC0
     var[*(*data)++] = objects[objNum].roomNum;
 }
 
-void load_sound(byte** data) // 1, 0x00 
+void b2Load_sound(byte** data) // 1, 0x00 
 {
     int soundNum;
 
@@ -1125,7 +1128,7 @@ void load_sound(byte** data) // 1, 0x00
     loadSoundFile(soundNum);
 }
 
-void play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
+void b2Play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
 {
     int soundNum;
 
@@ -1135,7 +1138,7 @@ void play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
     flag[soundEndFlag] = TRUE;
 }
 
-void stop_sound(byte** data) // 0, 0x00 
+void b2Stop_sound(byte** data) // 0, 0x00 
 {
     checkForEnd = FALSE;
     stop_midi();
@@ -1144,7 +1147,7 @@ void stop_sound(byte** data) // 0, 0x00
 #pragma code-name (pop)
 #pragma code-name (push, "BANKRAM03")
 
-int getNum(char* inputString, int* i)
+int b3GetNum(char* inputString, int* i)
 {
     char tempString[80], strPos = 0;
 
@@ -1159,7 +1162,7 @@ int getNum(char* inputString, int* i)
     return (atoi(tempString));
 }
 
-boolean charIsIn(char testChar, char* testString)
+boolean b3CharIsIn(char testChar, char* testString)
 {
     int i;
 
@@ -1170,7 +1173,7 @@ boolean charIsIn(char testChar, char* testString)
     return FALSE;
 }
 
-void processString(char* inputString, char* outputString)
+void b3ProcessString(char* inputString, char* outputString)
 {
     int i, strPos = 0, tempNum, widthNum, count;
     char* numString;
@@ -1188,10 +1191,10 @@ void processString(char* inputString, char* outputString)
                 /* %% isn't actually supported */
                 //case '%': sprintf(outputString, "%s%%", outputString); break;
             case 'v':
-                tempNum = getNum(inputString, &i);
+                tempNum = b3GetNum(inputString, &i);
                 if (inputString[i + 1] == '|') {
                     i += 2;
-                    widthNum = getNum(inputString, &i);
+                    widthNum = b3GetNum(inputString, &i);
                     sprintf(numString, "%d", var[tempNum]);
                     for (count = strlen(numString); count < widthNum; count++) {
                         sprintf(outputString, "%s0", outputString);
@@ -1202,20 +1205,20 @@ void processString(char* inputString, char* outputString)
                     sprintf(outputString, "%s%d", outputString, var[tempNum]);
                 break;
             case 'm':
-                tempNum = getNum(inputString, &i);
+                tempNum = b3GetNum(inputString, &i);
                 sprintf(outputString, "%s%s", outputString,
                     logics[currentLog].data->messages[tempNum - 1]);
                 break;
             case 'g':
-                tempNum = getNum(inputString, &i);
+                tempNum = b3GetNum(inputString, &i);
                 sprintf(outputString, "%s%s", outputString, logics[0].data->messages[tempNum - 1]);
                 break;
             case 'w':
-                tempNum = getNum(inputString, &i);
+                tempNum = b3GetNum(inputString, &i);
                 sprintf(outputString, "%s%s", outputString, wordText[tempNum]);
                 break;
             case 's':
-                tempNum = getNum(inputString, &i);
+                tempNum = b3GetNum(inputString, &i);
                 sprintf(outputString, "%s%s", outputString, string[tempNum]);
                 break;
             default: /* ignore the second character */
@@ -1228,16 +1231,16 @@ void processString(char* inputString, char* outputString)
     }
 
     /* Recursive part to make sure all % formatting codes are dealt with */
-    if (charIsIn('%', outputString)) {
+    if (b3CharIsIn('%', outputString)) {
         strcpy(temp, outputString);
-        processString(temp, outputString);
+        b3ProcessString(temp, outputString);
     }
 
     free(numString);
     free(temp);
 }
 
-void print(byte** data) // 1, 00 
+void b3Print(byte** data) // 1, 00 
 {
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
@@ -1247,7 +1250,7 @@ void print(byte** data) // 1, 00
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    processString(logics[currentLog].data->messages[(*(*data)++) - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[(*(*data)++) - 1], tempString);
     printInBoxBig(tempString, -1, -1, 30);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1259,7 +1262,7 @@ void print(byte** data) // 1, 00
     free(tempString);
 }
 
-void print_v(byte** data) // 1, 0x80 
+void b3Print_v(byte** data) // 1, 0x80 
 {
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
@@ -1268,7 +1271,7 @@ void print_v(byte** data) // 1, 0x80
     temp = create_bitmap(640, 336);
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    processString(logics[currentLog].data->messages[(var[*(*data)++]) - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[(var[*(*data)++]) - 1], tempString);
     //printf("Warning Print In Bigbox Not Implemented Implement This");
     //printInBoxBig2(tempString, -1, -1, 30);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
@@ -1280,7 +1283,7 @@ void print_v(byte** data) // 1, 0x80
     free(tempString);
 }
 
-void display(byte** data) // 3, 0x00 
+void b3Display(byte** data) // 3, 0x00 
 {
     int row, col, messNum;
     char* tempString = malloc(256);
@@ -1288,7 +1291,7 @@ void display(byte** data) // 3, 0x00
     col = *(*data)++;
     row = *(*data)++;
     messNum = *(*data)++;
-    processString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
     drawBigString(screen, tempString, row * 16, 20 + (col * 16), agi_fg, agi_bg);
     /*lprintf("info: display() %s, fg: %d bg: %d row: %d col: %d",
        tempString, agi_fg, agi_bg, row, col);*/
@@ -1296,7 +1299,7 @@ void display(byte** data) // 3, 0x00
     free(tempString);
 }
 
-void display_v(byte** data) // 3, 0xE0 
+void b3Display_v(byte** data) // 3, 0xE0 
 {
     int row, col, messNum;
     char* tempString = (char*)malloc(256);
@@ -1306,7 +1309,7 @@ void display_v(byte** data) // 3, 0xE0
     messNum = var[*(*data)++];
     //drawString(picture, logics[currentLog].data->messages[messNum-1],
     //   row*8, col*8, agi_fg, agi_bg);
-    processString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
     drawBigString(screen, tempString, row * 16, 20 + (col * 16), agi_fg, agi_bg);
     /*lprintf("info: display.v() %s, foreground: %d background: %d",
        tempString, agi_fg, agi_bg);*/
@@ -1314,7 +1317,7 @@ void display_v(byte** data) // 3, 0xE0
     free(tempString);
 }
 
-void clear_lines(byte** data) // 3, 0x00 
+void b3Clear_lines(byte** data) // 3, 0x00 
 {
     int boxColour, startLine, endLine;
 
@@ -1328,7 +1331,7 @@ void clear_lines(byte** data) // 3, 0x00
     show_mouse(screen);
 }
 
-void text_screen(byte** data) // 0, 0x00 
+void b3Text_screen(byte** data) // 0, 0x00 
 {
     screenMode = AGI_TEXT;
     /* Do something else here */
@@ -1337,7 +1340,7 @@ void text_screen(byte** data) // 0, 0x00
     clear(screen);
 }
 
-void graphics(byte** data) // 0, 0x00 
+void b3Graphics(byte** data) // 0, 0x00 
 {
     screenMode = AGI_GRAPHICS;
     /* Do something else here */
@@ -1347,45 +1350,45 @@ void graphics(byte** data) // 0, 0x00
     clear(screen);
 }
 
-void set_cursor_char(byte** data) // 1, 0x00 
+void b3Set_cursor_char(byte** data) // 1, 0x00 
 {
     char* temp = (char*)malloc(256);
 
-    processString(logics[currentLog].data->messages[(*(*data)++) - 1], temp);
+    b3ProcessString(logics[currentLog].data->messages[(*(*data)++) - 1], temp);
     cursorChar = temp[0];
 
     free(temp);
 }
 
-void set_text_attribute(byte** data) // 2, 0x00 
+void b3Set_text_attribute(byte** data) // 2, 0x00 
 {
     agi_fg = (*(*data)++) + 1;
     agi_bg = (*(*data)++) + 1;
 }
 
-void shake_screen(byte** data) // 1, 0x00 
+void b3Shake_screen(byte** data) // 1, 0x00 
 {
     (*data)++;  /* Ignore this for now. */
 }
 
-void configure_screen(byte** data) // 3, 0x00 
+void b3Configure_screen(byte** data) // 3, 0x00 
 {
     min_print_line = *(*data)++;
     user_input_line = *(*data)++;
     status_line_num = *(*data)++;
 }
 
-void status_line_on(byte** data) // 0, 0x00 
+void b3Status_line_on(byte** data) // 0, 0x00 
 {
     statusLineDisplayed = TRUE;
 }
 
-void status_line_off(byte** data) // 0, 0x00 
+void b3Status_line_off(byte** data) // 0, 0x00 
 {
     statusLineDisplayed = FALSE;
 }
 
-void set_string(byte** data) // 2, 0x00 
+void b3Set_string(byte** data) // 2, 0x00 
 {
     int stringNum, messNum;
 
@@ -1394,7 +1397,7 @@ void set_string(byte** data) // 2, 0x00
     strcpy(string[stringNum], logics[currentLog].data->messages[messNum - 1]);
 }
 
-void get_string(byte** data) // 5, 0x00 
+void b3Get_string(byte** data) // 5, 0x00 
 {
     int strNum, messNum, row, col, l;
 
@@ -1406,7 +1409,7 @@ void get_string(byte** data) // 5, 0x00
     getString(logics[currentLog].data->messages[messNum - 1], string[strNum], row, col, l);
 }
 
-void word_to_string(byte** data) // 2, 0x00 
+void b3Word_to_string(byte** data) // 2, 0x00 
 {
     int stringNum, wordNum;
 
@@ -1415,7 +1418,7 @@ void word_to_string(byte** data) // 2, 0x00
     strcpy(string[stringNum], wordText[wordNum]);
 }
 
-void parse(byte** data) // 1, 0x00 
+void b3Parse(byte** data) // 1, 0x00 
 {
     int stringNum;
 
@@ -1426,7 +1429,7 @@ void parse(byte** data) // 1, 0x00
 #pragma code-name (pop)
 #pragma code-name (push, "BANKRAM04")
 
-void get_num(byte** data) // 2, 0x40 
+void b4Get_num(byte** data) // 2, 0x40 
 {
     int messNum, varNum;
     char temp[80];
@@ -1437,19 +1440,19 @@ void get_num(byte** data) // 2, 0x40
     var[varNum] = atoi(temp);
 }
 
-void prevent_input(byte** data) // 0, 0x00 
+void b4Prevent_input(byte** data) // 0, 0x00 
 {
     inputLineDisplayed = FALSE;
     /* Do something else here */
 }
 
-void accept_input(byte** data) // 0, 0x00 
+void b4Accept_input(byte** data) // 0, 0x00 
 {
     inputLineDisplayed = TRUE;
     /* Do something else here */
 }
 
-void set_key(byte** data) // 3, 0x00 
+void b4Set_key(byte** data) // 3, 0x00 
 {
     int asciiCode, scanCode, eventCode;
     char* tempStr = (char*)malloc(256);
@@ -1482,7 +1485,7 @@ void set_key(byte** data) // 3, 0x00
     free(tempStr);
 }
 
-void add_to_pic(byte** data) // 7, 0x00 
+void b4Add_to_pic(byte** data) // 7, 0x00 
 {
     int viewNum, loopNum, celNum, x, y, priNum, baseCol;
 
@@ -1497,7 +1500,7 @@ void add_to_pic(byte** data) // 7, 0x00
     addToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
-void add_to_pic_v(byte** data) // 7, 0xFE 
+void b4Add_to_pic_v(byte** data) // 7, 0xFE 
 {
     int viewNum, loopNum, celNum, x, y, priNum, baseCol;
 
@@ -1512,7 +1515,7 @@ void add_to_pic_v(byte** data) // 7, 0xFE
     addToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
-void status(byte** data) // 0, 0x00 
+void b4Status(byte** data) // 0, 0x00 
 {
     /* Inventory */
     // set text mode
@@ -1520,22 +1523,17 @@ void status(byte** data) // 0, 0x00
     var[25] = 255;
 }
 
-void save_game(byte** data) // 0, 0x00 
+void b4Save_game(byte** data) // 0, 0x00 
 {
     /* Not supported yet */
 }
 
-void restore_game(byte** data) // 0, 0x00 
+void b4Restore_game(byte** data) // 0, 0x00 
 {
     /* Not supported yet */
 }
 
-void init_disk(byte** data) // 0, 0x00 
-{
-    /* Not supported. Seems to be an old command. */
-}
-
-void restart_game(byte** data) // 0, 0x00 
+void b4Restart_game(byte** data) // 0, 0x00 
 {
     int i;
 
@@ -1550,10 +1548,10 @@ void restart_game(byte** data) // 0, 0x00
 
     newRoomNum = 0;
     hasEnteredNewRoom = TRUE;
-    freeMenuItems();
+    b4FreeMenuItems();
 }
 
-void show_obj(byte** data) // 1, 0x00 
+void b4Show_obj(byte** data) // 1, 0x00 
 {
     int objectNum;
 
@@ -1561,7 +1559,7 @@ void show_obj(byte** data) // 1, 0x00
     /* Not supported yet */
 }
 
-void random_num(byte** data) // 3, 0x20  random() renamed to avoid clash
+void b4Random_num(byte** data) // 3, 0x20  random() renamed to avoid clash
 {
     int startValue, endValue;
 
@@ -1570,17 +1568,17 @@ void random_num(byte** data) // 3, 0x20  random() renamed to avoid clash
     var[*(*data)++] = (rand() % ((endValue - startValue) + 1)) + startValue;
 }
 
-void program_control(byte** data) // 0, 0x00 
+void b4Program_control(byte** data) // 0, 0x00 
 {
     controlMode = PROGRAM_CONTROL;
 }
 
-void player_control(byte** data) // 0, 0x00 
+void b4Player_control(byte** data) // 0, 0x00 
 {
     controlMode = PLAYER_CONTROL;
 }
 
-void obj_status_v(byte** data) // 1, 0x80 
+void b4Obj_status_v(byte** data) // 1, 0x80 
 {
     int objectNum;
 
@@ -1591,7 +1589,7 @@ void obj_status_v(byte** data) // 1, 0x80
     showObjectState(objectNum);
 }
 
-void quit(byte** data) // 1, 0x00                     /* 0 args for AGI version 2_089 */
+void b4Quit(byte** data) // 1, 0x00                     /* 0 args for AGI version 2_089 */
 {
     int quitType, ch;
 
@@ -1608,12 +1606,7 @@ void quit(byte** data) // 1, 0x00                     /* 0 args for AGI version 
     }
 }
 
-void show_mem(byte** data) // 0, 0x00 
-{
-    /* Ignore */
-}
-
-void pause(byte** data) // 0, 0x00 
+void b4Pause(byte** data) // 0, 0x00 
 {
     while (key[KEY_ENTER]) { /* Wait */ }
     printInBoxBig("      Game paused.\nPress ENTER to continue.", -1, -1, 30);
@@ -1622,28 +1615,23 @@ void pause(byte** data) // 0, 0x00
     okToShowPic = TRUE;
 }
 
-void echo_line(byte** data) // 0, 0x00 
+void b4Echo_line(byte** data) // 0, 0x00 
 {
 
 }
 
-void cancel_line(byte** data) // 0, 0x00 
+void b4Cancel_line(byte** data) // 0, 0x00 
 {
     /*currentInputStr[0]=0;
     strPos=0;*/
 }
 
-void init_joy(byte** data) // 0, 0x00 
+void b4Init_joy(byte** data) // 0, 0x00 
 {
     /* Not important at this stage */
 }
 
-void toggle_monitor(byte** data) // 0, 0x00 
-{
-    /* Not important */
-}
-
-void version(byte** data) // 0, 0x00 
+void b4Version(byte** data) // 0, 0x00 
 {
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
     printInBoxBig("MEKA AGI Interpreter\n    Version 1.0", -1, -1, 30);
@@ -1652,34 +1640,34 @@ void version(byte** data) // 0, 0x00
     okToShowPic = TRUE;
 }
 
-void script_size(byte** data) // 1, 0x00 
+void b4Script_size(byte** data) // 1, 0x00 
 {
     (*data)++;  /* Ignore the script size. Not important for this interpreter */
 }
 
-void set_game_id(byte** data) // 1, 0x00 
+void b4Set_game_id(byte** data) // 1, 0x00 
 {
     (*data)++;  /* Ignore the game ID. Not important */
 }
 
-void log(byte** data) // 1, 0x00 
+void b4Log(byte** data) // 1, 0x00 
 {
     (*data)++;  /* Ignore log message. Not important */
 }
 
-void set_scan_start(byte** data) // 0, 0x00 
+void b4Set_scan_start(byte** data) // 0, 0x00 
 {
     /* currentPoint is set in executeLogic() */
     logics[currentLog].entryPoint = logics[currentLog].currentPoint + 1;
     /* Does it return() at this point, or does it execute to the end?? */
 }
 
-void reset_scan_start(byte** data) // 0, 0x00 
+void b4Reset_scan_start(byte** data) // 0, 0x00 
 {
     logics[currentLog].entryPoint = 0;
 }
 
-void reposition_to(byte** data) // 3, 0x00 
+void b4Reposition_to(byte** data) // 3, 0x00 
 {
     int entryNum;
 
@@ -1688,7 +1676,7 @@ void reposition_to(byte** data) // 3, 0x00
     viewtab[entryNum].yPos = *(*data)++;
 }
 
-void reposition_to_v(byte** data) // 3, 0x60 
+void b4Reposition_to_v(byte** data) // 3, 0x60 
 {
     int entryNum;
 
@@ -1697,17 +1685,17 @@ void reposition_to_v(byte** data) // 3, 0x60
     viewtab[entryNum].yPos = var[*(*data)++];
 }
 
-void trace_on(byte** data) // 0, 0x00 
+void b4Trace_on(byte** data) // 0, 0x00 
 {
     /* Ignore at this stage */
 }
 
-void trace_info(byte** data) // 3, 0x00 
+void b4Trace_info(byte** data) // 3, 0x00 
 {
     *data += 3;  /* Ignore trace information at this stage. */
 }
 
-void print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions before */
+void b4Print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions before */
 {
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
@@ -1722,7 +1710,7 @@ void print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions befor
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    processString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
     printInBoxBig(tempString, x, y, l);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1734,7 +1722,7 @@ void print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions befor
     free(tempString);
 }
 
-void print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
+void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
 {
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
@@ -1749,7 +1737,7 @@ void print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    processString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
     printInBoxBig(tempString, x, y, l);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1761,12 +1749,12 @@ void print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
     free(tempString);
 }
 
-void discard_view_v(byte** data) // 1, 0x80 
+void b4Discard_view_v(byte** data) // 1, 0x80 
 {
     discardView(var[*(*data)++]);
 }
 
-void clear_text_rect(byte** data) // 5, 0x00 
+void b4Clear_text_rect(byte** data) // 5, 0x00 
 {
     int x1, y1, x2, y2, boxColour;
 
@@ -1782,66 +1770,66 @@ void clear_text_rect(byte** data) // 5, 0x00
     show_mouse(screen);
 }
 
-void set_upper_left(byte** data) // 2, 0x00    (x, y) ??
+void b4Set_upper_left(byte** data) // 2, 0x00    (x, y) ??
 {
     *data += 2;
 }
 
-void waitKeyRelease()
+void b4WaitKeyRelease()
 {
     while (keypressed()) { /* Wait */ }
 }
 
-int menuEvent0() { waitKeyRelease(); events[0].activated = 1; return D_O_K; }
-int menuEvent1() { waitKeyRelease(); events[1].activated = 1; return D_O_K; }
-int menuEvent2() { waitKeyRelease(); events[2].activated = 1; return D_O_K; }
-int menuEvent3() { waitKeyRelease(); events[3].activated = 1; return D_O_K; }
-int menuEvent4() { waitKeyRelease(); events[4].activated = 1; return D_O_K; }
-int menuEvent5() { waitKeyRelease(); events[5].activated = 1; return D_O_K; }
-int menuEvent6() { waitKeyRelease(); events[6].activated = 1; return D_O_K; }
-int menuEvent7() { waitKeyRelease(); events[7].activated = 1; return D_O_K; }
-int menuEvent8() { waitKeyRelease(); events[8].activated = 1; return D_O_K; }
-int menuEvent9() { waitKeyRelease(); events[9].activated = 1; return D_O_K; }
-int menuEvent10() { waitKeyRelease(); events[10].activated = 1; return D_O_K; }
-int menuEvent11() { waitKeyRelease(); events[11].activated = 1; return D_O_K; }
-int menuEvent12() { waitKeyRelease(); events[12].activated = 1; return D_O_K; }
-int menuEvent13() { waitKeyRelease(); events[13].activated = 1; return D_O_K; }
-int menuEvent14() { waitKeyRelease(); events[14].activated = 1; return D_O_K; }
-int menuEvent15() { waitKeyRelease(); events[15].activated = 1; return D_O_K; }
-int menuEvent16() { waitKeyRelease(); events[16].activated = 1; return D_O_K; }
-int menuEvent17() { waitKeyRelease(); events[17].activated = 1; return D_O_K; }
-int menuEvent18() { waitKeyRelease(); events[18].activated = 1; return D_O_K; }
-int menuEvent19() { waitKeyRelease(); events[19].activated = 1; return D_O_K; }
-int menuEvent20() { waitKeyRelease(); events[20].activated = 1; return D_O_K; }
-int menuEvent21() { waitKeyRelease(); events[21].activated = 1; return D_O_K; }
-int menuEvent22() { waitKeyRelease(); events[22].activated = 1; return D_O_K; }
-int menuEvent23() { waitKeyRelease(); events[23].activated = 1; return D_O_K; }
-int menuEvent24() { waitKeyRelease(); events[24].activated = 1; return D_O_K; }
-int menuEvent25() { waitKeyRelease(); events[25].activated = 1; return D_O_K; }
-int menuEvent26() { waitKeyRelease(); events[26].activated = 1; return D_O_K; }
-int menuEvent27() { waitKeyRelease(); events[27].activated = 1; return D_O_K; }
-int menuEvent28() { waitKeyRelease(); events[28].activated = 1; return D_O_K; }
-int menuEvent29() { waitKeyRelease(); events[29].activated = 1; return D_O_K; }
-int menuEvent30() { waitKeyRelease(); events[30].activated = 1; return D_O_K; }
-int menuEvent31() { waitKeyRelease(); events[31].activated = 1; return D_O_K; }
-int menuEvent32() { waitKeyRelease(); events[32].activated = 1; return D_O_K; }
-int menuEvent33() { waitKeyRelease(); events[33].activated = 1; return D_O_K; }
-int menuEvent34() { waitKeyRelease(); events[34].activated = 1; return D_O_K; }
-int menuEvent35() { waitKeyRelease(); events[35].activated = 1; return D_O_K; }
-int menuEvent36() { waitKeyRelease(); events[36].activated = 1; return D_O_K; }
-int menuEvent37() { waitKeyRelease(); events[37].activated = 1; return D_O_K; }
-int menuEvent38() { waitKeyRelease(); events[38].activated = 1; return D_O_K; }
-int menuEvent39() { waitKeyRelease(); events[39].activated = 1; return D_O_K; }
-int menuEvent40() { waitKeyRelease(); events[40].activated = 1; return D_O_K; }
-int menuEvent41() { waitKeyRelease(); events[41].activated = 1; return D_O_K; }
-int menuEvent42() { waitKeyRelease(); events[42].activated = 1; return D_O_K; }
-int menuEvent43() { waitKeyRelease(); events[43].activated = 1; return D_O_K; }
-int menuEvent44() { waitKeyRelease(); events[44].activated = 1; return D_O_K; }
-int menuEvent45() { waitKeyRelease(); events[45].activated = 1; return D_O_K; }
-int menuEvent46() { waitKeyRelease(); events[46].activated = 1; return D_O_K; }
-int menuEvent47() { waitKeyRelease(); events[47].activated = 1; return D_O_K; }
-int menuEvent48() { waitKeyRelease(); events[48].activated = 1; return D_O_K; }
-int menuEvent49() { waitKeyRelease(); events[49].activated = 1; return D_O_K; }
+int menuEvent0() { b4WaitKeyRelease(); events[0].activated = 1; return D_O_K; }
+int menuEvent1() { b4WaitKeyRelease(); events[1].activated = 1; return D_O_K; }
+int menuEvent2() { b4WaitKeyRelease(); events[2].activated = 1; return D_O_K; }
+int menuEvent3() { b4WaitKeyRelease(); events[3].activated = 1; return D_O_K; }
+int menuEvent4() { b4WaitKeyRelease(); events[4].activated = 1; return D_O_K; }
+int menuEvent5() { b4WaitKeyRelease(); events[5].activated = 1; return D_O_K; }
+int menuEvent6() { b4WaitKeyRelease(); events[6].activated = 1; return D_O_K; }
+int menuEvent7() { b4WaitKeyRelease(); events[7].activated = 1; return D_O_K; }
+int menuEvent8() { b4WaitKeyRelease(); events[8].activated = 1; return D_O_K; }
+int menuEvent9() { b4WaitKeyRelease(); events[9].activated = 1; return D_O_K; }
+int menuEvent10() { b4WaitKeyRelease(); events[10].activated = 1; return D_O_K; }
+int menuEvent11() { b4WaitKeyRelease(); events[11].activated = 1; return D_O_K; }
+int menuEvent12() { b4WaitKeyRelease(); events[12].activated = 1; return D_O_K; }
+int menuEvent13() { b4WaitKeyRelease(); events[13].activated = 1; return D_O_K; }
+int menuEvent14() { b4WaitKeyRelease(); events[14].activated = 1; return D_O_K; }
+int menuEvent15() { b4WaitKeyRelease(); events[15].activated = 1; return D_O_K; }
+int menuEvent16() { b4WaitKeyRelease(); events[16].activated = 1; return D_O_K; }
+int menuEvent17() { b4WaitKeyRelease(); events[17].activated = 1; return D_O_K; }
+int menuEvent18() { b4WaitKeyRelease(); events[18].activated = 1; return D_O_K; }
+int menuEvent19() { b4WaitKeyRelease(); events[19].activated = 1; return D_O_K; }
+int menuEvent20() { b4WaitKeyRelease(); events[20].activated = 1; return D_O_K; }
+int menuEvent21() { b4WaitKeyRelease(); events[21].activated = 1; return D_O_K; }
+int menuEvent22() { b4WaitKeyRelease(); events[22].activated = 1; return D_O_K; }
+int menuEvent23() { b4WaitKeyRelease(); events[23].activated = 1; return D_O_K; }
+int menuEvent24() { b4WaitKeyRelease(); events[24].activated = 1; return D_O_K; }
+int menuEvent25() { b4WaitKeyRelease(); events[25].activated = 1; return D_O_K; }
+int menuEvent26() { b4WaitKeyRelease(); events[26].activated = 1; return D_O_K; }
+int menuEvent27() { b4WaitKeyRelease(); events[27].activated = 1; return D_O_K; }
+int menuEvent28() { b4WaitKeyRelease(); events[28].activated = 1; return D_O_K; }
+int menuEvent29() { b4WaitKeyRelease(); events[29].activated = 1; return D_O_K; }
+int menuEvent30() { b4WaitKeyRelease(); events[30].activated = 1; return D_O_K; }
+int menuEvent31() { b4WaitKeyRelease(); events[31].activated = 1; return D_O_K; }
+int menuEvent32() { b4WaitKeyRelease(); events[32].activated = 1; return D_O_K; }
+int menuEvent33() { b4WaitKeyRelease(); events[33].activated = 1; return D_O_K; }
+int menuEvent34() { b4WaitKeyRelease(); events[34].activated = 1; return D_O_K; }
+int menuEvent35() { b4WaitKeyRelease(); events[35].activated = 1; return D_O_K; }
+int menuEvent36() { b4WaitKeyRelease(); events[36].activated = 1; return D_O_K; }
+int menuEvent37() { b4WaitKeyRelease(); events[37].activated = 1; return D_O_K; }
+int menuEvent38() { b4WaitKeyRelease(); events[38].activated = 1; return D_O_K; }
+int menuEvent39() { b4WaitKeyRelease(); events[39].activated = 1; return D_O_K; }
+int menuEvent40() { b4WaitKeyRelease(); events[40].activated = 1; return D_O_K; }
+int menuEvent41() { b4WaitKeyRelease(); events[41].activated = 1; return D_O_K; }
+int menuEvent42() { b4WaitKeyRelease(); events[42].activated = 1; return D_O_K; }
+int menuEvent43() { b4WaitKeyRelease(); events[43].activated = 1; return D_O_K; }
+int menuEvent44() { b4WaitKeyRelease(); events[44].activated = 1; return D_O_K; }
+int menuEvent45() { b4WaitKeyRelease(); events[45].activated = 1; return D_O_K; }
+int menuEvent46() { b4WaitKeyRelease(); events[46].activated = 1; return D_O_K; }
+int menuEvent47() { b4WaitKeyRelease(); events[47].activated = 1; return D_O_K; }
+int menuEvent48() { b4WaitKeyRelease(); events[48].activated = 1; return D_O_K; }
+int menuEvent49() { b4WaitKeyRelease(); events[49].activated = 1; return D_O_K; }
 
 int (*(menuFunctions[50]))() = {
     menuEvent0, menuEvent1, menuEvent2, menuEvent3, menuEvent4,
@@ -1862,7 +1850,7 @@ int (*(menuFunctions[50]))() = {
 ** This function frees all dynamically allocated memory taken up by the
 ** menus.
 ***************************************************************************/
-void freeMenuItems()
+void b4FreeMenuItems()
 {
     int i, j;
 
@@ -1881,7 +1869,7 @@ void freeMenuItems()
     numOfMenus = 0;
 }
 
-void set_menu(byte** data) // 1, 0x00 
+void b4Set_menu(byte** data) // 1, 0x00 
 {
     int messNum, startOffset;
     char* messData;
@@ -1910,7 +1898,7 @@ void set_menu(byte** data) // 1, 0x00
     the_menu[numOfMenus].child = NULL;
 }
 
-void set_menu_item(byte** data) // 2, 0x00 
+void b4Set_menu_item(byte** data) // 2, 0x00 
 {
     int messNum, controllerNum, i;
 
@@ -1932,27 +1920,27 @@ void set_menu_item(byte** data) // 2, 0x00
     the_menu[numOfMenus - 1].child[i + 1].child = NULL;
 }
 
-void submit_menu(byte** data) // 0, 0x00 
+void b4Submit_menu(byte** data) // 0, 0x00 
 {
-
+    printf("Hello");
 }
 
-void enable_item(byte** data) // 1, 0x00 
-{
-    (*data)++;
-}
-
-void disable_item(byte** data) // 1, 0x00 
+void b4Enable_item(byte** data) // 1, 0x00 
 {
     (*data)++;
 }
 
-void menu_input(byte** data) // 0, 0x00 
+void b4Disable_item(byte** data) // 1, 0x00 
+{
+    (*data)++;
+}
+
+void b4Menu_input(byte** data) // 0, 0x00 
 {
     do_menu(the_menu, 10, 20);
 }
 
-void show_obj_v(byte** data) // 1, 0x01 
+void b4Show_obj_v(byte** data) // 1, 0x01 
 {
     int objectNum;
 
@@ -1960,37 +1948,37 @@ void show_obj_v(byte** data) // 1, 0x01
     /* Not supported yet */
 }
 
-void open_dialogue(byte** data) // 0, 0x00 
+void b4Open_dialogue(byte** data) // 0, 0x00 
 {
 
 }
 
-void close_dialogue(byte** data) // 0, 0x00 
+void b4Close_dialogue(byte** data) // 0, 0x00 
 {
 
 }
 
-void mul_n(byte** data) // 2, 0x80 
+void b4Mul_n(byte** data) // 2, 0x80 
 {
     var[*(*data)++] *= *(*data)++;
 }
 
-void mul_v(byte** data) // 2, 0xC0 
+void b4Mul_v(byte** data) // 2, 0xC0 
 {
     var[*(*data)++] *= var[*(*data)++];
 }
 
-void div_n(byte** data) // 2, 0x80 
+void b4Div_n(byte** data) // 2, 0x80 
 {
     var[*(*data)++] /= *(*data)++;
 }
 
-void div_v(byte** data) // 2, 0xC0 
+void b4Div_v(byte** data) // 2, 0xC0 
 {
     var[*(*data)++] /= var[*(*data)++];
 }
 
-void close_window(byte** data) // 0, 0x00 
+void b4Close_window(byte** data) // 0, 0x00 
 {
 
 }
@@ -2002,6 +1990,18 @@ byte getBankBasedOnCode(byte code)
     if (code <= HIGHEST_BANK1_FUNC)
     {
         return 1;
+    }
+    else if (code <= HIGHEST_BANK2_FUNC)
+    {
+        return 2;
+    }
+    else if (code <= HIGHEST_BANK3_FUNC)
+    {
+        return 3;
+    }
+    else if (code <= HIGHEST_BANK4_FUNC)
+    {
+        return 4;
     }
     return RAM_BANK;
 }
@@ -2087,12 +2087,13 @@ void ifHandler(byte** data, byte codeBank)
                 break; /* Should never happen */
             }
             RAM_BANK = previousBank;
+
 #ifdef VERBOSE
 
             printf("Data was %p trying to add %p ", data, codeWindowAddress - &codeWindow[0]);
 #endif // VERBOSE
-            *data += (codeWindowAddress - &codeWindow[0]);
-            
+            * data += (codeWindowAddress - &codeWindow[0]);
+
 #ifdef VERBOSE
             printf("Data is %p %u \n", data, *data);
 #endif
@@ -2110,7 +2111,7 @@ void ifHandler(byte** data, byte codeBank)
                         if (ch > 0xfc) continue;
                         if (ch == 0x0e) { /* said() has variable number of args */
                             ch = *(*data)++;
-     
+
                             *data += (ch << 1);
                         }
                         else {
@@ -2124,8 +2125,8 @@ void ifHandler(byte** data, byte codeBank)
             }
             break;
         }
-
         RAM_BANK = previousBank;
+ 
     }
 
 #ifdef DEBUG
@@ -2171,7 +2172,7 @@ void executeLogic(int logNum)
     byte* codeWindowAddress;
     byte** ppCodeWindowAddress;
     boolean lastCodeWasNonWindow = FALSE;
-    
+
     //Temp
     int counter = 0;
 
@@ -2183,7 +2184,7 @@ void executeLogic(int logNum)
 
     RAM_BANK = LOGIC_ENTRY_BANK;
     currentLogic = logics[logNum];
-    
+
     RAM_BANK = LOGIC_FILE_BANK;
     currentLogicFile = *currentLogic.data;
 
@@ -2217,13 +2218,13 @@ void executeLogic(int logNum)
     RAM_BANK = currentLogicFile.codeBank;
 
     while ((code < endPos) && stillExecuting) {
-        
-        if (counter == 2)
+
+        if (logNum != 0)
         {
 #ifdef VERBOSE
-            printf("The code is now %u and the address is %p", *code, code);
-            exit(0);
+            printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
 #endif // VERBOSE
+            exit(0);
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
@@ -2239,6 +2240,7 @@ void executeLogic(int logNum)
         }
 
         currentLogic.currentPoint = (code - startPos);
+
 #ifdef DEBUG
         debugString[0] = 0;
         for (i = 0; i < 10; i++)
@@ -2251,12 +2253,12 @@ void executeLogic(int logNum)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif       
-        printf("\n The code is %d, on bank %d address, %p", *code, RAM_BANK, code);
+        printf("\n The code is %d, on bank %d address, %p \n", *code, RAM_BANK, code);
         codeAtTimeOfLastBankSwitch = *code;
         RAM_BANK = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
 #ifdef VERBOSE
-        printf("Bank is now %d to execute code %d", RAM_BANK, *code);
-#endif // VERBOSE
+        printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
+#endif // VERBOSE 
 
         code++;
         switch (codeAtTimeOfLastBankSwitch) {
@@ -2293,6 +2295,10 @@ void executeLogic(int logNum)
         case 20: b1Load_logics(ppCodeWindowAddress); break;
         case 21: b1Load_logics_v(ppCodeWindowAddress); break;
         case 22:
+            if (counter == 33)
+            {
+                printf("Made it here and about to execute %d on bank %d with address %p", codeAtTimeOfLastBankSwitch, RAM_BANK, *ppCodeWindowAddress);
+            }
             b1Call(ppCodeWindowAddress);
             /* The currentLog variable needs to be restored */
             currentLog = logNum;
@@ -2329,135 +2335,140 @@ void executeLogic(int logNum)
         case 38: b1Position_v(ppCodeWindowAddress); break;
         case 39: b1Get_posn(ppCodeWindowAddress); break;
         case 40: b1Reposition(ppCodeWindowAddress); break;
-        case 41: set_view(ppCodeWindowAddress); break;
-        case 42: set_view_v(ppCodeWindowAddress); break;
-        case 43: set_loop(ppCodeWindowAddress); break;
-        case 44: set_loop_v(ppCodeWindowAddress); break;
-        case 45: fix_loop(ppCodeWindowAddress); break;
-        case 46: release_loop(ppCodeWindowAddress); break;
-        case 47: set_cel(ppCodeWindowAddress); break;
-        case 48: set_cel_v(ppCodeWindowAddress); break;
-        case 49: last_cel(ppCodeWindowAddress); break;
-        case 50: current_cel(ppCodeWindowAddress); break;
-        case 51: current_loop(ppCodeWindowAddress); break;
-        case 52: current_view(ppCodeWindowAddress); break;
-        case 53: number_of_loops(ppCodeWindowAddress); break;
-        case 54: set_priority(ppCodeWindowAddress); break;
-        case 55: set_priority_v(ppCodeWindowAddress); break;
-        case 56: release_priority(ppCodeWindowAddress); break;
-        case 57: get_priority(ppCodeWindowAddress); break;
-        case 58: stop_update(ppCodeWindowAddress); break;
-        case 59: start_update(ppCodeWindowAddress); break;
-        case 60: force_update(ppCodeWindowAddress); break;
-        case 61: ignore_horizon(ppCodeWindowAddress); break;
-        case 62: observe_horizon(ppCodeWindowAddress); break;
-        case 63: set_horizon(ppCodeWindowAddress); break;
-        case 64: object_on_water(ppCodeWindowAddress); break;
-        case 65: object_on_land(ppCodeWindowAddress); break;
-        case 66: object_on_anything(ppCodeWindowAddress); break;
-        case 67: ignore_objs(ppCodeWindowAddress); break;
-        case 68: observe_objs(ppCodeWindowAddress); break;
-        case 69: distance(ppCodeWindowAddress); break;
-        case 70: stop_cycling(ppCodeWindowAddress); break;
-        case 71: start_cycling(ppCodeWindowAddress); break;
-        case 72: normal_cycle(ppCodeWindowAddress); break;
-        case 73: end_of_loop(ppCodeWindowAddress); break;
-        case 74: reverse_cycle(ppCodeWindowAddress); break;
-        case 75: reverse_loop(ppCodeWindowAddress); break;
-        case 76: cycle_time(ppCodeWindowAddress); break;
-        case 77: stop_motion(ppCodeWindowAddress); break;
-        case 78: start_motion(ppCodeWindowAddress); break;
-        case 79: step_size(ppCodeWindowAddress); break;
-        case 80: step_time(ppCodeWindowAddress); break;
-        case 81: move_obj(ppCodeWindowAddress); break;
-        case 82: move_obj_v(ppCodeWindowAddress); break;
-        case 83: follow_ego(ppCodeWindowAddress); break;
-        case 84: wander(ppCodeWindowAddress); break;
-        case 85: normal_motion(ppCodeWindowAddress); break;
-        case 86: set_dir(ppCodeWindowAddress); break;
-        case 87: get_dir(ppCodeWindowAddress); break;
-        case 88: ignore_blocks(ppCodeWindowAddress); break;
-        case 89: observe_blocks(ppCodeWindowAddress); break;
-        case 90: block(ppCodeWindowAddress); break;
-        case 91: unblock(ppCodeWindowAddress); break;
-        case 92: get(ppCodeWindowAddress); break;
-        case 93: get_v(ppCodeWindowAddress); break;
-        case 94: drop(ppCodeWindowAddress); break;
-        case 95: put(ppCodeWindowAddress); break;
-        case 96: put_v(ppCodeWindowAddress); break;
-        case 97: get_room_v(ppCodeWindowAddress); break;
-        case 98: load_sound(ppCodeWindowAddress); break;
-        case 99: play_sound(ppCodeWindowAddress); break;
-        case 100: stop_sound(ppCodeWindowAddress); break;
-        case 101: print(ppCodeWindowAddress); break;
-        case 102: print_v(ppCodeWindowAddress); break;
-        case 103: display(ppCodeWindowAddress); break;
-        case 104: display_v(ppCodeWindowAddress); break;
-        case 105: clear_lines(ppCodeWindowAddress); break;
-        case 106: text_screen(ppCodeWindowAddress); break;
-        case 107: graphics(ppCodeWindowAddress); break;
-        case 108: set_cursor_char(ppCodeWindowAddress); break;
-        case 109: set_text_attribute(ppCodeWindowAddress); break;
-        case 110: shake_screen(ppCodeWindowAddress); break;
-        case 111: configure_screen(ppCodeWindowAddress); break;
-        case 112: status_line_on(ppCodeWindowAddress); break;
-        case 113: status_line_off(ppCodeWindowAddress); break;
-        case 114: set_string(ppCodeWindowAddress); break;
-        case 115: get_string(ppCodeWindowAddress); break;
-        case 116: word_to_string(ppCodeWindowAddress); break;
-        case 117: parse(ppCodeWindowAddress); break;
-        case 118: get_num(ppCodeWindowAddress); break;
-        case 119: prevent_input(ppCodeWindowAddress); break;
-        case 120: accept_input(ppCodeWindowAddress); break;
-        case 121: set_key(ppCodeWindowAddress); break;
-        case 122: add_to_pic(ppCodeWindowAddress); break;
-        case 123: add_to_pic_v(ppCodeWindowAddress); break;
-        case 124: status(ppCodeWindowAddress); break;
-        case 125: save_game(ppCodeWindowAddress); break;
-        case 126: restore_game(ppCodeWindowAddress); break;
-        case 127: init_disk(ppCodeWindowAddress); break;
-        case 128: restart_game(ppCodeWindowAddress); break;
-        case 129: show_obj(ppCodeWindowAddress); break;
-        case 130: random_num(ppCodeWindowAddress); break;
-        case 131: program_control(ppCodeWindowAddress); break;
-        case 132: player_control(ppCodeWindowAddress); break;
-        case 133: obj_status_v(ppCodeWindowAddress); break;
-        case 134: quit(ppCodeWindowAddress); break;
-        case 135: show_mem(ppCodeWindowAddress); break;
-        case 136: pause(ppCodeWindowAddress); break;
-        case 137: echo_line(ppCodeWindowAddress); break;
-        case 138: cancel_line(ppCodeWindowAddress); break;
-        case 139: init_joy(ppCodeWindowAddress); break;
-        case 140: toggle_monitor(ppCodeWindowAddress); break;
-        case 141: version(ppCodeWindowAddress); break;
-        case 142: script_size(ppCodeWindowAddress); break;
-        case 143: set_game_id(ppCodeWindowAddress); break;
-        case 144: log(ppCodeWindowAddress); break;
-        case 145: set_scan_start(ppCodeWindowAddress); break;
-        case 146: reset_scan_start(ppCodeWindowAddress); break;
-        case 147: reposition_to(ppCodeWindowAddress); break;
-        case 148: reposition_to_v(ppCodeWindowAddress); break;
-        case 149: trace_on(ppCodeWindowAddress); break;
-        case 150: trace_info(ppCodeWindowAddress); break;
-        case 151: print_at(ppCodeWindowAddress); break;
-        case 152: print_at_v(ppCodeWindowAddress); break;
-        case 153: discard_view_v(ppCodeWindowAddress); break;
-        case 154: clear_text_rect(ppCodeWindowAddress); break;
-        case 155: set_upper_left(ppCodeWindowAddress); break;
-        case 156: set_menu(ppCodeWindowAddress); break;
-        case 157: set_menu_item(ppCodeWindowAddress); break;
-        case 158: submit_menu(ppCodeWindowAddress); break;
-        case 159: enable_item(ppCodeWindowAddress); break;
-        case 160: disable_item(ppCodeWindowAddress); break;
-        case 161: menu_input(ppCodeWindowAddress); break;
-        case 162: show_obj_v(ppCodeWindowAddress); break;
-        case 163: open_dialogue(ppCodeWindowAddress); break;
-        case 164: close_dialogue(ppCodeWindowAddress); break;
-        case 165: mul_n(ppCodeWindowAddress); break;
-        case 166: mul_v(ppCodeWindowAddress); break;
-        case 167: div_n(ppCodeWindowAddress); break;
-        case 168: div_v(ppCodeWindowAddress); break;
-        case 169: close_window(ppCodeWindowAddress); break;
+        case 41: b2Set_view(ppCodeWindowAddress); break;
+        case 42: b2Set_view_v(ppCodeWindowAddress); break;
+        case 43: b2Set_loop(ppCodeWindowAddress); break;
+        case 44: b2Set_loop_v(ppCodeWindowAddress); break;
+        case 45: b2Fix_loop(ppCodeWindowAddress); break;
+        case 46: b2Release_loop(ppCodeWindowAddress); break;
+        case 47: b2Set_cel(ppCodeWindowAddress); break;
+        case 48: b2Set_cel_v(ppCodeWindowAddress); break;
+        case 49: b2Last_cel(ppCodeWindowAddress); break;
+        case 50: b2Current_cel(ppCodeWindowAddress); break;
+        case 51: b2Current_loop(ppCodeWindowAddress); break;
+        case 52: b2Current_view(ppCodeWindowAddress); break;
+        case 53: b2Number_of_loops(ppCodeWindowAddress); break;
+        case 54: b2Set_priority(ppCodeWindowAddress); break;
+        case 55: b2Set_priority_v(ppCodeWindowAddress); break;
+        case 56: b2Release_priority(ppCodeWindowAddress); break;
+        case 57: b2Get_priority(ppCodeWindowAddress); break;
+        case 58: b2Stop_update(ppCodeWindowAddress); break;
+        case 59: b2Start_update(ppCodeWindowAddress); break;
+        case 60: b2Force_update(ppCodeWindowAddress); break;
+        case 61: b2Ignore_horizon(ppCodeWindowAddress); break;
+        case 62: b2Observe_horizon(ppCodeWindowAddress); break;
+        case 63: b2Set_horizon(ppCodeWindowAddress); break;
+        case 64: b2Object_on_water(ppCodeWindowAddress); break;
+        case 65: b2Object_on_land(ppCodeWindowAddress); break;
+        case 66: b2Object_on_anything(ppCodeWindowAddress); break;
+        case 67: b2Ignore_objs(ppCodeWindowAddress); break;
+        case 68: b2Observe_objs(ppCodeWindowAddress); break;
+        case 69: b2Distance(ppCodeWindowAddress); break;
+        case 70: b2Stop_cycling(ppCodeWindowAddress); break;
+        case 71: b2Start_cycling(ppCodeWindowAddress); break;
+        case 72: b2Normal_cycle(ppCodeWindowAddress); break;
+        case 73: b2End_of_loop(ppCodeWindowAddress); break;
+        case 74: b2Reverse_cycle(ppCodeWindowAddress); break;
+        case 75: b2Reverse_loop(ppCodeWindowAddress); break;
+        case 76: b2Cycle_time(ppCodeWindowAddress); break;
+        case 77: b2Stop_motion(ppCodeWindowAddress); break;
+        case 78: b2Start_motion(ppCodeWindowAddress); break;
+        case 79: b2Step_size(ppCodeWindowAddress); break;
+        case 80: b2Step_time(ppCodeWindowAddress); break;
+        case 81: b2Move_obj(ppCodeWindowAddress); break;
+        case 82: b2Move_obj_v(ppCodeWindowAddress); break;
+        case 83: b2Follow_ego(ppCodeWindowAddress); break;
+        case 84: b2Wander(ppCodeWindowAddress); break;
+        case 85: b2Normal_motion(ppCodeWindowAddress); break;
+        case 86: b2Set_dir(ppCodeWindowAddress); break;
+        case 87: b2Get_dir(ppCodeWindowAddress); break;
+        case 88: b2Ignore_blocks(ppCodeWindowAddress); break;
+        case 89: b2Observe_blocks(ppCodeWindowAddress); break;
+        case 90: b2Block(ppCodeWindowAddress); break;
+        case 91: b2Unblock(ppCodeWindowAddress); break;
+        case 92: b2Get(ppCodeWindowAddress); break;
+        case 93: b2Get_v(ppCodeWindowAddress); break;
+        case 94: b2Drop(ppCodeWindowAddress); break;
+        case 95: b2Put(ppCodeWindowAddress); break;
+        case 96: b2Put_v(ppCodeWindowAddress); break;
+        case 97: b2Get_room_v(ppCodeWindowAddress); break;
+        case 98: b2Load_sound(ppCodeWindowAddress); break;
+        case 99: b2Play_sound(ppCodeWindowAddress); break;
+        case 100: b2Stop_sound(ppCodeWindowAddress); break;
+        case 101: b3Print(ppCodeWindowAddress); break;
+        case 102: b3Print_v(ppCodeWindowAddress); break;
+        case 103: b3Display(ppCodeWindowAddress); break;
+        case 104: b3Display_v(ppCodeWindowAddress); break;
+        case 105: b3Clear_lines(ppCodeWindowAddress); break;
+        case 106: b3Text_screen(ppCodeWindowAddress); break;
+        case 107: b3Graphics(ppCodeWindowAddress); break;
+        case 108: b3Set_cursor_char(ppCodeWindowAddress); break;
+        case 109: b3Set_text_attribute(ppCodeWindowAddress); break;
+        case 110: b3Shake_screen(ppCodeWindowAddress); break;
+        case 111: b3Configure_screen(ppCodeWindowAddress); break;
+        case 112: b3Status_line_on(ppCodeWindowAddress); break;
+        case 113: b3Status_line_off(ppCodeWindowAddress); break;
+        case 114: b3Set_string(ppCodeWindowAddress); break;
+        case 115: b3Get_string(ppCodeWindowAddress); break;
+        case 116: b3Word_to_string(ppCodeWindowAddress); break;
+        case 117: b3Parse(ppCodeWindowAddress); break;
+        case 118: b4Get_num(ppCodeWindowAddress); break;
+        case 119: b4Prevent_input(ppCodeWindowAddress); break;
+        case 120: b4Accept_input(ppCodeWindowAddress); break;
+        case 121: b4Set_key(ppCodeWindowAddress); break;
+        case 122: b4Add_to_pic(ppCodeWindowAddress); break;
+        case 123: b4Add_to_pic_v(ppCodeWindowAddress); break;
+        case 124: b4Status(ppCodeWindowAddress); break;
+        case 125: b4Save_game(ppCodeWindowAddress); break;
+        case 126: b4Restore_game(ppCodeWindowAddress); break;
+        case 127: break;
+        case 128: b4Restart_game(ppCodeWindowAddress); break;
+        case 129: b4Show_obj(ppCodeWindowAddress); break;
+        case 130: b4Random_num(ppCodeWindowAddress); break;
+        case 131: b4Program_control(ppCodeWindowAddress); break;
+        case 132: b4Player_control(ppCodeWindowAddress); break;
+        case 133: b4Obj_status_v(ppCodeWindowAddress); break;
+        case 134: b4Quit(ppCodeWindowAddress); break;
+        case 135: break;
+        case 136: b4Pause(ppCodeWindowAddress); break;
+        case 137: b4Echo_line(ppCodeWindowAddress); break;
+        case 138: b4Cancel_line(ppCodeWindowAddress); break;
+        case 139: b4Init_joy(ppCodeWindowAddress); break;
+        case 140: break;
+        case 141: b4Version(ppCodeWindowAddress); break;
+        case 142: b4Script_size(ppCodeWindowAddress); break;
+        case 143: b4Set_game_id(ppCodeWindowAddress); break;
+        case 144: b4Log(ppCodeWindowAddress); break;
+        case 145: b4Set_scan_start(ppCodeWindowAddress); break;
+        case 146: b4Reset_scan_start(ppCodeWindowAddress); break;
+        case 147: b4Reposition_to(ppCodeWindowAddress); break;
+        case 148: b4Reposition_to_v(ppCodeWindowAddress); break;
+        case 149: b4Trace_on(ppCodeWindowAddress); break;
+        case 150: b4Trace_info(ppCodeWindowAddress); break;
+        case 151: b4Print_at(ppCodeWindowAddress); break;
+        case 152: b4Print_at_v(ppCodeWindowAddress); break;
+        case 153: b4Discard_view_v(ppCodeWindowAddress); break;
+        case 154: b4Clear_text_rect(ppCodeWindowAddress); break;
+        case 155: b4Set_upper_left(ppCodeWindowAddress); break;
+        case 156: b4Set_menu(ppCodeWindowAddress); break;
+        case 157: b4Set_menu_item(ppCodeWindowAddress); break;
+        case 158:
+        {
+            b4Submit_menu(ppCodeWindowAddress);
+            printf("I am outter here");
+            break;
+        }
+        case 159: b4Enable_item(ppCodeWindowAddress); break;
+        case 160: b4Disable_item(ppCodeWindowAddress); break;
+        case 161: b4Menu_input(ppCodeWindowAddress); break;
+        case 162: b4Show_obj_v(ppCodeWindowAddress); break;
+        case 163: b4Open_dialogue(ppCodeWindowAddress); break;
+        case 164: b4Close_dialogue(ppCodeWindowAddress); break;
+        case 165: b4Mul_n(ppCodeWindowAddress); break;
+        case 166: b4Mul_v(ppCodeWindowAddress); break;
+        case 167: b4Div_n(ppCodeWindowAddress); break;
+        case 168: b4Div_v(ppCodeWindowAddress); break;
+        case 169: b4Close_window(ppCodeWindowAddress); break;
         case 170:  break;
         case 171:  break;
         case 172:  break;
@@ -2499,12 +2510,20 @@ void executeLogic(int logNum)
                 //*(code - 1), logNum, currentLogic.currentPoint);
             break;
         }
+
         RAM_BANK = currentLogicFile.codeBank;
+        printf("The bank was put back to %d \n", RAM_BANK);
 
         if (!lastCodeWasNonWindow)
         {
-            code += (codeWindowAddress - &codeWindow[0] + 1);
+#ifdef VERBOSE
+            printf("Now jumping (%p - %p - 1) = %p \n", codeWindowAddress, &codeWindow[0], (codeWindowAddress - &codeWindow[0] - 1));
+#endif // VERBOSE
+            code += (codeWindowAddress - &codeWindow[0]) - 1;
         }
+
+
+
         lastCodeWasNonWindow = FALSE;
 
         counter++;
