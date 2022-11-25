@@ -33,6 +33,7 @@ byte horizon;
 
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
+//#define VERBOSE
 
 const int TIMER_WAIT_MS = 50;
 
@@ -257,7 +258,9 @@ void main()
    while (TRUE) {
       /* Cycle initiator. Controlled by delay variable (var[10). */
       if (counter >= var[10]) {
+#ifdef VERBOSE
           printf("Interpret Runs");
+#endif // VERBOSE
           interpret();
         counter=0;
       }

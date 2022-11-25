@@ -142,8 +142,7 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 	RAM_BANK = DIRECTORY_BANK;
 
 	if ((fp = fopen(fName, "rb")) == NULL) {
-		printf("Could not find file : %s.\n", fName);
-		printf("Make sure you are in an AGI version 2 game directory.\n");
+		printf("no file : %s.\n", fName);
 		exit(0);
 	}
 
@@ -282,7 +281,9 @@ void loadAGIDirs()
 		loadAGIv3Dir();
 	}
 	else {
+#ifdef VERBOSE
 		printf("Loading Indexes");
+#endif // VERBOSE
 		loadAGIDir(0, "logdir", &numLogics);
 		loadAGIDir(1, "picdir", &numPictures);
 		loadAGIDir(2, "viewdir", &numViews);
@@ -387,7 +388,9 @@ boolean seekAndCheckSignature(char* fileName, AGIFilePosType* location)
 	signatureValidationPassed = signatureValidationPassed & currentByte == 0x34;
 
 	if (!signatureValidationPassed) {  /* All AGI data files start with 0x1234 */
+#ifdef VERBOSE
 		printf("Fail Sig. Validation %s.\n", location->fileNum);
+#endif // VERBOSE
 		result = FALSE;
 	}
 
@@ -467,7 +470,9 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	char fileName[10];
 
 	if (location->filePos == EMPTY) {
+#ifdef VERBOSE
 		printf("Could not find requested AGI file, as the filePos is empty.\n");
+#endif // VERBOSE
 		exit(0);
 	}
 

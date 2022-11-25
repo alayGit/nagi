@@ -1,6 +1,7 @@
 #ifndef _HELPERS_H_
 #define _HELPERS_H_
 #include "general.h"
+#include <cx16.h>
 
 #define ASCIIA 65
 #define ASCIIZ 90
@@ -17,7 +18,13 @@
 #define DIFF_ASCII_PETSCII_CAPS -128
 #define DIFF_ASCII_PETSCII_LOWER -32
 
+typedef void (*fnTrampoline_1)(void* data);
+
 byte convertAsciiByteToPetsciiByte(byte* toConvert);
+
+extern void trampoline_1(fnTrampoline_1 func, void* data, byte bank);
+
+
 
 
 #endif

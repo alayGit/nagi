@@ -93,7 +93,8 @@ void bankedRamInit()
 		(int) _BANKRAM01_SIZE__,
 		(int) _BANKRAM02_SIZE__,
 		(int)_BANKRAM03_SIZE__,
-		(int)_BANKRAM04_SIZE__
+		(int)_BANKRAM04_SIZE__,
+		(int)_BANKRAM05_SIZE__
 	};
 
 
@@ -126,7 +127,9 @@ void bankedRamInit()
 			fclose(fp);
 		}
 		else {
+#ifdef VERBOSE
 			printf("Cannot find file");
+#endif // VERBOSE
 		}
 	}
 	RAM_BANK = previousBank;

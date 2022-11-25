@@ -22,6 +22,7 @@
 #include "logic.h"
 #include "memoryManager.h"
 #include "stub.h"
+#include "helpers.h"
 
 #define HIGHEST_BANK1_FUNC 40
 #define HIGHEST_BANK2_FUNC 100
@@ -69,7 +70,9 @@ void b1AddLogLine(char* message)
     FILE* fp;
 
     if ((fp = fopen("log.txt", "a")) == NULL) {
+#ifdef VERBOSE
         fprintf(stderr, "Error opening log file.");
+#endif // VERBOSE
         return;
     }
 
@@ -1642,6 +1645,7 @@ void b4Version(byte** data) // 0, 0x00
 
 void b4Script_size(byte** data) // 1, 0x00 
 {
+    printf("The script size is %d", **data);
     (*data)++;  /* Ignore the script size. Not important for this interpreter */
 }
 
@@ -1922,7 +1926,7 @@ void b4Set_menu_item(byte** data) // 2, 0x00
 
 void b4Submit_menu(byte** data) // 0, 0x00 
 {
-    printf("Hello");
+
 }
 
 void b4Enable_item(byte** data) // 1, 0x00 
@@ -1981,6 +1985,227 @@ void b4Div_v(byte** data) // 2, 0xC0
 void b4Close_window(byte** data) // 0, 0x00 
 {
 
+}
+
+
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM05")
+boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppCodeWindowAddress, byte bank)
+{
+    switch (code)
+    {
+    case 0: /* return */
+        return FALSE;
+        break;
+    case 1: trampoline_1(&b1Increment,ppCodeWindowAddress, bank); break;
+    case 2: b1Decrement(ppCodeWindowAddress); break;
+    case 3: b1Assignn(ppCodeWindowAddress); break;
+    case 4: b1Assignv(ppCodeWindowAddress); break;
+    case 5: b1Addn(ppCodeWindowAddress); break;
+    case 6: b1Addv(ppCodeWindowAddress); break;
+    case 7: b1Subn(ppCodeWindowAddress); break;
+    case 8: b1Subv(ppCodeWindowAddress); break;
+    case 9: b1Lindirectv(ppCodeWindowAddress); break;
+    case 10: b1Rindirect(ppCodeWindowAddress); break;
+    case 11: b1Lindirectn(ppCodeWindowAddress); break;
+    case 12: b1Set(ppCodeWindowAddress); break;
+    case 13: b1Reset(ppCodeWindowAddress); break;
+    case 14: b1Toggle(ppCodeWindowAddress); break;
+    case 15: b1Set_v(ppCodeWindowAddress); break;
+    case 16: b1Reset_v(ppCodeWindowAddress); break;
+    case 17: b1Toggle_v(ppCodeWindowAddress); break;
+    case 18:
+        b1New_room(ppCodeWindowAddress);
+        exitAllLogics = TRUE;
+        return FALSE;
+        break;
+    case 19:
+        b1New_room_v(ppCodeWindowAddress);
+        exitAllLogics = TRUE;
+        return FALSE;
+        break;
+    case 20: b1Load_logics(ppCodeWindowAddress); break;
+    case 21: b1Load_logics_v(ppCodeWindowAddress); break;
+    case 22:
+        b1Call(ppCodeWindowAddress);
+        /* The currentLog variable needs to be restored */
+        *currentLog = logNum;
+        if (exitAllLogics) return FALSE;
+#ifdef DEBUG
+        sprintf(debugString, "LOGIC.%d:       ", currentLog);
+        drawBigString(screen, debugString, 0, 384, 0, 7);
+#endif
+        break;
+    case 23:
+        b1Call_v(ppCodeWindowAddress);
+        /* The currentLog variable needs to be restored */
+        *currentLog = logNum;
+        if (exitAllLogics) return FALSE;
+#ifdef DEBUG
+        sprintf(debugString, "LOGIC.%d:       ", currentLog);
+        drawBigString(screen, debugString, 0, 384, 0, 7);
+#endif
+        break;
+    case 24: b1Load_pic(ppCodeWindowAddress); break;
+    case 25: b1Draw_pic(ppCodeWindowAddress); break;
+    case 26: b1Show_pic(ppCodeWindowAddress); break;
+    case 27: b1Discard_pic(ppCodeWindowAddress); break;
+    case 28: b1Overlay_pic(ppCodeWindowAddress); break;
+    case 29: b1Show_pri_screen(ppCodeWindowAddress); break;
+    case 30: b1Load_view(ppCodeWindowAddress); break;
+    case 31: b1Load_view_v(ppCodeWindowAddress); break;
+    case 32: b1Discard_view(ppCodeWindowAddress); break;
+    case 33: b1Animate_obj(ppCodeWindowAddress); break;
+    case 34: b1Unanimate_all(ppCodeWindowAddress); break;
+    case 35: b1Draw(ppCodeWindowAddress); break;
+    case 36: b1Erase(ppCodeWindowAddress); break;
+    case 37: b1Position(ppCodeWindowAddress); break;
+    case 38: b1Position_v(ppCodeWindowAddress); break;
+    case 39: b1Get_posn(ppCodeWindowAddress); break;
+    case 40: b1Reposition(ppCodeWindowAddress); break;
+    case 41: b2Set_view(ppCodeWindowAddress); break;
+    case 42: b2Set_view_v(ppCodeWindowAddress); break;
+    case 43: b2Set_loop(ppCodeWindowAddress); break;
+    case 44: b2Set_loop_v(ppCodeWindowAddress); break;
+    case 45: b2Fix_loop(ppCodeWindowAddress); break;
+    case 46: b2Release_loop(ppCodeWindowAddress); break;
+    case 47: b2Set_cel(ppCodeWindowAddress); break;
+    case 48: b2Set_cel_v(ppCodeWindowAddress); break;
+    case 49: b2Last_cel(ppCodeWindowAddress); break;
+    case 50: b2Current_cel(ppCodeWindowAddress); break;
+    case 51: b2Current_loop(ppCodeWindowAddress); break;
+    case 52: b2Current_view(ppCodeWindowAddress); break;
+    case 53: b2Number_of_loops(ppCodeWindowAddress); break;
+    case 54: b2Set_priority(ppCodeWindowAddress); break;
+    case 55: b2Set_priority_v(ppCodeWindowAddress); break;
+    case 56: b2Release_priority(ppCodeWindowAddress); break;
+    case 57: b2Get_priority(ppCodeWindowAddress); break;
+    case 58: b2Stop_update(ppCodeWindowAddress); break;
+    case 59: b2Start_update(ppCodeWindowAddress); break;
+    case 60: b2Force_update(ppCodeWindowAddress); break;
+    case 61: b2Ignore_horizon(ppCodeWindowAddress); break;
+    case 62: b2Observe_horizon(ppCodeWindowAddress); break;
+    case 63: b2Set_horizon(ppCodeWindowAddress); break;
+    case 64: b2Object_on_water(ppCodeWindowAddress); break;
+    case 65: b2Object_on_land(ppCodeWindowAddress); break;
+    case 66: b2Object_on_anything(ppCodeWindowAddress); break;
+    case 67: b2Ignore_objs(ppCodeWindowAddress); break;
+    case 68: b2Observe_objs(ppCodeWindowAddress); break;
+    case 69: b2Distance(ppCodeWindowAddress); break;
+    case 70: b2Stop_cycling(ppCodeWindowAddress); break;
+    case 71: b2Start_cycling(ppCodeWindowAddress); break;
+    case 72: b2Normal_cycle(ppCodeWindowAddress); break;
+    case 73: b2End_of_loop(ppCodeWindowAddress); break;
+    case 74: b2Reverse_cycle(ppCodeWindowAddress); break;
+    case 75: b2Reverse_loop(ppCodeWindowAddress); break;
+    case 76: b2Cycle_time(ppCodeWindowAddress); break;
+    case 77: b2Stop_motion(ppCodeWindowAddress); break;
+    case 78: b2Start_motion(ppCodeWindowAddress); break;
+    case 79: b2Step_size(ppCodeWindowAddress); break;
+    case 80: b2Step_time(ppCodeWindowAddress); break;
+    case 81: b2Move_obj(ppCodeWindowAddress); break;
+    case 82: b2Move_obj_v(ppCodeWindowAddress); break;
+    case 83: b2Follow_ego(ppCodeWindowAddress); break;
+    case 84: b2Wander(ppCodeWindowAddress); break;
+    case 85: b2Normal_motion(ppCodeWindowAddress); break;
+    case 86: b2Set_dir(ppCodeWindowAddress); break;
+    case 87: b2Get_dir(ppCodeWindowAddress); break;
+    case 88: b2Ignore_blocks(ppCodeWindowAddress); break;
+    case 89: b2Observe_blocks(ppCodeWindowAddress); break;
+    case 90: b2Block(ppCodeWindowAddress); break;
+    case 91: b2Unblock(ppCodeWindowAddress); break;
+    case 92: b2Get(ppCodeWindowAddress); break;
+    case 93: b2Get_v(ppCodeWindowAddress); break;
+    case 94: b2Drop(ppCodeWindowAddress); break;
+    case 95: b2Put(ppCodeWindowAddress); break;
+    case 96: b2Put_v(ppCodeWindowAddress); break;
+    case 97: b2Get_room_v(ppCodeWindowAddress); break;
+    case 98: b2Load_sound(ppCodeWindowAddress); break;
+    case 99: b2Play_sound(ppCodeWindowAddress); break;
+    case 100: b2Stop_sound(ppCodeWindowAddress); break;
+    case 101: b3Print(ppCodeWindowAddress); break;
+    case 102: b3Print_v(ppCodeWindowAddress); break;
+    case 103: b3Display(ppCodeWindowAddress); break;
+    case 104: b3Display_v(ppCodeWindowAddress); break;
+    case 105: b3Clear_lines(ppCodeWindowAddress); break;
+    case 106: b3Text_screen(ppCodeWindowAddress); break;
+    case 107: b3Graphics(ppCodeWindowAddress); break;
+    case 108: b3Set_cursor_char(ppCodeWindowAddress); break;
+    case 109: b3Set_text_attribute(ppCodeWindowAddress); break;
+    case 110: b3Shake_screen(ppCodeWindowAddress); break;
+    case 111: b3Configure_screen(ppCodeWindowAddress); break;
+    case 112: b3Status_line_on(ppCodeWindowAddress); break;
+    case 113: b3Status_line_off(ppCodeWindowAddress); break;
+    case 114: b3Set_string(ppCodeWindowAddress); break;
+    case 115: b3Get_string(ppCodeWindowAddress); break;
+    case 116: b3Word_to_string(ppCodeWindowAddress); break;
+    case 117: b3Parse(ppCodeWindowAddress); break;
+    case 118: b4Get_num(ppCodeWindowAddress); break;
+    case 119: b4Prevent_input(ppCodeWindowAddress); break;
+    case 120: b4Accept_input(ppCodeWindowAddress); break;
+    case 121: b4Set_key(ppCodeWindowAddress); break;
+    case 122: b4Add_to_pic(ppCodeWindowAddress); break;
+    case 123: b4Add_to_pic_v(ppCodeWindowAddress); break;
+    case 124: b4Status(ppCodeWindowAddress); break;
+    case 125: b4Save_game(ppCodeWindowAddress); break;
+    case 126: b4Restore_game(ppCodeWindowAddress); break;
+    case 127: break;
+    case 128: b4Restart_game(ppCodeWindowAddress); break;
+    case 129: b4Show_obj(ppCodeWindowAddress); break;
+    case 130: b4Random_num(ppCodeWindowAddress); break;
+    case 131: b4Program_control(ppCodeWindowAddress); break;
+    case 132: b4Player_control(ppCodeWindowAddress); break;
+    case 133: b4Obj_status_v(ppCodeWindowAddress); break;
+    case 134: b4Quit(ppCodeWindowAddress); break;
+    case 135: break;
+    case 136: b4Pause(ppCodeWindowAddress); break;
+    case 137: b4Echo_line(ppCodeWindowAddress); break;
+    case 138: b4Cancel_line(ppCodeWindowAddress); break;
+    case 139: b4Init_joy(ppCodeWindowAddress); break;
+    case 140: break;
+    case 141: b4Version(ppCodeWindowAddress); break;
+    case 142: trampoline_1(&b4Script_size, ppCodeWindowAddress, bank); break;
+    case 143: b4Set_game_id(ppCodeWindowAddress); break;
+    case 144: b4Log(ppCodeWindowAddress); break;
+    case 145: b4Set_scan_start(ppCodeWindowAddress); break;
+    case 146: b4Reset_scan_start(ppCodeWindowAddress); break;
+    case 147: b4Reposition_to(ppCodeWindowAddress); break;
+    case 148: b4Reposition_to_v(ppCodeWindowAddress); break;
+    case 149: b4Trace_on(ppCodeWindowAddress); break;
+    case 150: b4Trace_info(ppCodeWindowAddress); break;
+    case 151: b4Print_at(ppCodeWindowAddress); break;
+    case 152: b4Print_at_v(ppCodeWindowAddress); break;
+    case 153: b4Discard_view_v(ppCodeWindowAddress); break;
+    case 154: b4Clear_text_rect(ppCodeWindowAddress); break;
+    case 155: b4Set_upper_left(ppCodeWindowAddress); break;
+    case 156: b4Set_menu(ppCodeWindowAddress); break;
+    case 157: b4Set_menu_item(ppCodeWindowAddress); break;
+    case 158: b4Submit_menu(ppCodeWindowAddress); break;
+    case 159: b4Enable_item(ppCodeWindowAddress); break;
+    case 160: b4Disable_item(ppCodeWindowAddress); break;
+    case 161: b4Menu_input(ppCodeWindowAddress); break;
+    case 162: b4Show_obj_v(ppCodeWindowAddress); break;
+    case 163: b4Open_dialogue(ppCodeWindowAddress); break;
+    case 164: b4Close_dialogue(ppCodeWindowAddress); break;
+    case 165: b4Mul_n(ppCodeWindowAddress); break;
+    case 166: b4Mul_v(ppCodeWindowAddress); break;
+    case 167: b4Div_n(ppCodeWindowAddress); break;
+    case 168: b4Div_v(ppCodeWindowAddress); break;
+    case 169: b4Close_window(ppCodeWindowAddress); break;
+    case 170:  break;
+    case 171:  break;
+    case 172:  break;
+    case 173:  break;
+    case 174:  break;
+    case 175:  break;
+    case 176:  break;
+    case 177:  break;
+    case 178:  break;
+    case 179:  break;
+    case 180:  break;
+    case 181:  break;
+    }
+    exit(0);
 }
 
 #pragma code-name (pop)
@@ -2171,6 +2396,7 @@ void executeLogic(int logNum)
     byte codeWindow[CODE_WINDOW_SIZE];
     byte* codeWindowAddress;
     byte** ppCodeWindowAddress;
+    byte instructionCodeBank;
     boolean lastCodeWasNonWindow = FALSE;
 
     //Temp
@@ -2252,267 +2478,65 @@ void executeLogic(int logNum)
             drawBigString(screen, debugString, 0, 400, 0, 7);
             if ((readkey() & 0xff) == 'q') closedown();
         }
-#endif       
+#endif  
+#ifdef VERBOSE
         printf("\n The code is %d, on bank %d address, %p \n", *code, RAM_BANK, code);
+#endif // VERBOSE
         codeAtTimeOfLastBankSwitch = *code;
-        RAM_BANK = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
+       instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
+
 #ifdef VERBOSE
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
 #endif // VERBOSE 
 
-        code++;
-        switch (codeAtTimeOfLastBankSwitch) {
-        case 0: /* return */
-            stillExecuting = FALSE;
-            break;
-        case 1: b1Increment(ppCodeWindowAddress); break;
-        case 2: b1Decrement(ppCodeWindowAddress); break;
-        case 3: b1Assignn(ppCodeWindowAddress); break;
-        case 4: b1Assignv(ppCodeWindowAddress); break;
-        case 5: b1Addn(ppCodeWindowAddress); break;
-        case 6: b1Addv(ppCodeWindowAddress); break;
-        case 7: b1Subn(ppCodeWindowAddress); break;
-        case 8: b1Subv(ppCodeWindowAddress); break;
-        case 9: b1Lindirectv(ppCodeWindowAddress); break;
-        case 10: b1Rindirect(ppCodeWindowAddress); break;
-        case 11: b1Lindirectn(ppCodeWindowAddress); break;
-        case 12: b1Set(ppCodeWindowAddress); break;
-        case 13: b1Reset(ppCodeWindowAddress); break;
-        case 14: b1Toggle(ppCodeWindowAddress); break;
-        case 15: b1Set_v(ppCodeWindowAddress); break;
-        case 16: b1Reset_v(ppCodeWindowAddress); break;
-        case 17: b1Toggle_v(ppCodeWindowAddress); break;
-        case 18:
-            b1New_room(ppCodeWindowAddress);
-            exitAllLogics = TRUE;
-            stillExecuting = FALSE;
-            break;
-        case 19:
-            b1New_room_v(ppCodeWindowAddress);
-            exitAllLogics = TRUE;
-            stillExecuting = FALSE;
-            break;
-        case 20: b1Load_logics(ppCodeWindowAddress); break;
-        case 21: b1Load_logics_v(ppCodeWindowAddress); break;
-        case 22:
-            if (counter == 33)
-            {
-                printf("Made it here and about to execute %d on bank %d with address %p", codeAtTimeOfLastBankSwitch, RAM_BANK, *ppCodeWindowAddress);
-            }
-            b1Call(ppCodeWindowAddress);
-            /* The currentLog variable needs to be restored */
-            currentLog = logNum;
-            if (exitAllLogics) stillExecuting = FALSE;
-#ifdef DEBUG
-            sprintf(debugString, "LOGIC.%d:       ", currentLog);
-            drawBigString(screen, debugString, 0, 384, 0, 7);
-#endif
-            break;
-        case 23:
-            b1Call_v(ppCodeWindowAddress);
-            /* The currentLog variable needs to be restored */
-            currentLog = logNum;
-            if (exitAllLogics) stillExecuting = FALSE;
-#ifdef DEBUG
-            sprintf(debugString, "LOGIC.%d:       ", currentLog);
-            drawBigString(screen, debugString, 0, 384, 0, 7);
-#endif
-            break;
-        case 24: b1Load_pic(ppCodeWindowAddress); break;
-        case 25: b1Draw_pic(ppCodeWindowAddress); break;
-        case 26: b1Show_pic(ppCodeWindowAddress); break;
-        case 27: b1Discard_pic(ppCodeWindowAddress); break;
-        case 28: b1Overlay_pic(ppCodeWindowAddress); break;
-        case 29: b1Show_pri_screen(ppCodeWindowAddress); break;
-        case 30: b1Load_view(ppCodeWindowAddress); break;
-        case 31: b1Load_view_v(ppCodeWindowAddress); break;
-        case 32: b1Discard_view(ppCodeWindowAddress); break;
-        case 33: b1Animate_obj(ppCodeWindowAddress); break;
-        case 34: b1Unanimate_all(ppCodeWindowAddress); break;
-        case 35: b1Draw(ppCodeWindowAddress); break;
-        case 36: b1Erase(ppCodeWindowAddress); break;
-        case 37: b1Position(ppCodeWindowAddress); break;
-        case 38: b1Position_v(ppCodeWindowAddress); break;
-        case 39: b1Get_posn(ppCodeWindowAddress); break;
-        case 40: b1Reposition(ppCodeWindowAddress); break;
-        case 41: b2Set_view(ppCodeWindowAddress); break;
-        case 42: b2Set_view_v(ppCodeWindowAddress); break;
-        case 43: b2Set_loop(ppCodeWindowAddress); break;
-        case 44: b2Set_loop_v(ppCodeWindowAddress); break;
-        case 45: b2Fix_loop(ppCodeWindowAddress); break;
-        case 46: b2Release_loop(ppCodeWindowAddress); break;
-        case 47: b2Set_cel(ppCodeWindowAddress); break;
-        case 48: b2Set_cel_v(ppCodeWindowAddress); break;
-        case 49: b2Last_cel(ppCodeWindowAddress); break;
-        case 50: b2Current_cel(ppCodeWindowAddress); break;
-        case 51: b2Current_loop(ppCodeWindowAddress); break;
-        case 52: b2Current_view(ppCodeWindowAddress); break;
-        case 53: b2Number_of_loops(ppCodeWindowAddress); break;
-        case 54: b2Set_priority(ppCodeWindowAddress); break;
-        case 55: b2Set_priority_v(ppCodeWindowAddress); break;
-        case 56: b2Release_priority(ppCodeWindowAddress); break;
-        case 57: b2Get_priority(ppCodeWindowAddress); break;
-        case 58: b2Stop_update(ppCodeWindowAddress); break;
-        case 59: b2Start_update(ppCodeWindowAddress); break;
-        case 60: b2Force_update(ppCodeWindowAddress); break;
-        case 61: b2Ignore_horizon(ppCodeWindowAddress); break;
-        case 62: b2Observe_horizon(ppCodeWindowAddress); break;
-        case 63: b2Set_horizon(ppCodeWindowAddress); break;
-        case 64: b2Object_on_water(ppCodeWindowAddress); break;
-        case 65: b2Object_on_land(ppCodeWindowAddress); break;
-        case 66: b2Object_on_anything(ppCodeWindowAddress); break;
-        case 67: b2Ignore_objs(ppCodeWindowAddress); break;
-        case 68: b2Observe_objs(ppCodeWindowAddress); break;
-        case 69: b2Distance(ppCodeWindowAddress); break;
-        case 70: b2Stop_cycling(ppCodeWindowAddress); break;
-        case 71: b2Start_cycling(ppCodeWindowAddress); break;
-        case 72: b2Normal_cycle(ppCodeWindowAddress); break;
-        case 73: b2End_of_loop(ppCodeWindowAddress); break;
-        case 74: b2Reverse_cycle(ppCodeWindowAddress); break;
-        case 75: b2Reverse_loop(ppCodeWindowAddress); break;
-        case 76: b2Cycle_time(ppCodeWindowAddress); break;
-        case 77: b2Stop_motion(ppCodeWindowAddress); break;
-        case 78: b2Start_motion(ppCodeWindowAddress); break;
-        case 79: b2Step_size(ppCodeWindowAddress); break;
-        case 80: b2Step_time(ppCodeWindowAddress); break;
-        case 81: b2Move_obj(ppCodeWindowAddress); break;
-        case 82: b2Move_obj_v(ppCodeWindowAddress); break;
-        case 83: b2Follow_ego(ppCodeWindowAddress); break;
-        case 84: b2Wander(ppCodeWindowAddress); break;
-        case 85: b2Normal_motion(ppCodeWindowAddress); break;
-        case 86: b2Set_dir(ppCodeWindowAddress); break;
-        case 87: b2Get_dir(ppCodeWindowAddress); break;
-        case 88: b2Ignore_blocks(ppCodeWindowAddress); break;
-        case 89: b2Observe_blocks(ppCodeWindowAddress); break;
-        case 90: b2Block(ppCodeWindowAddress); break;
-        case 91: b2Unblock(ppCodeWindowAddress); break;
-        case 92: b2Get(ppCodeWindowAddress); break;
-        case 93: b2Get_v(ppCodeWindowAddress); break;
-        case 94: b2Drop(ppCodeWindowAddress); break;
-        case 95: b2Put(ppCodeWindowAddress); break;
-        case 96: b2Put_v(ppCodeWindowAddress); break;
-        case 97: b2Get_room_v(ppCodeWindowAddress); break;
-        case 98: b2Load_sound(ppCodeWindowAddress); break;
-        case 99: b2Play_sound(ppCodeWindowAddress); break;
-        case 100: b2Stop_sound(ppCodeWindowAddress); break;
-        case 101: b3Print(ppCodeWindowAddress); break;
-        case 102: b3Print_v(ppCodeWindowAddress); break;
-        case 103: b3Display(ppCodeWindowAddress); break;
-        case 104: b3Display_v(ppCodeWindowAddress); break;
-        case 105: b3Clear_lines(ppCodeWindowAddress); break;
-        case 106: b3Text_screen(ppCodeWindowAddress); break;
-        case 107: b3Graphics(ppCodeWindowAddress); break;
-        case 108: b3Set_cursor_char(ppCodeWindowAddress); break;
-        case 109: b3Set_text_attribute(ppCodeWindowAddress); break;
-        case 110: b3Shake_screen(ppCodeWindowAddress); break;
-        case 111: b3Configure_screen(ppCodeWindowAddress); break;
-        case 112: b3Status_line_on(ppCodeWindowAddress); break;
-        case 113: b3Status_line_off(ppCodeWindowAddress); break;
-        case 114: b3Set_string(ppCodeWindowAddress); break;
-        case 115: b3Get_string(ppCodeWindowAddress); break;
-        case 116: b3Word_to_string(ppCodeWindowAddress); break;
-        case 117: b3Parse(ppCodeWindowAddress); break;
-        case 118: b4Get_num(ppCodeWindowAddress); break;
-        case 119: b4Prevent_input(ppCodeWindowAddress); break;
-        case 120: b4Accept_input(ppCodeWindowAddress); break;
-        case 121: b4Set_key(ppCodeWindowAddress); break;
-        case 122: b4Add_to_pic(ppCodeWindowAddress); break;
-        case 123: b4Add_to_pic_v(ppCodeWindowAddress); break;
-        case 124: b4Status(ppCodeWindowAddress); break;
-        case 125: b4Save_game(ppCodeWindowAddress); break;
-        case 126: b4Restore_game(ppCodeWindowAddress); break;
-        case 127: break;
-        case 128: b4Restart_game(ppCodeWindowAddress); break;
-        case 129: b4Show_obj(ppCodeWindowAddress); break;
-        case 130: b4Random_num(ppCodeWindowAddress); break;
-        case 131: b4Program_control(ppCodeWindowAddress); break;
-        case 132: b4Player_control(ppCodeWindowAddress); break;
-        case 133: b4Obj_status_v(ppCodeWindowAddress); break;
-        case 134: b4Quit(ppCodeWindowAddress); break;
-        case 135: break;
-        case 136: b4Pause(ppCodeWindowAddress); break;
-        case 137: b4Echo_line(ppCodeWindowAddress); break;
-        case 138: b4Cancel_line(ppCodeWindowAddress); break;
-        case 139: b4Init_joy(ppCodeWindowAddress); break;
-        case 140: break;
-        case 141: b4Version(ppCodeWindowAddress); break;
-        case 142: b4Script_size(ppCodeWindowAddress); break;
-        case 143: b4Set_game_id(ppCodeWindowAddress); break;
-        case 144: b4Log(ppCodeWindowAddress); break;
-        case 145: b4Set_scan_start(ppCodeWindowAddress); break;
-        case 146: b4Reset_scan_start(ppCodeWindowAddress); break;
-        case 147: b4Reposition_to(ppCodeWindowAddress); break;
-        case 148: b4Reposition_to_v(ppCodeWindowAddress); break;
-        case 149: b4Trace_on(ppCodeWindowAddress); break;
-        case 150: b4Trace_info(ppCodeWindowAddress); break;
-        case 151: b4Print_at(ppCodeWindowAddress); break;
-        case 152: b4Print_at_v(ppCodeWindowAddress); break;
-        case 153: b4Discard_view_v(ppCodeWindowAddress); break;
-        case 154: b4Clear_text_rect(ppCodeWindowAddress); break;
-        case 155: b4Set_upper_left(ppCodeWindowAddress); break;
-        case 156: b4Set_menu(ppCodeWindowAddress); break;
-        case 157: b4Set_menu_item(ppCodeWindowAddress); break;
-        case 158:
+
+ /*       if (counter == 4)
         {
-            b4Submit_menu(ppCodeWindowAddress);
-            printf("I am outter here");
-            break;
+            exit(0);
+        }*/
+
+        if (*code < 0xfe)
+        {
+            code++;
+            RAM_BANK = INSTRUCTION_HANDLER_BANK;
+            b5instructionHandler(codeAtTimeOfLastBankSwitch, &currentLog, logNum, ppCodeWindowAddress, instructionCodeBank);
+            RAM_BANK = currentLogicFile.codeBank;
         }
-        case 159: b4Enable_item(ppCodeWindowAddress); break;
-        case 160: b4Disable_item(ppCodeWindowAddress); break;
-        case 161: b4Menu_input(ppCodeWindowAddress); break;
-        case 162: b4Show_obj_v(ppCodeWindowAddress); break;
-        case 163: b4Open_dialogue(ppCodeWindowAddress); break;
-        case 164: b4Close_dialogue(ppCodeWindowAddress); break;
-        case 165: b4Mul_n(ppCodeWindowAddress); break;
-        case 166: b4Mul_v(ppCodeWindowAddress); break;
-        case 167: b4Div_n(ppCodeWindowAddress); break;
-        case 168: b4Div_v(ppCodeWindowAddress); break;
-        case 169: b4Close_window(ppCodeWindowAddress); break;
-        case 170:  break;
-        case 171:  break;
-        case 172:  break;
-        case 173:  break;
-        case 174:  break;
-        case 175:  break;
-        case 176:  break;
-        case 177:  break;
-        case 178:  break;
-        case 179:  break;
-        case 180:  break;
-        case 181:  break;
-
-        case 0xfe: /* Unconditional branch: else, goto. */
+        else {
+            switch (codeAtTimeOfLastBankSwitch) {
+            case 0xfe: /* Unconditional branch: else, goto. */
+                code++;
 #ifdef DEBUG
-            sprintf(debugString, "(%d) else                           ", currentLogic.currentPoint);
-            drawBigString(screen, debugString, 0, 400, 0, 7);
-            if ((readkey() & 0xff) == 'q') closedown();
+                sprintf(debugString, "(%d) else                           ", currentLogic.currentPoint);
+                drawBigString(screen, debugString, 0, 400, 0, 7);
+                if ((readkey() & 0xff) == 'q') closedown();
 #endif
-            lastCodeWasNonWindow = TRUE;
-            b1 = *code++;
-            b2 = *code++;
-            disp = (b2 << 8) | b1;  /* Should be signed 16 bit */
-            code += disp;
-            break;
+                lastCodeWasNonWindow = TRUE;
+                b1 = *code++;
+                b2 = *code++;
+                disp = (b2 << 8) | b1;  /* Should be signed 16 bit */
+                code += disp;
+                break;
 
-        case 0xff: /* Conditional branch: if */
+            case 0xff: /* Conditional branch: if */
+                code++;
 #ifdef DEBUG
-            sprintf(debugString, "(%d) if                             ", currentLogic.currentPoint);
-            drawBigString(screen, debugString, 0, 400, 0, 7);
-            if ((readkey() & 0xff) == 'q') closedown();
+                sprintf(debugString, "(%d) if                             ", currentLogic.currentPoint);
+                drawBigString(screen, debugString, 0, 400, 0, 7);
+                if ((readkey() & 0xff) == 'q') closedown();
 #endif
-            lastCodeWasNonWindow = TRUE;
-            ifHandler(&code, currentLogicFile.codeBank);
-            break;
+                lastCodeWasNonWindow = TRUE;
+                ifHandler(&code, currentLogicFile.codeBank);
+                break;
 
-        default:    /* Error has occurred */
-            ////lprintf("catastrophe: Illegal action [%d], logic %d, posn %d.",
-                //*(code - 1), logNum, currentLogic.currentPoint);
-            break;
+            default:    /* Error has occurred */
+                ////lprintf("catastrophe: Illegal action [%d], logic %d, posn %d.",
+                    //*(code - 1), logNum, currentLogic.currentPoint);
+                break;
+            }
         }
 
         RAM_BANK = currentLogicFile.codeBank;
-        printf("The bank was put back to %d \n", RAM_BANK);
 
         if (!lastCodeWasNonWindow)
         {

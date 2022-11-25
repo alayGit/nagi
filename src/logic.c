@@ -124,12 +124,16 @@ void discardLogicFile(int logFileNum)
 		logicData = logics[logFileNum].data;
 		if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->messages, logicData->messageBank))
 		{
+#ifdef VERBOSE
 			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+#endif // VERBOSE
 		}
 
 		if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->logicCode, logicData->codeBank))
 		{
+#ifdef VERBOSE
 			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+#endif
 		}
 
 		logics[logFileNum].loaded = FALSE;
