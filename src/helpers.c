@@ -19,3 +19,14 @@ void trampoline_1(fnTrampoline_1 func, void* data, byte bank)
 	func(data);
 	RAM_BANK = previousRamBank;
 }
+
+byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank)
+{
+	byte returnVal;
+	byte previousRamBank = RAM_BANK;
+	RAM_BANK = bank;
+	returnVal = func(data);
+	RAM_BANK = previousRamBank;
+
+	return returnVal;
+}

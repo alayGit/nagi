@@ -1645,7 +1645,6 @@ void b4Version(byte** data) // 0, 0x00
 
 void b4Script_size(byte** data) // 1, 0x00 
 {
-    printf("The script size is %d", **data);
     (*data)++;  /* Ignore the script size. Not important for this interpreter */
 }
 
@@ -1998,36 +1997,36 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
         return FALSE;
         break;
     case 1: trampoline_1(&b1Increment,ppCodeWindowAddress, bank); break;
-    case 2: b1Decrement(ppCodeWindowAddress); break;
-    case 3: b1Assignn(ppCodeWindowAddress); break;
-    case 4: b1Assignv(ppCodeWindowAddress); break;
-    case 5: b1Addn(ppCodeWindowAddress); break;
-    case 6: b1Addv(ppCodeWindowAddress); break;
-    case 7: b1Subn(ppCodeWindowAddress); break;
-    case 8: b1Subv(ppCodeWindowAddress); break;
-    case 9: b1Lindirectv(ppCodeWindowAddress); break;
-    case 10: b1Rindirect(ppCodeWindowAddress); break;
-    case 11: b1Lindirectn(ppCodeWindowAddress); break;
-    case 12: b1Set(ppCodeWindowAddress); break;
-    case 13: b1Reset(ppCodeWindowAddress); break;
-    case 14: b1Toggle(ppCodeWindowAddress); break;
-    case 15: b1Set_v(ppCodeWindowAddress); break;
-    case 16: b1Reset_v(ppCodeWindowAddress); break;
-    case 17: b1Toggle_v(ppCodeWindowAddress); break;
+    case 2: trampoline_1(&b1Decrement,ppCodeWindowAddress, bank); break;
+    case 3: trampoline_1(&b1Assignn, ppCodeWindowAddress, bank); break;
+    case 4: trampoline_1(&b1Assignv, ppCodeWindowAddress, bank); break;
+    case 5: trampoline_1(&b1Addn, ppCodeWindowAddress, bank); break;
+    case 6: trampoline_1(&b1Addv, ppCodeWindowAddress, bank); break;
+    case 7: trampoline_1(&b1Subn, ppCodeWindowAddress, bank); break;
+    case 8: trampoline_1(&b1Subv, ppCodeWindowAddress, bank); break;
+    case 9: trampoline_1(&b1Lindirectv, ppCodeWindowAddress, bank); break;
+    case 10: trampoline_1(&b1Rindirect, ppCodeWindowAddress, bank); break;
+    case 11: trampoline_1(&b1Lindirectn, ppCodeWindowAddress, bank); break;
+    case 12: trampoline_1(&b1Set, ppCodeWindowAddress, bank); break;
+    case 13: trampoline_1(&b1Reset, ppCodeWindowAddress, bank); break;
+    case 14: trampoline_1(&b1Toggle, ppCodeWindowAddress, bank); break;
+    case 15: trampoline_1(&b1Set_v, ppCodeWindowAddress, bank); break;
+    case 16: trampoline_1(&b1Reset_v, ppCodeWindowAddress, bank); break;
+    case 17: trampoline_1(&b1Toggle_v, ppCodeWindowAddress, bank); break;
     case 18:
-        b1New_room(ppCodeWindowAddress);
+        trampoline_1(&b1New_room,ppCodeWindowAddress, bank);
         exitAllLogics = TRUE;
         return FALSE;
         break;
     case 19:
-        b1New_room_v(ppCodeWindowAddress);
+        trampoline_1(&b1New_room_v, ppCodeWindowAddress, bank);
         exitAllLogics = TRUE;
         return FALSE;
         break;
-    case 20: b1Load_logics(ppCodeWindowAddress); break;
-    case 21: b1Load_logics_v(ppCodeWindowAddress); break;
+    case 20: trampoline_1(&b1Load_logics, ppCodeWindowAddress, bank); break;
+    case 21: trampoline_1(&b1Load_logics_v, ppCodeWindowAddress, bank); break;
     case 22:
-        b1Call(ppCodeWindowAddress);
+        trampoline_1(&b1Call,ppCodeWindowAddress, bank);
         /* The currentLog variable needs to be restored */
         *currentLog = logNum;
         if (exitAllLogics) return FALSE;
@@ -2046,152 +2045,152 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
         drawBigString(screen, debugString, 0, 384, 0, 7);
 #endif
         break;
-    case 24: b1Load_pic(ppCodeWindowAddress); break;
-    case 25: b1Draw_pic(ppCodeWindowAddress); break;
-    case 26: b1Show_pic(ppCodeWindowAddress); break;
-    case 27: b1Discard_pic(ppCodeWindowAddress); break;
-    case 28: b1Overlay_pic(ppCodeWindowAddress); break;
-    case 29: b1Show_pri_screen(ppCodeWindowAddress); break;
-    case 30: b1Load_view(ppCodeWindowAddress); break;
-    case 31: b1Load_view_v(ppCodeWindowAddress); break;
-    case 32: b1Discard_view(ppCodeWindowAddress); break;
-    case 33: b1Animate_obj(ppCodeWindowAddress); break;
-    case 34: b1Unanimate_all(ppCodeWindowAddress); break;
-    case 35: b1Draw(ppCodeWindowAddress); break;
-    case 36: b1Erase(ppCodeWindowAddress); break;
-    case 37: b1Position(ppCodeWindowAddress); break;
-    case 38: b1Position_v(ppCodeWindowAddress); break;
-    case 39: b1Get_posn(ppCodeWindowAddress); break;
-    case 40: b1Reposition(ppCodeWindowAddress); break;
-    case 41: b2Set_view(ppCodeWindowAddress); break;
-    case 42: b2Set_view_v(ppCodeWindowAddress); break;
-    case 43: b2Set_loop(ppCodeWindowAddress); break;
-    case 44: b2Set_loop_v(ppCodeWindowAddress); break;
-    case 45: b2Fix_loop(ppCodeWindowAddress); break;
-    case 46: b2Release_loop(ppCodeWindowAddress); break;
-    case 47: b2Set_cel(ppCodeWindowAddress); break;
-    case 48: b2Set_cel_v(ppCodeWindowAddress); break;
-    case 49: b2Last_cel(ppCodeWindowAddress); break;
-    case 50: b2Current_cel(ppCodeWindowAddress); break;
-    case 51: b2Current_loop(ppCodeWindowAddress); break;
-    case 52: b2Current_view(ppCodeWindowAddress); break;
-    case 53: b2Number_of_loops(ppCodeWindowAddress); break;
-    case 54: b2Set_priority(ppCodeWindowAddress); break;
-    case 55: b2Set_priority_v(ppCodeWindowAddress); break;
-    case 56: b2Release_priority(ppCodeWindowAddress); break;
-    case 57: b2Get_priority(ppCodeWindowAddress); break;
-    case 58: b2Stop_update(ppCodeWindowAddress); break;
-    case 59: b2Start_update(ppCodeWindowAddress); break;
-    case 60: b2Force_update(ppCodeWindowAddress); break;
-    case 61: b2Ignore_horizon(ppCodeWindowAddress); break;
-    case 62: b2Observe_horizon(ppCodeWindowAddress); break;
-    case 63: b2Set_horizon(ppCodeWindowAddress); break;
-    case 64: b2Object_on_water(ppCodeWindowAddress); break;
-    case 65: b2Object_on_land(ppCodeWindowAddress); break;
-    case 66: b2Object_on_anything(ppCodeWindowAddress); break;
-    case 67: b2Ignore_objs(ppCodeWindowAddress); break;
-    case 68: b2Observe_objs(ppCodeWindowAddress); break;
-    case 69: b2Distance(ppCodeWindowAddress); break;
-    case 70: b2Stop_cycling(ppCodeWindowAddress); break;
-    case 71: b2Start_cycling(ppCodeWindowAddress); break;
-    case 72: b2Normal_cycle(ppCodeWindowAddress); break;
-    case 73: b2End_of_loop(ppCodeWindowAddress); break;
-    case 74: b2Reverse_cycle(ppCodeWindowAddress); break;
-    case 75: b2Reverse_loop(ppCodeWindowAddress); break;
-    case 76: b2Cycle_time(ppCodeWindowAddress); break;
-    case 77: b2Stop_motion(ppCodeWindowAddress); break;
-    case 78: b2Start_motion(ppCodeWindowAddress); break;
-    case 79: b2Step_size(ppCodeWindowAddress); break;
-    case 80: b2Step_time(ppCodeWindowAddress); break;
-    case 81: b2Move_obj(ppCodeWindowAddress); break;
-    case 82: b2Move_obj_v(ppCodeWindowAddress); break;
-    case 83: b2Follow_ego(ppCodeWindowAddress); break;
-    case 84: b2Wander(ppCodeWindowAddress); break;
-    case 85: b2Normal_motion(ppCodeWindowAddress); break;
-    case 86: b2Set_dir(ppCodeWindowAddress); break;
-    case 87: b2Get_dir(ppCodeWindowAddress); break;
-    case 88: b2Ignore_blocks(ppCodeWindowAddress); break;
-    case 89: b2Observe_blocks(ppCodeWindowAddress); break;
-    case 90: b2Block(ppCodeWindowAddress); break;
-    case 91: b2Unblock(ppCodeWindowAddress); break;
-    case 92: b2Get(ppCodeWindowAddress); break;
-    case 93: b2Get_v(ppCodeWindowAddress); break;
-    case 94: b2Drop(ppCodeWindowAddress); break;
-    case 95: b2Put(ppCodeWindowAddress); break;
-    case 96: b2Put_v(ppCodeWindowAddress); break;
-    case 97: b2Get_room_v(ppCodeWindowAddress); break;
-    case 98: b2Load_sound(ppCodeWindowAddress); break;
-    case 99: b2Play_sound(ppCodeWindowAddress); break;
-    case 100: b2Stop_sound(ppCodeWindowAddress); break;
-    case 101: b3Print(ppCodeWindowAddress); break;
-    case 102: b3Print_v(ppCodeWindowAddress); break;
-    case 103: b3Display(ppCodeWindowAddress); break;
-    case 104: b3Display_v(ppCodeWindowAddress); break;
-    case 105: b3Clear_lines(ppCodeWindowAddress); break;
-    case 106: b3Text_screen(ppCodeWindowAddress); break;
-    case 107: b3Graphics(ppCodeWindowAddress); break;
-    case 108: b3Set_cursor_char(ppCodeWindowAddress); break;
-    case 109: b3Set_text_attribute(ppCodeWindowAddress); break;
-    case 110: b3Shake_screen(ppCodeWindowAddress); break;
-    case 111: b3Configure_screen(ppCodeWindowAddress); break;
-    case 112: b3Status_line_on(ppCodeWindowAddress); break;
-    case 113: b3Status_line_off(ppCodeWindowAddress); break;
-    case 114: b3Set_string(ppCodeWindowAddress); break;
-    case 115: b3Get_string(ppCodeWindowAddress); break;
-    case 116: b3Word_to_string(ppCodeWindowAddress); break;
-    case 117: b3Parse(ppCodeWindowAddress); break;
-    case 118: b4Get_num(ppCodeWindowAddress); break;
-    case 119: b4Prevent_input(ppCodeWindowAddress); break;
-    case 120: b4Accept_input(ppCodeWindowAddress); break;
-    case 121: b4Set_key(ppCodeWindowAddress); break;
-    case 122: b4Add_to_pic(ppCodeWindowAddress); break;
-    case 123: b4Add_to_pic_v(ppCodeWindowAddress); break;
-    case 124: b4Status(ppCodeWindowAddress); break;
-    case 125: b4Save_game(ppCodeWindowAddress); break;
-    case 126: b4Restore_game(ppCodeWindowAddress); break;
+    case 24: trampoline_1(&b1Load_pic, ppCodeWindowAddress, bank); break;
+    case 25: trampoline_1(&b1Draw_pic, ppCodeWindowAddress, bank); break;
+    case 26: trampoline_1(&b1Show_pic, ppCodeWindowAddress, bank); break;
+    case 27: trampoline_1(&b1Discard_pic, ppCodeWindowAddress, bank); break;
+    case 28: trampoline_1(&b1Overlay_pic, ppCodeWindowAddress, bank); break;
+    case 29: trampoline_1(&b1Show_pri_screen, ppCodeWindowAddress, bank); break;
+    case 30: trampoline_1(&b1Load_view, ppCodeWindowAddress, bank); break;
+    case 31: trampoline_1(&b1Load_view_v, ppCodeWindowAddress, bank); break;
+    case 32: trampoline_1(&b1Discard_view, ppCodeWindowAddress, bank); break;
+    case 33: trampoline_1(&b1Animate_obj, ppCodeWindowAddress, bank); break;
+    case 34: trampoline_1(&b1Unanimate_all, ppCodeWindowAddress, bank); break;
+    case 35: trampoline_1(&b1Draw, ppCodeWindowAddress, bank); break;
+    case 36: trampoline_1(&b1Erase, ppCodeWindowAddress, bank); break;
+    case 37: trampoline_1(&b1Position, ppCodeWindowAddress, bank); break;
+    case 38: trampoline_1(&b1Position_v, ppCodeWindowAddress, bank); break;
+    case 39: trampoline_1(&b1Get_posn, ppCodeWindowAddress, bank); break;
+    case 40: trampoline_1(&b1Reposition, ppCodeWindowAddress, bank); break;
+    case 41: trampoline_1(&b2Set_view, ppCodeWindowAddress, bank); break;
+    case 42: trampoline_1(&b2Set_view_v, ppCodeWindowAddress, bank); break;
+    case 43: trampoline_1(&b2Set_loop, ppCodeWindowAddress, bank); break;
+    case 44: trampoline_1(&b2Set_loop_v, ppCodeWindowAddress, bank); break;
+    case 45: trampoline_1(&b2Fix_loop, ppCodeWindowAddress, bank); break;
+    case 46: trampoline_1(&b2Release_loop, ppCodeWindowAddress, bank); break;
+    case 47: trampoline_1(&b2Set_cel, ppCodeWindowAddress, bank); break;
+    case 48: trampoline_1(&b2Set_cel_v, ppCodeWindowAddress, bank); break;
+    case 49: trampoline_1(&b2Last_cel, ppCodeWindowAddress, bank); break;
+    case 50: trampoline_1(&b2Current_cel, ppCodeWindowAddress, bank); break;
+    case 51: trampoline_1(&b2Current_loop, ppCodeWindowAddress, bank); break;
+    case 52: trampoline_1(&b2Current_view, ppCodeWindowAddress, bank); break;
+    case 53: trampoline_1(&b2Number_of_loops, ppCodeWindowAddress, bank); break;
+    case 54: trampoline_1(&b2Set_priority, ppCodeWindowAddress, bank); break;
+    case 55: trampoline_1(&b2Set_priority_v, ppCodeWindowAddress, bank); break;
+    case 56: trampoline_1(&b2Release_priority, ppCodeWindowAddress, bank); break;
+    case 57: trampoline_1(&b2Get_priority, ppCodeWindowAddress, bank); break;
+    case 58: trampoline_1(&b2Stop_update, ppCodeWindowAddress, bank); break;
+    case 59: trampoline_1(&b2Start_update, ppCodeWindowAddress, bank); break;
+    case 60: trampoline_1(&b2Force_update, ppCodeWindowAddress, bank); break;
+    case 61: trampoline_1(&b2Ignore_horizon, ppCodeWindowAddress, bank); break;
+    case 62: trampoline_1(&b2Observe_horizon, ppCodeWindowAddress, bank); break;
+    case 63: trampoline_1(&b2Set_horizon, ppCodeWindowAddress, bank); break;
+    case 64: trampoline_1(&b2Object_on_water, ppCodeWindowAddress, bank); break;
+    case 65: trampoline_1(&b2Object_on_land, ppCodeWindowAddress, bank); break;
+    case 66: trampoline_1(&b2Object_on_anything, ppCodeWindowAddress, bank); break;
+    case 67: trampoline_1(&b2Ignore_objs, ppCodeWindowAddress, bank); break;
+    case 68: trampoline_1(&b2Observe_objs, ppCodeWindowAddress, bank); break;
+    case 69: trampoline_1(&b2Distance, ppCodeWindowAddress, bank); break;
+    case 70: trampoline_1(&b2Stop_cycling, ppCodeWindowAddress, bank); break;
+    case 71: trampoline_1(&b2Start_cycling, ppCodeWindowAddress, bank); break;
+    case 72: trampoline_1(&b2Normal_cycle, ppCodeWindowAddress, bank); break;
+    case 73: trampoline_1(&b2End_of_loop, ppCodeWindowAddress, bank); break;
+    case 74: trampoline_1(&b2Reverse_cycle, ppCodeWindowAddress, bank); break;
+    case 75: trampoline_1(&b2Reverse_loop, ppCodeWindowAddress, bank); break;
+    case 76: trampoline_1(&b2Cycle_time, ppCodeWindowAddress, bank); break;
+    case 77: trampoline_1(&b2Stop_motion, ppCodeWindowAddress, bank); break;
+    case 78: trampoline_1(&b2Start_motion, ppCodeWindowAddress, bank); break;
+    case 79: trampoline_1(&b2Step_size, ppCodeWindowAddress, bank); break;
+    case 80: trampoline_1(&b2Step_time, ppCodeWindowAddress, bank); break;
+    case 81: trampoline_1(&b2Move_obj, ppCodeWindowAddress, bank); break;
+    case 82: trampoline_1(&b2Move_obj_v, ppCodeWindowAddress, bank); break;
+    case 83: trampoline_1(&b2Follow_ego, ppCodeWindowAddress, bank); break;
+    case 84: trampoline_1(&b2Wander, ppCodeWindowAddress, bank); break;
+    case 85: trampoline_1(&b2Normal_motion, ppCodeWindowAddress, bank); break;
+    case 86: trampoline_1(&b2Set_dir, ppCodeWindowAddress, bank); break;
+    case 87: trampoline_1(&b2Get_dir, ppCodeWindowAddress, bank); break;
+    case 88: trampoline_1(&b2Ignore_blocks, ppCodeWindowAddress, bank); break;
+    case 89: trampoline_1(&b2Observe_blocks, ppCodeWindowAddress, bank); break;
+    case 90: trampoline_1(&b2Block, ppCodeWindowAddress, bank); break;
+    case 91: trampoline_1(&b2Unblock, ppCodeWindowAddress, bank); break;
+    case 92: trampoline_1(&b2Get, ppCodeWindowAddress, bank); break;
+    case 93: trampoline_1(&b2Get_v, ppCodeWindowAddress, bank); break;
+    case 94: trampoline_1(&b2Drop, ppCodeWindowAddress, bank); break;
+    case 95: trampoline_1(&b2Put, ppCodeWindowAddress, bank); break;
+    case 96: trampoline_1(&b2Put_v, ppCodeWindowAddress, bank); break;
+    case 97: trampoline_1(&b2Get_room_v, ppCodeWindowAddress, bank); break;
+    case 98: trampoline_1(&b2Load_sound, ppCodeWindowAddress, bank); break;
+    case 99: trampoline_1(&b2Play_sound, ppCodeWindowAddress, bank); break;
+    case 100: trampoline_1(&b2Stop_sound, ppCodeWindowAddress, bank); break;
+    case 101: trampoline_1(&b3Print, ppCodeWindowAddress, bank); break;
+    case 102: trampoline_1(&b3Print_v, ppCodeWindowAddress, bank); break;
+    case 103: trampoline_1(&b3Display, ppCodeWindowAddress, bank); break;
+    case 104: trampoline_1(&b3Display_v, ppCodeWindowAddress, bank); break;
+    case 105: trampoline_1(&b3Clear_lines, ppCodeWindowAddress, bank); break;
+    case 106: trampoline_1(&b3Text_screen, ppCodeWindowAddress, bank); break;
+    case 107: trampoline_1(&b3Graphics, ppCodeWindowAddress, bank); break;
+    case 108: trampoline_1(&b3Set_cursor_char, ppCodeWindowAddress, bank); break;
+    case 109: trampoline_1(&b3Set_text_attribute, ppCodeWindowAddress, bank); break;
+    case 110: trampoline_1(&b3Shake_screen, ppCodeWindowAddress, bank); break;
+    case 111: trampoline_1(&b3Configure_screen, ppCodeWindowAddress, bank); break;
+    case 112: trampoline_1(&b3Status_line_on, ppCodeWindowAddress, bank); break;
+    case 113: trampoline_1(&b3Status_line_off, ppCodeWindowAddress, bank); break;
+    case 114: trampoline_1(&b3Set_string, ppCodeWindowAddress, bank); break;
+    case 115: trampoline_1(&b3Get_string, ppCodeWindowAddress, bank); break;
+    case 116: trampoline_1(&b3Word_to_string, ppCodeWindowAddress, bank); break;
+    case 117: trampoline_1(&b3Parse, ppCodeWindowAddress, bank); break;
+    case 118: trampoline_1(&b4Get_num, ppCodeWindowAddress, bank); break;
+    case 119: trampoline_1(&b4Prevent_input, ppCodeWindowAddress, bank); break;
+    case 120: trampoline_1(&b4Accept_input, ppCodeWindowAddress, bank); break;
+    case 121: trampoline_1(&b4Set_key, ppCodeWindowAddress, bank); break;
+    case 122: trampoline_1(&b4Add_to_pic, ppCodeWindowAddress, bank); break;
+    case 123: trampoline_1(&b4Add_to_pic_v, ppCodeWindowAddress, bank); break;
+    case 124: trampoline_1(&b4Status, ppCodeWindowAddress, bank); break;
+    case 125: trampoline_1(&b4Save_game, ppCodeWindowAddress, bank); break;
+    case 126: trampoline_1(&b4Restore_game, ppCodeWindowAddress, bank); break;
     case 127: break;
-    case 128: b4Restart_game(ppCodeWindowAddress); break;
-    case 129: b4Show_obj(ppCodeWindowAddress); break;
-    case 130: b4Random_num(ppCodeWindowAddress); break;
-    case 131: b4Program_control(ppCodeWindowAddress); break;
-    case 132: b4Player_control(ppCodeWindowAddress); break;
-    case 133: b4Obj_status_v(ppCodeWindowAddress); break;
-    case 134: b4Quit(ppCodeWindowAddress); break;
+    case 128: trampoline_1(&b4Restart_game, ppCodeWindowAddress, bank); break;
+    case 129: trampoline_1(&b4Show_obj, ppCodeWindowAddress, bank); break;
+    case 130: trampoline_1(&b4Random_num, ppCodeWindowAddress, bank); break;
+    case 131: trampoline_1(&b4Program_control, ppCodeWindowAddress, bank); break;
+    case 132: trampoline_1(&b4Player_control, ppCodeWindowAddress, bank); break;
+    case 133: trampoline_1(&b4Obj_status_v, ppCodeWindowAddress, bank); break;
+    case 134: trampoline_1(&b4Quit, ppCodeWindowAddress, bank); break;
     case 135: break;
-    case 136: b4Pause(ppCodeWindowAddress); break;
-    case 137: b4Echo_line(ppCodeWindowAddress); break;
-    case 138: b4Cancel_line(ppCodeWindowAddress); break;
-    case 139: b4Init_joy(ppCodeWindowAddress); break;
+    case 136: trampoline_1(&b4Pause, ppCodeWindowAddress, bank); break;
+    case 137: trampoline_1(&b4Echo_line, ppCodeWindowAddress, bank); break;
+    case 138: trampoline_1(&b4Cancel_line, ppCodeWindowAddress, bank); break;
+    case 139: trampoline_1(&b4Init_joy, ppCodeWindowAddress, bank); break;
     case 140: break;
-    case 141: b4Version(ppCodeWindowAddress); break;
+    case 141: trampoline_1(&b4Version, ppCodeWindowAddress, bank); break;
     case 142: trampoline_1(&b4Script_size, ppCodeWindowAddress, bank); break;
-    case 143: b4Set_game_id(ppCodeWindowAddress); break;
-    case 144: b4Log(ppCodeWindowAddress); break;
-    case 145: b4Set_scan_start(ppCodeWindowAddress); break;
-    case 146: b4Reset_scan_start(ppCodeWindowAddress); break;
-    case 147: b4Reposition_to(ppCodeWindowAddress); break;
-    case 148: b4Reposition_to_v(ppCodeWindowAddress); break;
-    case 149: b4Trace_on(ppCodeWindowAddress); break;
-    case 150: b4Trace_info(ppCodeWindowAddress); break;
-    case 151: b4Print_at(ppCodeWindowAddress); break;
-    case 152: b4Print_at_v(ppCodeWindowAddress); break;
-    case 153: b4Discard_view_v(ppCodeWindowAddress); break;
-    case 154: b4Clear_text_rect(ppCodeWindowAddress); break;
-    case 155: b4Set_upper_left(ppCodeWindowAddress); break;
-    case 156: b4Set_menu(ppCodeWindowAddress); break;
-    case 157: b4Set_menu_item(ppCodeWindowAddress); break;
-    case 158: b4Submit_menu(ppCodeWindowAddress); break;
-    case 159: b4Enable_item(ppCodeWindowAddress); break;
-    case 160: b4Disable_item(ppCodeWindowAddress); break;
-    case 161: b4Menu_input(ppCodeWindowAddress); break;
-    case 162: b4Show_obj_v(ppCodeWindowAddress); break;
-    case 163: b4Open_dialogue(ppCodeWindowAddress); break;
-    case 164: b4Close_dialogue(ppCodeWindowAddress); break;
-    case 165: b4Mul_n(ppCodeWindowAddress); break;
-    case 166: b4Mul_v(ppCodeWindowAddress); break;
-    case 167: b4Div_n(ppCodeWindowAddress); break;
-    case 168: b4Div_v(ppCodeWindowAddress); break;
-    case 169: b4Close_window(ppCodeWindowAddress); break;
+    case 143: trampoline_1(&b4Set_game_id, ppCodeWindowAddress, bank); break;
+    case 144: trampoline_1(&b4Log, ppCodeWindowAddress, bank); break;
+    case 145: trampoline_1(&b4Set_scan_start, ppCodeWindowAddress, bank); break;
+    case 146: trampoline_1(&b4Reset_scan_start, ppCodeWindowAddress, bank); break;
+    case 147: trampoline_1(&b4Reposition_to, ppCodeWindowAddress, bank); break;
+    case 148: trampoline_1(&b4Reposition_to_v, ppCodeWindowAddress, bank); break;
+    case 149: trampoline_1(&b4Trace_on, ppCodeWindowAddress, bank); break;
+    case 150: trampoline_1(&b4Trace_info, ppCodeWindowAddress, bank); break;
+    case 151: trampoline_1(&b4Print_at, ppCodeWindowAddress, bank); break;
+    case 152: trampoline_1(&b4Print_at_v, ppCodeWindowAddress, bank); break;
+    case 153: trampoline_1(&b4Discard_view_v, ppCodeWindowAddress, bank); break;
+    case 154: trampoline_1(&b4Clear_text_rect, ppCodeWindowAddress, bank); break;
+    case 155: trampoline_1(&b4Set_upper_left, ppCodeWindowAddress, bank); break;
+    case 156: trampoline_1(&b4Set_menu, ppCodeWindowAddress, bank); break;
+    case 157: trampoline_1(&b4Set_menu_item, ppCodeWindowAddress, bank); break;
+    case 158: trampoline_1(&b4Submit_menu, ppCodeWindowAddress, bank); break;
+    case 159: trampoline_1(&b4Enable_item, ppCodeWindowAddress, bank); break;
+    case 160: trampoline_1(&b4Disable_item, ppCodeWindowAddress, bank); break;
+    case 161: trampoline_1(&b4Menu_input, ppCodeWindowAddress, bank); break;
+    case 162: trampoline_1(&b4Show_obj_v, ppCodeWindowAddress, bank); break;
+    case 163: trampoline_1(&b4Open_dialogue, ppCodeWindowAddress, bank); break;
+    case 164: trampoline_1(&b4Close_dialogue, ppCodeWindowAddress, bank); break;
+    case 165: trampoline_1(&b4Mul_n, ppCodeWindowAddress, bank); break;
+    case 166: trampoline_1(&b4Mul_v, ppCodeWindowAddress, bank); break;
+    case 167: trampoline_1(&b4Div_n, ppCodeWindowAddress, bank); break;
+    case 168: trampoline_1(&b4Div_v, ppCodeWindowAddress, bank); break;
+    case 169: trampoline_1(&b4Close_window, ppCodeWindowAddress, bank); break;
     case 170:  break;
     case 171:  break;
     case 172:  break;
@@ -2205,7 +2204,39 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 180:  break;
     case 181:  break;
     }
-    exit(0);
+
+    return TRUE;
+}
+
+int ifLogicHandlers(byte ch, byte** ppCodeWindowAddress, byte bank)
+{
+    printf("I am here and ch is %d and the bank is %d\n", ch, RAM_BANK);
+    switch (ch) {
+    case 0: return FALSE; break; /* Should never happen */
+    case 1: return trampoline_1b(&b1Equaln, ppCodeWindowAddress, bank); break;
+    case 2: return trampoline_1b(&b1Equalv, ppCodeWindowAddress, bank); break;
+    case 3: return trampoline_1b(&b1Lessn, ppCodeWindowAddress, bank); break;
+    case 4: return trampoline_1b(&b1Lessv, ppCodeWindowAddress, bank); break;
+    case 5: return trampoline_1b(&b1Greatern, ppCodeWindowAddress, bank); break;
+    case 6: return trampoline_1b(&b1Greaterv, ppCodeWindowAddress, bank); break;
+    case 7: return trampoline_1b(&b1Isset, ppCodeWindowAddress, bank); break;
+    case 8: return trampoline_1b(&b1Issetv, ppCodeWindowAddress, bank); break;
+    case 9: return trampoline_1b(&b1Has, ppCodeWindowAddress, bank); break;
+    case 10: return trampoline_1b(&b1Obj_in_room, ppCodeWindowAddress, bank); break;
+    case 11: return trampoline_1b(&b1Posn, ppCodeWindowAddress, bank); break;
+    case 12: return trampoline_1b(&b1Controller, ppCodeWindowAddress, bank); break;
+    case 13: return trampoline_1b(&b1Have_key, ppCodeWindowAddress, bank); break;
+    case 14: return trampoline_1b(&said, ppCodeWindowAddress, bank); break;
+    case 15: return trampoline_1b(&b1Compare_strings, ppCodeWindowAddress, bank); break;
+    case 16: return trampoline_1b(&b1Obj_in_box, ppCodeWindowAddress, bank); break;
+    case 17: return trampoline_1b(&b1Center_posn, ppCodeWindowAddress, bank); break;
+    case 18: return trampoline_1b(&b1Right_posn, ppCodeWindowAddress, bank); break;
+    default:
+        ////lprintf("catastrophe: Illegal test [%d], logic %d, posn %d.",
+            //ch, currentLog, logics[currentLog].currentPoint);
+        return FALSE;
+        break; /* Should never happen */
+    }
 }
 
 #pragma code-name (pop)
@@ -2245,6 +2276,7 @@ void ifHandler(byte** data, byte codeBank)
     byte codeWindow[CODE_WINDOW_SIZE];
     byte* codeWindowAddress;
     byte** ppCodeWindowAddress;
+    byte ifHandlerBank;
 
     ppCodeWindowAddress = &codeWindowAddress;
 
@@ -2259,7 +2291,6 @@ void ifHandler(byte** data, byte codeBank)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif
-        RAM_BANK = getBankBasedOnCode(ch);
         switch (ch) {
         case 0xff: /* Closing if bracket. Expression must be true. */
 #ifdef DEBUG
@@ -2284,33 +2315,11 @@ void ifHandler(byte** data, byte codeBank)
         default:
             memcpy(&codeWindow[0], *data, CODE_WINDOW_SIZE);
             codeWindowAddress = &codeWindow[0];
-
-            switch (ch) {
-            case 0: testVal = FALSE; break; /* Should never happen */
-            case 1: testVal = b1Equaln(ppCodeWindowAddress); break;
-            case 2: testVal = b1Equalv(ppCodeWindowAddress); break;
-            case 3: testVal = b1Lessn(ppCodeWindowAddress); break;
-            case 4: testVal = b1Lessv(ppCodeWindowAddress); break;
-            case 5: testVal = b1Greatern(ppCodeWindowAddress); break;
-            case 6: testVal = b1Greaterv(ppCodeWindowAddress); break;
-            case 7: testVal = b1Isset(ppCodeWindowAddress); break;
-            case 8: testVal = b1Issetv(ppCodeWindowAddress); break;
-            case 9: testVal = b1Has(ppCodeWindowAddress); break;
-            case 10: testVal = b1Obj_in_room(ppCodeWindowAddress); break;
-            case 11: testVal = b1Posn(ppCodeWindowAddress); break;
-            case 12: testVal = b1Controller(ppCodeWindowAddress); break;
-            case 13: testVal = b1Have_key(); break;
-            case 14: testVal = said(ppCodeWindowAddress); break;
-            case 15: testVal = b1Compare_strings(ppCodeWindowAddress); break;
-            case 16: testVal = b1Obj_in_box(ppCodeWindowAddress); break;
-            case 17: testVal = b1Center_posn(ppCodeWindowAddress); break;
-            case 18: testVal = b1Right_posn(ppCodeWindowAddress); break;
-            default:
-                ////lprintf("catastrophe: Illegal test [%d], logic %d, posn %d.",
-                    //ch, currentLog, logics[currentLog].currentPoint);
-                testVal = FALSE;
-                break; /* Should never happen */
-            }
+            RAM_BANK = IF_LOGIC_HANDLERS_BANK;
+            ifHandlerBank = getBankBasedOnCode(ch);
+            printf("The if handler bank is %d", ifHandlerBank);
+             testVal = ifLogicHandlers(ch, ppCodeWindowAddress, ifHandlerBank);
+           
             RAM_BANK = previousBank;
 
 #ifdef VERBOSE
@@ -2423,6 +2432,12 @@ void executeLogic(int logNum)
     if (!currentLogic.loaded) {
         discardAfterward = TRUE;
         loadLogicFile(logNum);
+
+        RAM_BANK = LOGIC_ENTRY_BANK;
+        currentLogic = logics[logNum];
+
+        RAM_BANK = LOGIC_FILE_BANK;
+        currentLogicFile = *currentLogic.data;
     }
 #ifdef DEBUG
     debugString[0] = 0;
@@ -2445,7 +2460,7 @@ void executeLogic(int logNum)
 
     while ((code < endPos) && stillExecuting) {
 
-        if (logNum != 0)
+        if (logNum != 0 && counter == 9)
         {
 #ifdef VERBOSE
             printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
@@ -2489,17 +2504,11 @@ void executeLogic(int logNum)
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
 #endif // VERBOSE 
 
-
- /*       if (counter == 4)
-        {
-            exit(0);
-        }*/
-
         if (*code < 0xfe)
         {
             code++;
             RAM_BANK = INSTRUCTION_HANDLER_BANK;
-            b5instructionHandler(codeAtTimeOfLastBankSwitch, &currentLog, logNum, ppCodeWindowAddress, instructionCodeBank);
+           stillExecuting = b5instructionHandler(codeAtTimeOfLastBankSwitch, &currentLog, logNum, ppCodeWindowAddress, instructionCodeBank);
             RAM_BANK = currentLogicFile.codeBank;
         }
         else {

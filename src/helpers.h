@@ -19,10 +19,12 @@
 #define DIFF_ASCII_PETSCII_LOWER -32
 
 typedef void (*fnTrampoline_1)(void* data);
+typedef byte (*fnTrampoline_1b)(void* data);
 
 byte convertAsciiByteToPetsciiByte(byte* toConvert);
 
 extern void trampoline_1(fnTrampoline_1 func, void* data, byte bank);
+extern byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank);
 
 
 
