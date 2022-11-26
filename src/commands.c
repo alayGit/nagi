@@ -34,7 +34,9 @@
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
 //#define VERBOSE_LOGIC_EXEC
-#define VERBOSE_MENU
+//#define VERBOSE_MENU
+//#define VERBOSE_MENU_DUMP
+//#define VERBOSE_MESSAGE_TEXT
 
 //#define  DEBUG
 
@@ -52,14 +54,33 @@ int currentLog, agi_bg = 1, agi_fg = 16;
 extern char cursorChar;
 boolean oldQuit = FALSE;
 
-/* MENU data */
-#define MAX_MENU_SIZE 20
+
 int numOfMenus = 0;
 MENU* the_menu = (MENU*) & BANK_RAM[MENU_START];
 MENU* the_menuChildren = (MENU*)&BANK_RAM[MENU_CHILD_START];
 
 void executeLogic(int logNum);
-void b4FreeMenuItems();
+
+void menuChildInit()
+{
+    int i;
+    int previousRamBank = RAM_BANK;
+
+    RAM_BANK = MENU_BANK;
+
+    for (i = 0; i < MAX_MENU_SIZE * MAX_MENU_SIZE; i++)
+    {
+        MENU menuChild;
+        menuChild.dp = NULL;
+        menuChild.flags = 0;
+        menuChild.menuTextBank = 0;
+        menuChild.proc = NULL;
+        menuChild.text = NULL;
+        the_menuChildren[i] = menuChild;
+    }
+
+    RAM_BANK = previousRamBank;
+}
 
 void getMenu(MENU* menu, byte menuNo)
 {
@@ -76,7 +97,7 @@ void setMenu(MENU* menu, byte menuNo)
     byte previousBank = RAM_BANK;
     
 #ifdef VERBOSE_MENU
-    printf("-- Adding menu %p at position %d child %p dp %p flags %d proc %p address %p \n", menu, menuNo, menu->child, menu->dp, menu->flags, menu->proc, menu->text);
+    printf("-- Adding menu %p at position %d dp %p flags %d proc %p address %p \n", menu, menuNo, menu->dp, menu->flags, menu->proc, menu->text);
 #endif // VERBOSE_MENU
 
     RAM_BANK = MENU_BANK;
@@ -85,20 +106,40 @@ void setMenu(MENU* menu, byte menuNo)
     RAM_BANK = previousBank;
 }
 
-void setMenuChild(MENU* menu, byte menuNo, byte menuChildNo)
+void setMenuChild(MENU* menu, byte menuNo)
 {
+    int i;
     byte previousBank = RAM_BANK;
 
     RAM_BANK = MENU_BANK;
 
+    for (i = 0; i < MAX_MENU_SIZE && the_menuChildren[menuNo * MAX_MENU_SIZE + i].text != NULL; i++);
+    
+    if (i < MAX_MENU_SIZE)
+    {
 #ifdef VERBOSE_MENU
-    printf("-- Adding menu childen %p at position %d child %p dp %p flags %d proc %p text %p \n", menu, menuChildNo * MAX_MENU_SIZE + menuChildNo, menu->child, menu->dp, menu->flags, menu->proc, menu->text);
+        printf("-- Adding menu childen %p at position %d dp %p flags %d proc %p text %p \n", menu, menuNo * MAX_MENU_SIZE + i, menu->dp, menu->flags, menu->proc, menu->text);
 #endif // VERBOSE_MENU
-
-    the_menuChildren[menuChildNo * MAX_MENU_SIZE + menuChildNo] = *menu;
+        the_menuChildren[menuNo * MAX_MENU_SIZE + i] = *menu;
+    }
 
     RAM_BANK = previousBank;
 }
+
+//void getMenuChild(MENU* menu, byte menuNo, byte menuChildNo)
+//{
+//    byte previousBank = RAM_BANK;
+//
+//    RAM_BANK = MENU_BANK;
+//
+//#ifdef VERBOSE_MENU
+//    printf("-- Get menu childen %p at position %d child %p dp %p flags %d proc %p text %p \n", menu, menuNo * MAX_MENU_SIZE + i, menu->child, menu->dp, menu->flags, menu->proc, menu->text);
+//#endif // VERBOSE_MENU
+//
+//    *menu = the_menuChildren[menuChildNo * MAX_MENU_SIZE + menuChildNo];
+//
+//    RAM_BANK = previousBank;
+//}
 
 
 void getLogicFile(LOGICFile* logicFile, byte logicFileNo)
@@ -134,7 +175,7 @@ char* getMessagePointer(byte logicFileNo, byte messageNo)
         result = (char*)logicFile.messages[messageNo + i];
     }
 
-#ifdef VERBOSE_MENU
+#ifdef VERBOSE_MESSAGE_TEXT
     printf("The menu is %s \n", result);
 #endif //VERBOSE_MENU
 
@@ -143,6 +184,39 @@ char* getMessagePointer(byte logicFileNo, byte messageNo)
 
     return result;
 }
+
+#ifdef VERBOSE_MENU_DUMP
+void testMenus()
+{
+    byte previousRamBank = RAM_BANK;
+    int i, j;
+    MENU menuToPrint, childMenuToPrint;
+
+    RAM_BANK = MENU_BANK;
+
+    for (i = 0; i < numOfMenus; i++)
+    {
+        menuToPrint = the_menu[i];
+
+        RAM_BANK = menuToPrint.menuTextBank;
+        printf("- %s dp %dp flags %d proc %d \n", menuToPrint.text, menuToPrint.dp, menuToPrint.flags, menuToPrint.proc);
+        RAM_BANK = MENU_BANK;
+
+        for (j = 0; the_menuChildren[i * MAX_MENU_SIZE + j].text != NULL; j++)
+        {
+            childMenuToPrint = the_menuChildren[i * MAX_MENU_SIZE + j];
+
+            RAM_BANK = childMenuToPrint.menuTextBank;
+            printf("    -- %s %p dp %d flags %d proc %p \n", childMenuToPrint.text, childMenuToPrint.text, childMenuToPrint.dp, childMenuToPrint.flags, childMenuToPrint.proc);
+
+            RAM_BANK = MENU_BANK;
+        }
+    }
+
+    printf("\n\n_____________________________________________________\n");
+    RAM_BANK = previousRamBank;
+}
+#endif // VERBOSE_MENU
 
 #pragma code-name (push, "BANKRAM01");
 /****************************************************************************
@@ -1634,7 +1708,6 @@ void b4Restart_game(byte** data) // 0, 0x00
 
     newRoomNum = 0;
     hasEnteredNewRoom = TRUE;
-    b4FreeMenuItems();
 }
 
 void b4Show_obj(byte** data) // 1, 0x00 
@@ -1930,44 +2003,25 @@ int (*(menuFunctions[50]))() = {
     menuEvent45, menuEvent46, menuEvent47, menuEvent48, menuEvent49
 };
 
-/***************************************************************************
-** freeMenuItems
-**
-** This function frees all dynamically allocated memory taken up by the
-** menus.
-***************************************************************************/
-void b4FreeMenuItems()
-{
-    int i, j;
-
-    for (i = 0; i < numOfMenus; i++) {
-        for (j = 0; the_menu[i].child[j].text != NULL; j++) {
-            //free(the_menu[i].child[j].text);
-        }
-
-        /* Free the child menu array */
-        //free(the_menu[i].child);
-        the_menu[i].text = NULL;
-        the_menu[i].proc = NULL;
-        the_menu[i].child = NULL;
-    }
-
-    numOfMenus = 0;
-}
-
 void b4Set_menu(byte** data) // 1, 0x00 
 {
     int messNum, startOffset;
     char* messData;
 
     MENU newMenu;
-    MENU menuChild;
+    LOGICFile currentLogicFile;
 
-    newMenu.child = NULL;
+    if (numOfMenus == 0)
+    {
+        menuChildInit();
+    }
+
+    getLogicFile(&currentLogicFile, currentLog);
+
     newMenu.dp = NULL;
     newMenu.flags = 0;
     newMenu.proc = 0;
-    newMenu.text = NULL;
+    newMenu.menuTextBank = currentLogicFile.messageBank;
 
     messNum = *(*data)++;
 
@@ -1980,23 +2034,14 @@ void b4Set_menu(byte** data) // 1, 0x00
 
     newMenu.proc = NULL;
 
-    menuChild.text = NULL;
-    menuChild.proc = NULL;
-    menuChild.child = NULL;
-
-#ifdef VERBOSE_MENU
-        printf("The new menu address is %p \n", &newMenu);
-#endif // VERBOSE_MENU
-
     setMenu(&newMenu, numOfMenus);
-    setMenuChild(&menuChild, numOfMenus, 0);
     numOfMenus++;
 
-    newMenu.child = NULL;
     newMenu.dp = NULL;
     newMenu.flags = 0;
     newMenu.proc = NULL;
     newMenu.text = NULL;
+    newMenu.menuTextBank = 0;
 
     /* Mark end of menu */
     setMenu(&newMenu, numOfMenus);
@@ -2005,6 +2050,10 @@ void b4Set_menu(byte** data) // 1, 0x00
 void b4Set_menu_item(byte** data) // 2, 0x00 
 {
     int messNum, controllerNum, i;
+    MENU childMenu;
+    LOGICFile currentLogicFile;
+
+    getLogicFile(&currentLogicFile, currentLog);
 
     messNum = *(*data)++;
     controllerNum = *(*data)++;
@@ -2014,14 +2063,15 @@ void b4Set_menu_item(byte** data) // 2, 0x00
     }
     events[controllerNum].activated = 0;
 
-    i = 0; while (the_menu[numOfMenus - 1].child[i].text != NULL) i++;
-    the_menu[numOfMenus - 1].child[i].text = strdup(logics[currentLog].data->messages[messNum - 1]);
-    the_menu[numOfMenus - 1].child[i].proc = menuFunctions[controllerNum];
-    the_menu[numOfMenus - 1].child[i].child = NULL;
+    childMenu.text = getMessagePointer(currentLog, messNum - 1);
+    childMenu.proc = menuFunctions[controllerNum];
+    childMenu.menuTextBank = currentLogicFile.messageBank;
 
-    the_menu[numOfMenus - 1].child[i + 1].text = NULL;
-    the_menu[numOfMenus - 1].child[i + 1].proc = NULL;
-    the_menu[numOfMenus - 1].child[i + 1].child = NULL;
+    setMenuChild(&childMenu, numOfMenus - 1);
+
+#ifdef VERBOSE_MENU_DUMP
+    testMenus();
+#endif // VERBOSE_MENU
 }
 
 void b4Submit_menu(byte** data) // 0, 0x00 
@@ -2527,6 +2577,7 @@ void executeLogic(int logNum)
     sprintf(debugString, "LOGIC.%d:       ", currentLog);
     drawBigString(screen, debugString, 0, 384, 0, 7);
 #endif
+
     /* Load logic file temporarily in order to execute it if the logic is
     ** not already in memory. */
     if (!currentLogic.loaded) {

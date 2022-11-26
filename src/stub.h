@@ -10,8 +10,8 @@ int keypressed();
 typedef struct MENU
 {
 	char* text;                   /* menu item text */
+	byte menuTextBank;
 	int (*proc)(void);            /* callback function */
-	struct MENU* child;           /* to allow nested menus */
 	int flags;                    /* flags about the menu state */
 	void* dp;                     /* any data the menu might require */
 } MENU;

@@ -11,7 +11,7 @@
 //#define VERBOSE_DISPLAY_FILEOFFSETS
 //#define VERBOSE_DISPLAY_MESSAGES
 //#define VERBOSE_DISPLAY_OFFSETS
-#define VERBOSE
+//#define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

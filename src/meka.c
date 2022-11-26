@@ -231,15 +231,10 @@ void initialise()
 
 void closedown()
 {
-    byte previousRamBank = RAM_BANK;
-
-    RAM_BANK = 4;
-   b4FreeMenuItems();
    discardObjects();
    discardWords();
    closePicture();
 
-   RAM_BANK = previousRamBank;
    exit(0);
 }
 
