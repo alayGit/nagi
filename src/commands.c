@@ -33,7 +33,8 @@
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
-#define VERBOSE
+//#define VERBOSE_LOGIC_EXEC
+#define VERBOSE_MENU
 
 //#define  DEBUG
 
@@ -54,12 +55,94 @@ boolean oldQuit = FALSE;
 /* MENU data */
 #define MAX_MENU_SIZE 20
 int numOfMenus = 0;
-MENU the_menu[MAX_MENU_SIZE] = {
-   { NULL, NULL, NULL }
-};
+MENU* the_menu = (MENU*) & BANK_RAM[MENU_START];
+MENU* the_menuChildren = (MENU*)&BANK_RAM[MENU_CHILD_START];
 
 void executeLogic(int logNum);
 void b4FreeMenuItems();
+
+void getMenu(MENU* menu, byte menuNo)
+{
+    byte previousBank = RAM_BANK;
+
+    RAM_BANK = MENU_BANK;
+    *menu = the_menu[menuNo];
+
+    RAM_BANK = previousBank;
+}
+
+void setMenu(MENU* menu, byte menuNo)
+{
+    byte previousBank = RAM_BANK;
+    
+#ifdef VERBOSE_MENU
+    printf("-- Adding menu %p at position %d child %p dp %p flags %d proc %p address %p \n", menu, menuNo, menu->child, menu->dp, menu->flags, menu->proc, menu->text);
+#endif // VERBOSE_MENU
+
+    RAM_BANK = MENU_BANK;
+    the_menu[menuNo] = *menu;
+
+    RAM_BANK = previousBank;
+}
+
+void setMenuChild(MENU* menu, byte menuNo, byte menuChildNo)
+{
+    byte previousBank = RAM_BANK;
+
+    RAM_BANK = MENU_BANK;
+
+#ifdef VERBOSE_MENU
+    printf("-- Adding menu childen %p at position %d child %p dp %p flags %d proc %p text %p \n", menu, menuChildNo * MAX_MENU_SIZE + menuChildNo, menu->child, menu->dp, menu->flags, menu->proc, menu->text);
+#endif // VERBOSE_MENU
+
+    the_menuChildren[menuChildNo * MAX_MENU_SIZE + menuChildNo] = *menu;
+
+    RAM_BANK = previousBank;
+}
+
+
+void getLogicFile(LOGICFile* logicFile, byte logicFileNo)
+{
+    byte previousBank = RAM_BANK;
+    LOGICEntry logicEntry;
+
+    RAM_BANK = LOGIC_ENTRY_BANK;
+    
+    logicEntry = logics[logicFileNo];
+
+    RAM_BANK = LOGIC_FILE_BANK;
+    *logicFile = *logicEntry.data;
+
+    RAM_BANK = previousBank;
+}
+
+char* getMessagePointer(byte logicFileNo, byte messageNo)
+{
+    byte previousBank = RAM_BANK;
+    char* result;
+    int i;
+
+    LOGICFile logicFile;
+    getLogicFile(&logicFile, logicFileNo);
+
+    RAM_BANK = logicFile.messageBank;
+
+    result = (char*) logicFile.messages[messageNo];
+
+    for (i = 1; i < strlen(result) && *result == ' '; i++)
+    {
+        result = (char*)logicFile.messages[messageNo + i];
+    }
+
+#ifdef VERBOSE_MENU
+    printf("The menu is %s \n", result);
+#endif //VERBOSE_MENU
+
+
+    RAM_BANK = previousBank;
+
+    return result;
+}
 
 #pragma code-name (push, "BANKRAM01");
 /****************************************************************************
@@ -70,7 +153,7 @@ void b1AddLogLine(char* message)
     FILE* fp;
 
     if ((fp = fopen("log.txt", "a")) == NULL) {
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
         fprintf(stderr, "Error opening log file.");
 #endif // VERBOSE
         return;
@@ -1877,28 +1960,46 @@ void b4Set_menu(byte** data) // 1, 0x00
     int messNum, startOffset;
     char* messData;
 
-    messNum = *(*data)++;
-    messData = logics[currentLog].data->messages[messNum - 1];
+    MENU newMenu;
+    MENU menuChild;
 
-    /* Find the real start of the message (Some menu headings have
-    ** leading spaces which make the MEKA menu look weird). */
-    for (startOffset = 0; messData[startOffset] == ' '; startOffset++) {}
+    newMenu.child = NULL;
+    newMenu.dp = NULL;
+    newMenu.flags = 0;
+    newMenu.proc = 0;
+    newMenu.text = NULL;
+
+    messNum = *(*data)++;
 
     /* Create new menu and allocate space for MAX_MENU_SIZE items */
-    the_menu[numOfMenus].text = strdup(messData + startOffset);
-    the_menu[numOfMenus].proc = NULL;
-    the_menu[numOfMenus].child =
-        (struct MENU*)malloc(sizeof(struct MENU*) * MAX_MENU_SIZE);
-    the_menu[numOfMenus].child[0].text = NULL;
-    the_menu[numOfMenus].child[0].proc = NULL;
-    the_menu[numOfMenus].child[0].child = NULL;
+    newMenu.text = getMessagePointer(currentLog, messNum - 1);
+    
+#ifdef VERBOSE_MENU
+    printf("The result is %p \n", newMenu.text);
+#endif // VERBOSE_MENU
 
+    newMenu.proc = NULL;
+
+    menuChild.text = NULL;
+    menuChild.proc = NULL;
+    menuChild.child = NULL;
+
+#ifdef VERBOSE_MENU
+        printf("The new menu address is %p \n", &newMenu);
+#endif // VERBOSE_MENU
+
+    setMenu(&newMenu, numOfMenus);
+    setMenuChild(&menuChild, numOfMenus, 0);
     numOfMenus++;
 
+    newMenu.child = NULL;
+    newMenu.dp = NULL;
+    newMenu.flags = 0;
+    newMenu.proc = NULL;
+    newMenu.text = NULL;
+
     /* Mark end of menu */
-    the_menu[numOfMenus].text = NULL;
-    the_menu[numOfMenus].proc = NULL;
-    the_menu[numOfMenus].child = NULL;
+    setMenu(&newMenu, numOfMenus);
 }
 
 void b4Set_menu_item(byte** data) // 2, 0x00 
@@ -2210,7 +2311,6 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
 
 int ifLogicHandlers(byte ch, byte** ppCodeWindowAddress, byte bank)
 {
-    printf("I am here and ch is %d and the bank is %d\n", ch, RAM_BANK);
     switch (ch) {
     case 0: return FALSE; break; /* Should never happen */
     case 1: return trampoline_1b(&b1Equaln, ppCodeWindowAddress, bank); break;
@@ -2317,18 +2417,18 @@ void ifHandler(byte** data, byte codeBank)
             codeWindowAddress = &codeWindow[0];
             RAM_BANK = IF_LOGIC_HANDLERS_BANK;
             ifHandlerBank = getBankBasedOnCode(ch);
-            printf("The if handler bank is %d", ifHandlerBank);
+
              testVal = ifLogicHandlers(ch, ppCodeWindowAddress, ifHandlerBank);
            
             RAM_BANK = previousBank;
 
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
 
             printf("Data was %p trying to add %p ", data, codeWindowAddress - &codeWindow[0]);
 #endif // VERBOSE
             * data += (codeWindowAddress - &codeWindow[0]);
 
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
             printf("Data is %p %u \n", data, *data);
 #endif
             if (notMode) testVal = (testVal ? FALSE : TRUE);
@@ -2462,7 +2562,7 @@ void executeLogic(int logNum)
 
         if (logNum != 0 && counter == 9)
         {
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
             printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
 #endif // VERBOSE
             exit(0);
@@ -2494,13 +2594,13 @@ void executeLogic(int logNum)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif  
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
         printf("\n The code is %d, on bank %d address, %p \n", *code, RAM_BANK, code);
 #endif // VERBOSE
         codeAtTimeOfLastBankSwitch = *code;
        instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
 
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
 #endif // VERBOSE 
 
@@ -2549,7 +2649,7 @@ void executeLogic(int logNum)
 
         if (!lastCodeWasNonWindow)
         {
-#ifdef VERBOSE
+#ifdef VERBOSE_LOGIC_EXEC
             printf("Now jumping (%p - %p - 1) = %p \n", codeWindowAddress, &codeWindow[0], (codeWindowAddress - &codeWindow[0] - 1));
 #endif // VERBOSE
             code += (codeWindowAddress - &codeWindow[0]) - 1;
