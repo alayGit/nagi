@@ -74,11 +74,18 @@
 #define NO_CODE_BANKS 5
 
 
+//Golden RAM
+#define LOCAL_WORK_AREA_START 514
+#define LOCAL_WORK_AREA_SIZE
+
+
 
 #ifdef _MSC_VER //Used for testing under windows
 extern byte* banked;
 #define  banked
 #endif 
+
+#define GOLDEN_RAM        ((unsigned char *)0x0400)
 
 extern int _noSegments;
 

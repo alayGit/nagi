@@ -6,6 +6,6 @@ rename agi.cx16* AGI.CX16*
 timeout 3
 OSFMount -D -m E:
 cd C:\Commander\ 
-x16emu.exe -sdcard "sdcard.img" -prg "agi.cx16" -run -debug
+x16emu.exe -sdcard "sdcard.img" -prg "agi.cx16" -run -debug -warp
 cd C:\meka\CommanderX16Version\
 

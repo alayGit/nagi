@@ -1,5 +1,5 @@
 #include "memoryManager.h"
-//#define VERBOSE
+#define VERBOSE
 MemoryArea* _memoryAreas;
 int _noSegments;
 
@@ -100,6 +100,11 @@ void bankedRamInit()
 
 	for (i = 0; i < NO_CODE_BANKS; i++)
 	{
+#ifdef VERBOSE
+		printf("The bank ram size %d is %d\n", i + 1, bankRamSizes[i]);
+#endif // VERBOSE
+
+
 		sprintf(fileName, "agi.cx16.0%d", i + 1);
 
 		RAM_BANK = i + 1;

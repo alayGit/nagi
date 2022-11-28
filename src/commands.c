@@ -26,13 +26,14 @@
 
 #define HIGHEST_BANK1_FUNC 40
 #define HIGHEST_BANK2_FUNC 100
-#define HIGHEST_BANK3_FUNC 117
+#define HIGHEST_BANK3_FUNC 138
 #define HIGHEST_BANK4_FUNC 181
 
 
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
+#define VERBOSE_STRING_CHECK
 //#define VERBOSE_LOGIC_EXEC
 //#define VERBOSE_MENU
 //#define VERBOSE_MENU_DUMP
@@ -56,10 +57,31 @@ boolean oldQuit = FALSE;
 
 
 int numOfMenus = 0;
-MENU* the_menu = (MENU*) & BANK_RAM[MENU_START];
+MENU* the_menu = (MENU*)&BANK_RAM[MENU_START];
 MENU* the_menuChildren = (MENU*)&BANK_RAM[MENU_CHILD_START];
 
 void executeLogic(int logNum);
+
+int getNum(char* inputString, int* i, int inputStringBank)
+{
+    char strPos = 0;
+    char* tempString = &BANK_RAM[GET_NUM_TEMP_START];
+    byte previousRamBank = RAM_BANK;
+
+    RAM_BANK = inputStringBank;
+
+    while (inputString[*i] == ' ') { *i++; }
+    if ((inputString[*i] < '0') && (inputString[*i] > '9')) return 0;
+    while ((inputString[*i] >= '0') && (inputString[*i] <= '9')) {
+        tempString[strPos++] = inputString[(*i)++];
+    }
+    tempString[strPos] = 0;
+
+    (*i)--;
+
+    RAM_BANK = previousRamBank;
+    return (atoi(tempString));
+}
 
 void menuChildInit()
 {
@@ -95,7 +117,7 @@ void getMenu(MENU* menu, byte menuNo)
 void setMenu(MENU* menu, byte menuNo)
 {
     byte previousBank = RAM_BANK;
-    
+
 #ifdef VERBOSE_MENU
     printf("-- Adding menu %p at position %d dp %p flags %d proc %p address %p \n", menu, menuNo, menu->dp, menu->flags, menu->proc, menu->text);
 #endif // VERBOSE_MENU
@@ -114,7 +136,7 @@ void setMenuChild(MENU* menu, byte menuNo)
     RAM_BANK = MENU_BANK;
 
     for (i = 0; i < MAX_MENU_SIZE && the_menuChildren[menuNo * MAX_MENU_SIZE + i].text != NULL; i++);
-    
+
     if (i < MAX_MENU_SIZE)
     {
 #ifdef VERBOSE_MENU
@@ -148,7 +170,7 @@ void getLogicFile(LOGICFile* logicFile, byte logicFileNo)
     LOGICEntry logicEntry;
 
     RAM_BANK = LOGIC_ENTRY_BANK;
-    
+
     logicEntry = logics[logicFileNo];
 
     RAM_BANK = LOGIC_FILE_BANK;
@@ -168,7 +190,7 @@ char* getMessagePointer(byte logicFileNo, byte messageNo)
 
     RAM_BANK = logicFile.messageBank;
 
-    result = (char*) logicFile.messages[messageNo];
+    result = (char*)logicFile.messages[messageNo];
 
     for (i = 1; i < strlen(result) && *result == ' '; i++)
     {
@@ -1307,21 +1329,6 @@ void b2Stop_sound(byte** data) // 0, 0x00
 #pragma code-name (pop)
 #pragma code-name (push, "BANKRAM03")
 
-int b3GetNum(char* inputString, int* i)
-{
-    char tempString[80], strPos = 0;
-
-    while (inputString[*i] == ' ') { *i++; }
-    if ((inputString[*i] < '0') && (inputString[*i] > '9')) return 0;
-    while ((inputString[*i] >= '0') && (inputString[*i] <= '9')) {
-        tempString[strPos++] = inputString[(*i)++];
-    }
-    tempString[strPos] = 0;
-
-    (*i)--;
-    return (atoi(tempString));
-}
-
 boolean b3CharIsIn(char testChar, char* testString)
 {
     int i;
@@ -1333,52 +1340,65 @@ boolean b3CharIsIn(char testChar, char* testString)
     return FALSE;
 }
 
-void b3ProcessString(char* inputString, char* outputString)
+void b3ProcessString(char* stringPointer, byte stringBank, char* outputString)
 {
-    int i, strPos = 0, tempNum, widthNum, count;
-    char* numString;
-    char* temp;
-
-    numString = (char*)malloc(80);
-    temp = (char*)malloc(256);
+#define TEMP_SIZE 80
+#define NUM_STRING_SIZE 80
+#define INPUT_BUFFER_SIZE 10
+    int i, j, strPos = 0, tempNum, widthNum, count, sprintfLength;
+    char* temp, messagePointer;
+    byte tempBank, logicFileBank;
+    char inputString[INPUT_BUFFER_SIZE];
+    LOGICFile logicFile;
 
     outputString[0] = 0;
 
-    for (i = 0; i < strlen(inputString); i++) {
+    for (i = 0, j = 0; i == 0 || inputString[i - 1] != '\0'; i = (i + 1) % INPUT_BUFFER_SIZE, j++) {
+        if (i == 0)
+        {
+            copyStringFromBanked(stringPointer, inputString, j, INPUT_BUFFER_SIZE, stringBank);
+        }
+
         if (inputString[i] == '%') {
             i++;
             switch (inputString[i++]) {
                 /* %% isn't actually supported */
                 //case '%': sprintf(outputString, "%s%%", outputString); break;
             case 'v':
-                tempNum = b3GetNum(inputString, &i);
+                tempNum = getNum(inputString, &i, stringBank);
                 if (inputString[i + 1] == '|') {
                     i += 2;
-                    widthNum = b3GetNum(inputString, &i);
-                    sprintf(numString, "%d", var[tempNum]);
-                    for (count = strlen(numString); count < widthNum; count++) {
+                    temp = (char*)banked_alloc(NUM_STRING_SIZE, &tempBank);
+                    widthNum = getNum(inputString, &i, stringBank);
+                    sprintfLength = sprintfBanked(temp, tempBank, "%d", var[tempNum]);
+                    for (count = sprintfLength; count < widthNum; count++) {
                         sprintf(outputString, "%s0", outputString);
                     }
                     sprintf(outputString, "%s%d", outputString, var[tempNum]);
+                    banked_dealloc((byte*)temp, &tempBank);
                 }
                 else
                     sprintf(outputString, "%s%d", outputString, var[tempNum]);
                 break;
             case 'm':
-                tempNum = b3GetNum(inputString, &i);
-                sprintf(outputString, "%s%s", outputString,
+                tempNum = getNum(inputString, &i, stringBank);
+                getLogicFile(&logicFile, currentLog);
+                messagePointer = getMessagePointer(currentLog, tempNum - 1);
+                sprintfBanked(outputString, logicFile.codeBank, "%s%s", outputString,
                     logics[currentLog].data->messages[tempNum - 1]);
                 break;
             case 'g':
-                tempNum = b3GetNum(inputString, &i);
-                sprintf(outputString, "%s%s", outputString, logics[0].data->messages[tempNum - 1]);
+                tempNum = getNum(inputString, &i, stringBank);
+                getLogicFile(&logicFile, currentLog);
+                messagePointer = getMessagePointer(0, tempNum - 1);
+                sprintfBanked(outputString, "%s%s", outputString, messagePointer);
                 break;
             case 'w':
-                tempNum = b3GetNum(inputString, &i);
+                tempNum = getNum(inputString, &i, stringBank);
                 sprintf(outputString, "%s%s", outputString, wordText[tempNum]);
                 break;
             case 's':
-                tempNum = b3GetNum(inputString, &i);
+                tempNum = getNum(inputString, &i, stringBank);
                 sprintf(outputString, "%s%s", outputString, string[tempNum]);
                 break;
             default: /* ignore the second character */
@@ -1392,12 +1412,12 @@ void b3ProcessString(char* inputString, char* outputString)
 
     /* Recursive part to make sure all % formatting codes are dealt with */
     if (b3CharIsIn('%', outputString)) {
-        strcpy(temp, outputString);
-        b3ProcessString(temp, outputString);
-    }
+        temp = (char*)banked_alloc(TEMP_SIZE, &tempBank);
+        strcpyBanked(temp, outputString, tempBank);
+        b3ProcessString(temp, tempBank, outputString);
 
-    free(numString);
-    free(temp);
+        banked_dealloc((byte*)temp, tempBank);
+    }
 }
 
 void b3Print(byte** data) // 1, 00 
@@ -1410,7 +1430,7 @@ void b3Print(byte** data) // 1, 00
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[(*(*data)++) - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[(*(*data)++) - 1], 0, tempString);
     printInBoxBig(tempString, -1, -1, 30);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1431,7 +1451,7 @@ void b3Print_v(byte** data) // 1, 0x80
     temp = create_bitmap(640, 336);
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[(var[*(*data)++]) - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[(var[*(*data)++]) - 1], 0, tempString);
     //printf("Warning Print In Bigbox Not Implemented Implement This");
     //printInBoxBig2(tempString, -1, -1, 30);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
@@ -1451,7 +1471,7 @@ void b3Display(byte** data) // 3, 0x00
     col = *(*data)++;
     row = *(*data)++;
     messNum = *(*data)++;
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
     drawBigString(screen, tempString, row * 16, 20 + (col * 16), agi_fg, agi_bg);
     /*lprintf("info: display() %s, fg: %d bg: %d row: %d col: %d",
        tempString, agi_fg, agi_bg, row, col);*/
@@ -1469,7 +1489,7 @@ void b3Display_v(byte** data) // 3, 0xE0
     messNum = var[*(*data)++];
     //drawString(picture, logics[currentLog].data->messages[messNum-1],
     //   row*8, col*8, agi_fg, agi_bg);
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
     drawBigString(screen, tempString, row * 16, 20 + (col * 16), agi_fg, agi_bg);
     /*lprintf("info: display.v() %s, foreground: %d background: %d",
        tempString, agi_fg, agi_bg);*/
@@ -1512,12 +1532,23 @@ void b3Graphics(byte** data) // 0, 0x00
 
 void b3Set_cursor_char(byte** data) // 1, 0x00 
 {
-    char* temp = (char*)malloc(256);
+    char* temp = (char*)&GOLDEN_RAM[LOCAL_WORK_AREA_START];
+    byte msgNo = (*(*data)++) - 1;
+    char* messagePointer = getMessagePointer(currentLog, msgNo);
+    LOGICFile logicFile;
 
-    b3ProcessString(logics[currentLog].data->messages[(*(*data)++) - 1], temp);
+    getLogicFile(&logicFile, currentLog);
+
+#ifdef VERBOSE_STRING_CHECK
+    printf("Your msgNo is %d\n", msgNo);
+#endif // VERBOSE_STRING_CHECK
+
+    b3ProcessString(messagePointer, logicFile.messageBank, temp);
     cursorChar = temp[0];
 
-    free(temp);
+#ifdef VERBOSE_STRING_CHECK
+    printf("Your cursor char is %c\n", cursorChar);
+#endif
 }
 
 void b3Set_text_attribute(byte** data) // 2, 0x00 
@@ -1586,10 +1617,7 @@ void b3Parse(byte** data) // 1, 0x00
     lookupWords(string[stringNum]);
 }
 
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM04")
-
-void b4Get_num(byte** data) // 2, 0x40 
+void b3Get_num(byte** data) // 2, 0x40 
 {
     int messNum, varNum;
     char temp[80];
@@ -1600,19 +1628,19 @@ void b4Get_num(byte** data) // 2, 0x40
     var[varNum] = atoi(temp);
 }
 
-void b4Prevent_input(byte** data) // 0, 0x00 
+void b3Prevent_input(byte** data) // 0, 0x00 
 {
     inputLineDisplayed = FALSE;
     /* Do something else here */
 }
 
-void b4Accept_input(byte** data) // 0, 0x00 
+void b3Accept_input(byte** data) // 0, 0x00 
 {
     inputLineDisplayed = TRUE;
     /* Do something else here */
 }
 
-void b4Set_key(byte** data) // 3, 0x00 
+void b3Set_key(byte** data) // 3, 0x00 
 {
     int asciiCode, scanCode, eventCode;
     char* tempStr = (char*)malloc(256);
@@ -1645,7 +1673,7 @@ void b4Set_key(byte** data) // 3, 0x00
     free(tempStr);
 }
 
-void b4Add_to_pic(byte** data) // 7, 0x00 
+void b3Add_to_pic(byte** data) // 7, 0x00 
 {
     int viewNum, loopNum, celNum, x, y, priNum, baseCol;
 
@@ -1660,7 +1688,7 @@ void b4Add_to_pic(byte** data) // 7, 0x00
     addToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
-void b4Add_to_pic_v(byte** data) // 7, 0xFE 
+void b3Add_to_pic_v(byte** data) // 7, 0xFE 
 {
     int viewNum, loopNum, celNum, x, y, priNum, baseCol;
 
@@ -1675,7 +1703,7 @@ void b4Add_to_pic_v(byte** data) // 7, 0xFE
     addToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
-void b4Status(byte** data) // 0, 0x00 
+void b3Status(byte** data) // 0, 0x00 
 {
     /* Inventory */
     // set text mode
@@ -1683,17 +1711,18 @@ void b4Status(byte** data) // 0, 0x00
     var[25] = 255;
 }
 
-void b4Save_game(byte** data) // 0, 0x00 
+void b3Save_game(byte** data) // 0, 0x00 
 {
     /* Not supported yet */
 }
 
-void b4Restore_game(byte** data) // 0, 0x00 
+void b3Restore_game(byte** data) // 0, 0x00 
 {
     /* Not supported yet */
 }
 
-void b4Restart_game(byte** data) // 0, 0x00 
+
+void b3Restart_game(byte** data) // 0, 0x00 
 {
     int i;
 
@@ -1710,7 +1739,7 @@ void b4Restart_game(byte** data) // 0, 0x00
     hasEnteredNewRoom = TRUE;
 }
 
-void b4Show_obj(byte** data) // 1, 0x00 
+void b3Show_obj(byte** data) // 1, 0x00 
 {
     int objectNum;
 
@@ -1718,7 +1747,7 @@ void b4Show_obj(byte** data) // 1, 0x00
     /* Not supported yet */
 }
 
-void b4Random_num(byte** data) // 3, 0x20  random() renamed to avoid clash
+void b3Random_num(byte** data) // 3, 0x20  random() renamed to avoid clash
 {
     int startValue, endValue;
 
@@ -1727,17 +1756,17 @@ void b4Random_num(byte** data) // 3, 0x20  random() renamed to avoid clash
     var[*(*data)++] = (rand() % ((endValue - startValue) + 1)) + startValue;
 }
 
-void b4Program_control(byte** data) // 0, 0x00 
+void b3Program_control(byte** data) // 0, 0x00 
 {
     controlMode = PROGRAM_CONTROL;
 }
 
-void b4Player_control(byte** data) // 0, 0x00 
+void b3Player_control(byte** data) // 0, 0x00 
 {
     controlMode = PLAYER_CONTROL;
 }
 
-void b4Obj_status_v(byte** data) // 1, 0x80 
+void b3Obj_status_v(byte** data) // 1, 0x80 
 {
     int objectNum;
 
@@ -1748,7 +1777,8 @@ void b4Obj_status_v(byte** data) // 1, 0x80
     showObjectState(objectNum);
 }
 
-void b4Quit(byte** data) // 1, 0x00                     /* 0 args for AGI version 2_089 */
+
+void b3Quit(byte** data) // 1, 0x00                     /* 0 args for AGI version 2_089 */
 {
     int quitType, ch;
 
@@ -1765,7 +1795,7 @@ void b4Quit(byte** data) // 1, 0x00                     /* 0 args for AGI versio
     }
 }
 
-void b4Pause(byte** data) // 0, 0x00 
+void b3Pause(byte** data) // 0, 0x00 
 {
     while (key[KEY_ENTER]) { /* Wait */ }
     printInBoxBig("      Game paused.\nPress ENTER to continue.", -1, -1, 30);
@@ -1774,16 +1804,21 @@ void b4Pause(byte** data) // 0, 0x00
     okToShowPic = TRUE;
 }
 
-void b4Echo_line(byte** data) // 0, 0x00 
+
+void b3Echo_line(byte** data) // 0, 0x00 
 {
 
 }
 
-void b4Cancel_line(byte** data) // 0, 0x00 
+
+void b3Cancel_line(byte** data) // 0, 0x00 
 {
     /*currentInputStr[0]=0;
     strPos=0;*/
 }
+
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM04")
 
 void b4Init_joy(byte** data) // 0, 0x00 
 {
@@ -1820,6 +1855,7 @@ void b4Set_scan_start(byte** data) // 0, 0x00
     logics[currentLog].entryPoint = logics[currentLog].currentPoint + 1;
     /* Does it return() at this point, or does it execute to the end?? */
 }
+
 
 void b4Reset_scan_start(byte** data) // 0, 0x00 
 {
@@ -1869,7 +1905,7 @@ void b4Print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions bef
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
     printInBoxBig(tempString, x, y, l);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1896,7 +1932,7 @@ void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], tempString);
+    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
     printInBoxBig(tempString, x, y, l);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -2027,7 +2063,7 @@ void b4Set_menu(byte** data) // 1, 0x00
 
     /* Create new menu and allocate space for MAX_MENU_SIZE items */
     newMenu.text = getMessagePointer(currentLog, messNum - 1);
-    
+
 #ifdef VERBOSE_MENU
     printf("The result is %p \n", newMenu.text);
 #endif // VERBOSE_MENU
@@ -2147,8 +2183,8 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 0: /* return */
         return FALSE;
         break;
-    case 1: trampoline_1(&b1Increment,ppCodeWindowAddress, bank); break;
-    case 2: trampoline_1(&b1Decrement,ppCodeWindowAddress, bank); break;
+    case 1: trampoline_1(&b1Increment, ppCodeWindowAddress, bank); break;
+    case 2: trampoline_1(&b1Decrement, ppCodeWindowAddress, bank); break;
     case 3: trampoline_1(&b1Assignn, ppCodeWindowAddress, bank); break;
     case 4: trampoline_1(&b1Assignv, ppCodeWindowAddress, bank); break;
     case 5: trampoline_1(&b1Addn, ppCodeWindowAddress, bank); break;
@@ -2165,7 +2201,7 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 16: trampoline_1(&b1Reset_v, ppCodeWindowAddress, bank); break;
     case 17: trampoline_1(&b1Toggle_v, ppCodeWindowAddress, bank); break;
     case 18:
-        trampoline_1(&b1New_room,ppCodeWindowAddress, bank);
+        trampoline_1(&b1New_room, ppCodeWindowAddress, bank);
         exitAllLogics = TRUE;
         return FALSE;
         break;
@@ -2177,7 +2213,7 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 20: trampoline_1(&b1Load_logics, ppCodeWindowAddress, bank); break;
     case 21: trampoline_1(&b1Load_logics_v, ppCodeWindowAddress, bank); break;
     case 22:
-        trampoline_1(&b1Call,ppCodeWindowAddress, bank);
+        trampoline_1(&b1Call, ppCodeWindowAddress, bank);
         /* The currentLog variable needs to be restored */
         *currentLog = logNum;
         if (exitAllLogics) return FALSE;
@@ -2290,27 +2326,27 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 115: trampoline_1(&b3Get_string, ppCodeWindowAddress, bank); break;
     case 116: trampoline_1(&b3Word_to_string, ppCodeWindowAddress, bank); break;
     case 117: trampoline_1(&b3Parse, ppCodeWindowAddress, bank); break;
-    case 118: trampoline_1(&b4Get_num, ppCodeWindowAddress, bank); break;
-    case 119: trampoline_1(&b4Prevent_input, ppCodeWindowAddress, bank); break;
-    case 120: trampoline_1(&b4Accept_input, ppCodeWindowAddress, bank); break;
-    case 121: trampoline_1(&b4Set_key, ppCodeWindowAddress, bank); break;
-    case 122: trampoline_1(&b4Add_to_pic, ppCodeWindowAddress, bank); break;
-    case 123: trampoline_1(&b4Add_to_pic_v, ppCodeWindowAddress, bank); break;
-    case 124: trampoline_1(&b4Status, ppCodeWindowAddress, bank); break;
-    case 125: trampoline_1(&b4Save_game, ppCodeWindowAddress, bank); break;
-    case 126: trampoline_1(&b4Restore_game, ppCodeWindowAddress, bank); break;
+    case 118: trampoline_1(&b3Get_num, ppCodeWindowAddress, bank); break;
+    case 119: trampoline_1(&b3Prevent_input, ppCodeWindowAddress, bank); break;
+    case 120: trampoline_1(&b3Accept_input, ppCodeWindowAddress, bank); break;
+    case 121: trampoline_1(&b3Set_key, ppCodeWindowAddress, bank); break;
+    case 122: trampoline_1(&b3Add_to_pic, ppCodeWindowAddress, bank); break;
+    case 123: trampoline_1(&b3Add_to_pic_v, ppCodeWindowAddress, bank); break;
+    case 124: trampoline_1(&b3Status, ppCodeWindowAddress, bank); break;
+    case 125: trampoline_1(&b3Save_game, ppCodeWindowAddress, bank); break;
+    case 126: trampoline_1(&b3Restore_game, ppCodeWindowAddress, bank); break;
     case 127: break;
-    case 128: trampoline_1(&b4Restart_game, ppCodeWindowAddress, bank); break;
-    case 129: trampoline_1(&b4Show_obj, ppCodeWindowAddress, bank); break;
-    case 130: trampoline_1(&b4Random_num, ppCodeWindowAddress, bank); break;
-    case 131: trampoline_1(&b4Program_control, ppCodeWindowAddress, bank); break;
-    case 132: trampoline_1(&b4Player_control, ppCodeWindowAddress, bank); break;
-    case 133: trampoline_1(&b4Obj_status_v, ppCodeWindowAddress, bank); break;
-    case 134: trampoline_1(&b4Quit, ppCodeWindowAddress, bank); break;
+    case 128: trampoline_1(&b3Restart_game, ppCodeWindowAddress, bank); break;
+    case 129: trampoline_1(&b3Show_obj, ppCodeWindowAddress, bank); break;
+    case 130: trampoline_1(&b3Random_num, ppCodeWindowAddress, bank); break;
+    case 131: trampoline_1(&b3Program_control, ppCodeWindowAddress, bank); break;
+    case 132: trampoline_1(&b3Player_control, ppCodeWindowAddress, bank); break;
+    case 133: trampoline_1(&b3Obj_status_v, ppCodeWindowAddress, bank); break;
+    case 134: trampoline_1(&b3Quit, ppCodeWindowAddress, bank); break;
     case 135: break;
-    case 136: trampoline_1(&b4Pause, ppCodeWindowAddress, bank); break;
-    case 137: trampoline_1(&b4Echo_line, ppCodeWindowAddress, bank); break;
-    case 138: trampoline_1(&b4Cancel_line, ppCodeWindowAddress, bank); break;
+    case 136: trampoline_1(&b3Pause, ppCodeWindowAddress, bank); break;
+    case 137: trampoline_1(&b3Echo_line, ppCodeWindowAddress, bank); break;
+    case 138: trampoline_1(&b3Cancel_line, ppCodeWindowAddress, bank); break;
     case 139: trampoline_1(&b4Init_joy, ppCodeWindowAddress, bank); break;
     case 140: break;
     case 141: trampoline_1(&b4Version, ppCodeWindowAddress, bank); break;
@@ -2468,8 +2504,8 @@ void ifHandler(byte** data, byte codeBank)
             RAM_BANK = IF_LOGIC_HANDLERS_BANK;
             ifHandlerBank = getBankBasedOnCode(ch);
 
-             testVal = ifLogicHandlers(ch, ppCodeWindowAddress, ifHandlerBank);
-           
+            testVal = ifLogicHandlers(ch, ppCodeWindowAddress, ifHandlerBank);
+
             RAM_BANK = previousBank;
 
 #ifdef VERBOSE_LOGIC_EXEC
@@ -2510,7 +2546,7 @@ void ifHandler(byte** data, byte codeBank)
             break;
         }
         RAM_BANK = previousBank;
- 
+
     }
 
 #ifdef DEBUG
@@ -2649,7 +2685,7 @@ void executeLogic(int logNum)
         printf("\n The code is %d, on bank %d address, %p \n", *code, RAM_BANK, code);
 #endif // VERBOSE
         codeAtTimeOfLastBankSwitch = *code;
-       instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
+        instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
 
 #ifdef VERBOSE_LOGIC_EXEC
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
@@ -2659,7 +2695,7 @@ void executeLogic(int logNum)
         {
             code++;
             RAM_BANK = INSTRUCTION_HANDLER_BANK;
-           stillExecuting = b5instructionHandler(codeAtTimeOfLastBankSwitch, &currentLog, logNum, ppCodeWindowAddress, instructionCodeBank);
+            stillExecuting = b5instructionHandler(codeAtTimeOfLastBankSwitch, &currentLog, logNum, ppCodeWindowAddress, instructionCodeBank);
             RAM_BANK = currentLogicFile.codeBank;
         }
         else {
