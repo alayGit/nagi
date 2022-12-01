@@ -2654,12 +2654,12 @@ void executeLogic(int logNum)
 
     while ((code < endPos) && stillExecuting) {
 
-        if (logNum != 0 && counter == 20)
+        if (logNum != 0 && counter == 9)
         {
 #ifdef VERBOSE_LOGIC_EXEC
             printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
 #endif // VERBOSE
-            //exit(0);
+            exit(0);
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);

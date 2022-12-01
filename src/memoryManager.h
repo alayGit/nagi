@@ -30,7 +30,7 @@
 #define EXTRA_SMALL_NO_BANKS 1
 #define SMALL_NO_BANKS 7
 #define MEDIUM_NO_BANKS 9
-#define LARGE_NO_BANKS 6
+#define LARGE_NO_BANKS 7
 
 #define TINY_FIRST_BANK  16
 #define EXTRA_SMALL_FIRST_BANK 17
@@ -71,12 +71,13 @@
 
 #define FIRST_CODE_BANK 1
 #define LAST_CODE_BANK 5
-#define NO_CODE_BANKS 6
+#define NO_CODE_BANKS 7
 
 
 //Code Banks
 #define LOAD_DIRS_BANK 6
 #define FILE_LOADER_HELPERS 6
+#define MEKA_BANK 7
 
 //Golden RAM
 #define LOCAL_WORK_AREA_START 514
@@ -93,7 +94,7 @@ extern byte* banked;
 
 extern int _noSegments;
 
-extern void _BANKRAM01_SIZE__[], _BANKRAM02_SIZE__[], _BANKRAM03_SIZE__[], _BANKRAM04_SIZE__[], _BANKRAM05_SIZE__[], _BANKRAM06_SIZE__[];
+extern void _BANKRAM01_SIZE__[], _BANKRAM02_SIZE__[], _BANKRAM03_SIZE__[], _BANKRAM04_SIZE__[], _BANKRAM05_SIZE__[], _BANKRAM06_SIZE__[], _BANKRAM07_SIZE__[];
 
 typedef struct {          /* DIR entry structure */
 	byte firstBank;

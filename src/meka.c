@@ -45,6 +45,7 @@ int dirnOfEgo, newRoomNum, score;
 
 extern int picFNum;    // Debugging. Delete at some stage!!
 
+#pragma code-name (push, "BANKRAM07")
 void adjustEgoPosition()
 {
    switch (var[2]) {
@@ -189,6 +190,17 @@ void timing_proc()
    }
 }
 
+void closedown()
+{
+   discardObjects();
+   discardWords();
+   closePicture();
+
+   exit(0);
+}
+
+#pragma code-name (pop)
+
 void initialise()
 {
     byte previousRamBank = RAM_BANK;
@@ -197,21 +209,21 @@ void initialise()
     initTimer(&timing_proc);
 
     RAM_BANK = LOAD_DIRS_BANK;
-   initFiles();             /* Load resource directories */
-   //// <<--  Determine exact version in here
-   for (i=0; i<255; i++) {  /* Initialize variables and flags */
-      var[i] = 0;
-      flag[i] = FALSE;
-   }
-   flag[5] = TRUE;
-   var[24] = 0x29;
-   var[22] = 3;
-   var[26] = 3;
-   var[8] = 255;     /* Number of free 256 byte pages of memory */
-   var[10] = 2;      /* Normal speed */
+    initFiles();             /* Load resource directories */
+    //// <<--  Determine exact version in here
+    for (i = 0; i < 255; i++) {  /* Initialize variables and flags */
+        var[i] = 0;
+        flag[i] = FALSE;
+    }
+    flag[5] = TRUE;
+    var[24] = 0x29;
+    var[22] = 3;
+    var[26] = 3;
+    var[8] = 255;     /* Number of free 256 byte pages of memory */
+    var[10] = 2;      /* Normal speed */
 
-   ///* SQ2 patch. I don't know where these are set in the game. */
-   ///* var[86] = 1; var[87] = 2; var[88] = 3; */
+    ///* SQ2 patch. I don't know where these are set in the game. */
+    ///* var[86] = 1; var[87] = 2; var[88] = 3; */
 
     initAGIScreen();
     initPalette();
@@ -227,17 +239,8 @@ void initialise()
 
     horizon = 36;
 
-   ///* Set up timer. The timer controls the interpreter speed. */
+    ///* Set up timer. The timer controls the interpreter speed. */
     counter = 0;
-}
-
-void closedown()
-{
-   discardObjects();
-   discardWords();
-   closePicture();
-
-   exit(0);
 }
 
 void main()
@@ -252,6 +255,7 @@ void main()
    //chdir("..\\KQ2-2917");
 
    initialise();
+   RAM_BANK = MEKA_BANK;
    while (TRUE) {
       /* Cycle initiator. Controlled by delay variable (var[10). */
       if (counter >= var[10]) {
