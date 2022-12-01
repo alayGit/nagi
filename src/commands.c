@@ -64,7 +64,7 @@ void executeLogic(int logNum);
 
 int getNum(char* inputString, int* i, int inputStringBank)
 {
-    char strPos = 0;
+   /* char strPos = 0;
     char* tempString = &BANK_RAM[GET_NUM_TEMP_START];
     byte previousRamBank = RAM_BANK;
 
@@ -80,7 +80,7 @@ int getNum(char* inputString, int* i, int inputStringBank)
     (*i)--;
 
     RAM_BANK = previousRamBank;
-    return (atoi(tempString));
+    return (atoi(tempString));*/
 }
 
 void menuChildInit()

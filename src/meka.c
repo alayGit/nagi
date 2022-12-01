@@ -191,10 +191,12 @@ void timing_proc()
 
 void initialise()
 {
+    byte previousRamBank = RAM_BANK;
     int i;
     memoryMangerInit();
     initTimer(&timing_proc);
 
+    RAM_BANK = LOAD_DIRS_BANK;
    initFiles();             /* Load resource directories */
    //// <<--  Determine exact version in here
    for (i=0; i<255; i++) {  /* Initialize variables and flags */

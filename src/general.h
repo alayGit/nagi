@@ -33,4 +33,9 @@ typedef struct {
 	int color_depth;
 } BITMAP;
 
+typedef struct {          /* DIR entry structure */
+	byte fileNum;
+	unsigned long filePos;
+} AGIFilePosType;
+
 #endif  /* _GENERAL_H_ */

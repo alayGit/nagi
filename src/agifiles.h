@@ -17,11 +17,6 @@
 
 #define  EMPTY  0xFFFFF   /* Empty DIR entry */
 
-typedef struct {          /* DIR entry structure */
-   byte fileNum;
-   unsigned long filePos;
-} AGIFilePosType;
-
 typedef struct {          /* AGI data file structure */
    unsigned int totalSize;
    unsigned int codeSize;

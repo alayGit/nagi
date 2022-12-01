@@ -10,7 +10,7 @@
 ***************************************************************************/
 //#define VERBOSE_DISPLAY_FILEOFFSETS
 //#define VERBOSE_DISPLAY_MESSAGES
-#define VERBOSE_DISPLAY_OFFSETS
+//#define VERBOSE_DISPLAY_OFFSETS
 #define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,12 +43,6 @@ boolean version3 = FALSE;
 ** the AGI files are for an AGIv3 game or for an AGIv2 game. It will also
 ** initialize the game signature in the case of a version 3 game.
 ***************************************************************************/
-void initFiles()
-{
-	//loadGameSig(gameSig);
-	//if (strlen(gameSig) > 0) version3 = TRUE;
-	loadAGIDirs();
-}
 
 byte cbm_openForSeeking(char* fileName)
 {
@@ -124,6 +118,9 @@ int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
 	// TODO: ERROR HANDLING!!!!!
 }
 
+
+#pragma code-name (push, "BANKRAM04")
+
 /***************************************************************************
 ** loadAGIDir
 **
@@ -137,9 +134,6 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 	unsigned char address[4] = { 0,0,0,0 };
 	AGIFilePosType tempPos;
 	int value;
-	byte previousBank = RAM_BANK;
-
-	RAM_BANK = DIRECTORY_BANK;
 
 	if ((fp = fopen(fName, "rb")) == NULL) {
 		printf("no file : %s.\n", fName);
@@ -166,7 +160,7 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 		switch (dirNum) {
 		case 0:
 		{
-			logdir[*count] = tempPos;
+			setLogicDirectory(&tempPos, &logdir[*count]);
 #ifdef VERBOSE_DISPLAY_FILEOFFSETS
 			printf("\n%d Logic File Name %s, Offset %lu\n", *count, logdir[*count].fileName, logdir[*count].filePos);
 #endif // VERBOSE_DISPLAY_FILEOFFSETS
@@ -176,7 +170,7 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 		}
 		case 1:
 		{
-			picdir[*count] = tempPos;
+			setLogicDirectory(&tempPos, &picdir[*count]);
 #ifdef VERBOSE_DISPLAY_FILEOFFSETS
 			printf("\n%d Pic File Name %s, Offset %lu\n", *count, picdir[*count].fileName, picdir[*count].filePos);
 #endif // VERBOSE_DISPLAY_FILEOFFSETS
@@ -184,14 +178,14 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 		break;
 		case 2:
 		{
-			viewdir[*count] = tempPos;
+		  setLogicDirectory(&tempPos,&viewdir[*count]);
 #ifdef VERBOSE_DISPLAY_FILEOFFSETS
 			printf("\n%d View File Name %s, Offset %lu\n", *count, viewdir[*count].fileName, viewdir[*count].filePos);
 #endif // VERBOSE_DISPLAY_FILEOFFSETS
 			break;
 		}
 		case 3:
-			snddir[*count] = tempPos;
+			setLogicDirectory(&tempPos, &snddir[*count]);
 
 #ifdef VERBOSE_DISPLAY_FILEOFFSETS
 			printf("\n%d sound File Name %s, Offset %lu\n", *count, snddir[*count].fileName, snddir[*count].filePos);
@@ -203,7 +197,6 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 	}
 
 	fclose(fp);
-	RAM_BANK = previousBank;
 }
 
 /***************************************************************************
@@ -294,45 +287,54 @@ void loadAGIDirs()
 	}
 }
 
+void initFiles()
+{
+	//loadGameSig(gameSig);
+	//if (strlen(gameSig) > 0) version3 = TRUE;
+	loadAGIDirs();
+}
+
+#pragma code-name (pop)
+
 #define  NORMAL     0
 #define  ALTERNATE  1
 
-/**************************************************************************
-** convertPic
-**
-** Purpose: To convert an AGIv3 resource to the AGIv2 format.
-**************************************************************************/
-void convertPic(unsigned char* input, unsigned char* output, int dataLen)
-{
-	unsigned char data, oldData, outData;
-	int mode = NORMAL, i = 0;
-
-	while (i++ < dataLen) {
-		data = *input++;
-
-		if (mode == ALTERNATE)
-			outData = ((data & 0xF0) >> 4) + ((oldData & 0x0F) << 4);
-		else
-			outData = data;
-
-		if ((outData == 0xF0) || (outData == 0xF2)) {
-			*output++ = outData;
-			if (mode == NORMAL) {
-				data = *input++;
-				*output++ = ((data & 0xF0) >> 4);
-				mode = ALTERNATE;
-			}
-			else {
-				*output++ = (data & 0x0F);
-				mode = NORMAL;
-			}
-		}
-		else
-			*output++ = outData;
-
-		oldData = data;
-	}
-}
+///**************************************************************************
+//** convertPic
+//**
+//** Purpose: To convert an AGIv3 resource to the AGIv2 format.
+//**************************************************************************/
+//void convertPic(unsigned char* input, unsigned char* output, int dataLen)
+//{
+//	unsigned char data, oldData, outData;
+//	int mode = NORMAL, i = 0;
+//
+//	while (i++ < dataLen) {
+//		data = *input++;
+//
+//		if (mode == ALTERNATE)
+//			outData = ((data & 0xF0) >> 4) + ((oldData & 0x0F) << 4);
+//		else
+//			outData = data;
+//
+//		if ((outData == 0xF0) || (outData == 0xF2)) {
+//			*output++ = outData;
+//			if (mode == NORMAL) {
+//				data = *input++;
+//				*output++ = ((data & 0xF0) >> 4);
+//				mode = ALTERNATE;
+//			}
+//			else {
+//				*output++ = (data & 0x0F);
+//				mode = NORMAL;
+//			}
+//		}
+//		else
+//			*output++ = outData;
+//
+//		oldData = data;
+//	}
+//}
 
 byte* readFileContentsIntoBankedRam(int size, byte* bank)
 {

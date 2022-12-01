@@ -1,6 +1,7 @@
 #ifndef _HELPERS_H_
 #define _HELPERS_H_
 #include "general.h"
+#include "memoryManager.h"
 #include <stdarg.h>
 #include <cx16.h>
 #include <string.h>
@@ -35,5 +36,7 @@ extern char* strcpyBanked(char* dest, const char* src, byte bank);
 extern void copyStringFromBanked(char* src, char* dest, int start, int chunk, byte sourceBank);
 
 extern int sprintfBanked(const char* buffer, byte bank, char const* const format, ...);
+
+extern void setLogicDirectory(AGIFilePosType* newLogicDirectory, AGIFilePosType* logicDirectoryLocation);
 
 #endif

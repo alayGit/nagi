@@ -74,6 +74,9 @@
 #define NO_CODE_BANKS 5
 
 
+//Code Banks
+#define LOAD_DIRS_BANK 4
+
 //Golden RAM
 #define LOCAL_WORK_AREA_START 514
 #define LOCAL_WORK_AREA_SIZE
