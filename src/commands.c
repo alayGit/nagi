@@ -34,7 +34,7 @@
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
 #define VERBOSE_STRING_CHECK
-//#define VERBOSE_LOGIC_EXEC
+#define VERBOSE_LOGIC_EXEC
 //#define VERBOSE_MENU
 //#define VERBOSE_MENU_DUMP
 //#define VERBOSE_MESSAGE_TEXT
@@ -2093,7 +2093,7 @@ void b4Set_menu_item(byte** data) // 2, 0x00
 
     messNum = *(*data)++;
     controllerNum = *(*data)++;
-
+    
     if (events[controllerNum].type == NO_EVENT) {
         events[controllerNum].type = MENU_EVENT;
     }
@@ -2104,10 +2104,13 @@ void b4Set_menu_item(byte** data) // 2, 0x00
     childMenu.menuTextBank = currentLogicFile.messageBank;
 
     setMenuChild(&childMenu, numOfMenus - 1);
+    
 
 #ifdef VERBOSE_MENU_DUMP
     testMenus();
 #endif // VERBOSE_MENU
+
+
 }
 
 void b4Submit_menu(byte** data) // 0, 0x00 
@@ -2609,6 +2612,10 @@ void executeLogic(int logNum)
     RAM_BANK = LOGIC_FILE_BANK;
     currentLogicFile = *currentLogic.data;
 
+
+    //printf("I am here in execute");
+    //exit(0);
+
 #ifdef DEBUG
     sprintf(debugString, "LOGIC.%d:       ", currentLog);
     drawBigString(screen, debugString, 0, 384, 0, 7);
@@ -2647,12 +2654,12 @@ void executeLogic(int logNum)
 
     while ((code < endPos) && stillExecuting) {
 
-        if (logNum != 0 && counter == 9)
+        if (logNum != 0 && counter == 20)
         {
 #ifdef VERBOSE_LOGIC_EXEC
             printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
 #endif // VERBOSE
-            exit(0);
+            //exit(0);
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);

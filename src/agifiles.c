@@ -10,7 +10,7 @@
 ***************************************************************************/
 //#define VERBOSE_DISPLAY_FILEOFFSETS
 //#define VERBOSE_DISPLAY_MESSAGES
-//#define VERBOSE_DISPLAY_OFFSETS
+#define VERBOSE_DISPLAY_OFFSETS
 #define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,7 +119,7 @@ int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
 }
 
 
-#pragma code-name (push, "BANKRAM04")
+#pragma code-name (push, "BANKRAM06")
 
 /***************************************************************************
 ** loadAGIDir
@@ -296,6 +296,28 @@ void initFiles()
 
 #pragma code-name (pop)
 
+byte* readFileContentsIntoBankedRam(int size, byte* bank)
+{
+	byte* result;
+	byte previousRamBank = RAM_BANK;
+
+	result = banked_alloc(size, bank);
+
+#ifdef VERBOSE
+	printf("Attempting to code data of size %d\n", size);
+#endif
+	RAM_BANK = *bank;
+	cbm_read(SEQUENTIAL_LFN, result, size);
+
+#ifdef VERBOSE
+	printf("Data is in bank %d at address %p and the first byte is %p and the size is %d \n", *bank, result, result[0], size);
+#endif // VERBOSE
+
+	RAM_BANK = previousRamBank;
+
+	return result;
+}
+
 #define  NORMAL     0
 #define  ALTERNATE  1
 
@@ -336,33 +358,9 @@ void initFiles()
 //	}
 //}
 
-byte* readFileContentsIntoBankedRam(int size, byte* bank)
-{
-	byte* result;
-	byte previousRamBank = RAM_BANK;
+#pragma code-name (push, "BANKRAM06")
 
-	result = banked_alloc(size, bank);
-
-#ifdef VERBOSE
-	printf("Attempting to code data of size %d\n", size);
-#endif
-	RAM_BANK = *bank;
-	cbm_read(SEQUENTIAL_LFN, result, size);
-
-#ifdef VERBOSE
-	printf("Data is in bank %d at address %p and the first byte is %p and the size is %d \n", *bank, result, result[0], size);
-#endif // VERBOSE
-
-	RAM_BANK = previousRamBank;
-
-	return result;
-}
-
-
-int getMessageSectionSize(AGIFile* AGIData)
-{
-	return AGIData->totalSize - AGIData->codeSize - 5 - AGIData->noMessages * 2;
-}
+#define getMessageSectionSize AGIData->totalSize - AGIData->codeSize - 5 - AGIData->noMessages * 2
 
 unsigned int getPositionOfFirstMessage(AGIFile* AGIData)
 {
@@ -436,12 +434,16 @@ byte seekAndReadLogicIntoMemory(AGIFile* AGIData)
 	return bank;
 }
 
+#pragma code-name (pop)
+
 //https://www.liquisearch.com/what_is_avis_durgan
 void xOrAvisDurgan(byte* toXOR, unsigned int* avisPos)
 {
 	*toXOR ^= avisDurgan[*avisPos];
 	*avisPos = (*avisPos + 1) % 11;
 }
+
+
 
 /**************************************************************************
 ** loadAGIFile
@@ -471,6 +473,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	byte previousRamBank = RAM_BANK;
 	char fileName[10];
 
+	previousRamBank = RAM_BANK;
+
 	if (location->filePos == EMPTY) {
 #ifdef VERBOSE
 		printf("Could not find requested AGI file, as the filePos is empty.\n");
@@ -487,6 +491,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	lfn = cbm_openForSeeking(&fileName[0]);
 
+	RAM_BANK = FILE_LOADER_HELPERS;
+
 	seekAndCheckSignature(&fileName[0], location);
 	AGIData->codeBank = seekAndReadLogicIntoMemory(AGIData);
 
@@ -496,20 +502,21 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
-
+		
 		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &AGIData->messageBank);
 		AGIData->messagePointers = (byte**)&wholeMessageSectionData[0];
+
+
 		AGIData->messageData = &wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
 
-		previousRamBank = RAM_BANK;
 		RAM_BANK = AGIData->messageBank;
 
 #ifdef VERBOSE
-		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize(AGIData));
+		printf("\nTrying to iterate from %d to %d\n", getMessageSectionSize);
 #endif
 		offsetPointer = AGIData->messagePointers;
 
-		for (i = 0; i < getMessageSectionSize(AGIData); i++) {
+		for (i = 0; i < getMessageSectionSize; i++) {
 
 			xOrAvisDurgan((byte*)&AGIData->messageData[i], &avisPos);
 			convertAsciiByteToPetsciiByte(&AGIData->messageData[i]);
@@ -623,5 +630,4 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 #ifdef VERBOSE
 	printf("File closed");
 #endif // VERBOSE
-
 	}
