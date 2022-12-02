@@ -26,10 +26,15 @@
 typedef void (*fnTrampoline_1)(void* data);
 typedef byte (*fnTrampoline_1b)(void* data);
 
+typedef void (*fnTrampoline_1v)(byte data);
+
+
 byte convertAsciiByteToPetsciiByte(byte* toConvert);
 
 extern void trampoline_1(fnTrampoline_1 func, void* data, byte bank);
 extern byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank);
+
+extern void trampoline_1v(fnTrampoline_1v func, byte data, byte bank);
 
 extern char* strcpyBanked(char* dest, const char* src, byte bank);
 

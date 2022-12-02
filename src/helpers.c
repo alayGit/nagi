@@ -36,6 +36,14 @@ byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank)
 	return returnVal;
 }
 
+void trampoline_1v(fnTrampoline_1v func, byte data, byte bank)
+{
+	byte previousRamBank = RAM_BANK;
+	RAM_BANK = bank;
+	func(data);
+	RAM_BANK = previousRamBank;
+}
+
 char* strcpyBanked(char* dest, const char* src, byte bank)
 {
 	char* result;
@@ -90,5 +98,7 @@ void setLogicDirectory(AGIFilePosType* newLogicDirectory, AGIFilePosType* logicD
 
 	RAM_BANK = previousRamBank;
 }
+
+
 
 

@@ -21,6 +21,72 @@
 ** not. If it isn't loaded, then the data is not in memory. */
 LOGICEntry* logics = (LOGICEntry*)&BANK_RAM[LOGIC_ENTRY_START];
 
+void getLogicDirectory(AGIFilePosType* returnedLogicDirectory, AGIFilePosType* logicDirectoryLocation)
+{
+	byte previousRamBank = RAM_BANK;
+
+	RAM_BANK = DIRECTORY_BANK;
+
+	*returnedLogicDirectory = *logicDirectoryLocation;
+
+	RAM_BANK = previousRamBank;
+}
+
+void getLogicFile(LOGICFile* logicFile, byte logicFileNo)
+{
+	byte previousBank = RAM_BANK;
+	LOGICEntry logicEntry;
+
+	RAM_BANK = LOGIC_ENTRY_BANK;
+
+	logicEntry = logics[logicFileNo];
+
+	RAM_BANK = LOGIC_FILE_BANK;
+	*logicFile = *logicEntry.data;
+
+	RAM_BANK = previousBank;
+}
+
+void setLogicFile(LOGICFile* logicFile, byte logicFileNo)
+{
+	byte previousBank = RAM_BANK;
+	LOGICEntry logicEntry;
+
+	RAM_BANK = LOGIC_ENTRY_BANK;
+
+	logicEntry = logics[logicFileNo];
+
+	RAM_BANK = LOGIC_FILE_BANK;
+
+	*logicFile;
+	*(logicEntry.data) = *logicFile;
+
+	RAM_BANK = previousBank;
+}
+
+void setLogicEntry(LOGICEntry* logicEntry, byte logicFileNo)
+{
+	byte previousBank = RAM_BANK;
+
+	RAM_BANK = LOGIC_ENTRY_BANK;
+
+	logics[logicFileNo] = *logicEntry;
+
+	RAM_BANK = previousBank;
+}
+
+void getLogicEntry(LOGICEntry* logicEntry, byte logicFileNo)
+{
+	byte previousBank = RAM_BANK;
+
+	RAM_BANK = LOGIC_ENTRY_BANK;
+	logics[logicFileNo].data = &((LOGICFile*)&BANK_RAM[LOGIC_FILE_BANK])[logicFileNo];
+	*logicEntry = logics[logicFileNo];
+
+	RAM_BANK = previousBank;
+}
+
+
 /***************************************************************************
 ** initLogics
 **
@@ -29,6 +95,7 @@ LOGICEntry* logics = (LOGICEntry*)&BANK_RAM[LOGIC_ENTRY_START];
 ** are marked as unloaded. Make sure you call initFiles() before calling
 ** this function.
 ***************************************************************************/
+#pragma code-name (push, "BANKRAM08")
 void initLogics()
 {
 	int i;
@@ -50,19 +117,17 @@ void initLogics()
 ** Purpose: To load a LOGIC file, decode the messages, and store in a
 ** suitable structure.
 **************************************************************************/
-void loadLogicFile(int logFileNum)
+void loadLogicFile(byte logFileNum)
 {
 	AGIFile tempAGI;
 	AGIFilePosType agiFilePosType;
 	LOGICEntry logicEntry;
-	LOGICFile* logicData;
+	LOGICFile logicData;
 
 	int dummy;
-	byte previousRamBank = RAM_BANK;
 
-	RAM_BANK = DIRECTORY_BANK;
-	agiFilePosType = logdir[logFileNum];
-	RAM_BANK = previousRamBank;
+	getLogicEntry(&logicEntry, logFileNum);
+	getLogicDirectory(&agiFilePosType, &logdir[logFileNum]);
 
 #ifdef VERBOSE
 	printf("\n%d Retrieved file num %d, Offset %lu\n", logFileNum, agiFilePosType.filePos);
@@ -79,31 +144,30 @@ void loadLogicFile(int logFileNum)
 
 	loadAGIFile(LOGIC, &agiFilePosType, &tempAGI);
 
-	RAM_BANK = LOGIC_FILE_BANK;
-	logicData = &((LOGICFile*)&BANK_RAM[LOGIC_FILE_BANK])[logFileNum];
-	logicData->codeBank = tempAGI.codeBank;
-	logicData->codeSize = tempAGI.codeSize;
-	logicData->logicCode = tempAGI.code;
-	logicData->messageBank = tempAGI.messageBank;
-	logicData->messages = (byte**)tempAGI.messagePointers;
-	logicData->numMessages = tempAGI.noMessages;
+	getLogicFile(&logicData, logFileNum);
+	logicData.codeBank = tempAGI.codeBank;
+	logicData.codeSize = tempAGI.codeSize;
+	logicData.logicCode = tempAGI.code;
+	logicData.messageBank = tempAGI.messageBank;
+	logicData.messages = (byte**)tempAGI.messagePointers;
+	logicData.numMessages = tempAGI.noMessages;
 
 #ifdef VERBOSE
 	printf("The codebank is %d, the code size is %d, the messageBank is %d, \n and the number of messages is %d, the code pointer is non zero and matched against temp agi %d the message pointer is non zero and matches temp agi %d \n",
-		logicData->codeBank, logicData->codeSize, logicData->messageBank, logicData->numMessages
-		, logicData->logicCode == tempAGI.code && logicData->logicCode
-		, logicData->messages == (byte**)tempAGI.messagePointers && logicData->messages
+		logicData.codeBank, logicData.codeSize, logicData.messageBank, logicData.numMessages
+		, logicData.logicCode == tempAGI.code && logicData.logicCode
+		, logicData.messages == (byte**)tempAGI.messagePointers && logicData.messages
 	);
 
 #endif // VERBOSE
-	RAM_BANK = LOGIC_ENTRY_BANK;
 
-	logics[logFileNum].data = logicData;
-	logicEntry = logics[logFileNum];
+	setLogicFile(&logicData, logFileNum);
+	
+	logicEntry.loaded = TRUE;
 
-	logics[logFileNum].loaded = TRUE;
+	setLogicEntry(&logicEntry, logFileNum);
 
-	RAM_BANK = previousRamBank;
+
 }
 
 /**************************************************************************
@@ -113,33 +177,37 @@ void loadLogicFile(int logFileNum)
 ** struct. This function can only be used with dynamically allocated
 ** LOGICFile structs which is what I plan to use.
 **************************************************************************/
-void discardLogicFile(int logFileNum)
+void discardLogicFile(byte logFileNum)
 {
-	byte previousRamBank = RAM_BANK;
 	int messNum;
-	LOGICFile* logicData;
+	LOGICFile logicData;
+	LOGICEntry logicEntry;
 
-	RAM_BANK = LOGIC_ENTRY_BANK;
-	if (logics[logFileNum].loaded) {
-		logicData = logics[logFileNum].data;
-		if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->messages, logicData->messageBank))
+	getLogicFile(&logicData, logFileNum);
+	getLogicEntry(&logicEntry, logFileNum);
+
+	if (logicEntry.loaded) {
+
+		if (logicEntry.loaded && !banked_dealloc((byte*)logicData.messages, logicData.messageBank))
 		{
 #ifdef VERBOSE
-			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData.codeBank);
 #endif // VERBOSE
 		}
 
-		if (logics[logFileNum].loaded && !banked_dealloc((byte*)logicData->logicCode, logicData->codeBank))
+		if (logicEntry.loaded && !banked_dealloc((byte*)logicData.logicCode, logicData.codeBank))
 		{
 #ifdef VERBOSE
-			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData->codeBank);
+			printf("Failed to deallocate messages for logic %d in bank %d", logFileNum, logicData.codeBank);
 #endif
 		}
 
-		logics[logFileNum].loaded = FALSE;
+		logicEntry.loaded = FALSE;
+		setLogicEntry(&logicEntry, logFileNum);
 	}
-	RAM_BANK = previousRamBank;
 }
+
+#pragma code-name (pop)
 
 void testLogic()
 {

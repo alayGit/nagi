@@ -68,9 +68,11 @@ void adjustEgoPosition()
 
 void discardResources()
 {
-   int i;
+   byte i;
 
-   for (i=1; i<256; i++) discardLogicFile(i);
+   for (i = 1; i < 256; i++) { 
+       trampoline_1v(&discardLogicFile, i, LOGIC_FILE_BANK);
+   }
    for (i=0; i<256; i++) discardView(i);
    for (i=0; i<256; i++) discardPictureFile(i);
    for (i=0; i<256; i++) discardSoundFile(i);
@@ -227,6 +229,8 @@ void initialise()
 
     initAGIScreen();
     initPalette();
+
+    RAM_BANK = LOGIC_CODE_BANK;
     initLogics();
     initPicture();
     initPictures();
@@ -241,6 +245,8 @@ void initialise()
 
     ///* Set up timer. The timer controls the interpreter speed. */
     counter = 0;
+
+    RAM_BANK = previousRamBank;
 }
 
 void main()

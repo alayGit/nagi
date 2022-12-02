@@ -33,8 +33,8 @@
 #define  PLAYER_CONTROL   0
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
-#define VERBOSE_STRING_CHECK
-#define VERBOSE_LOGIC_EXEC
+//#define VERBOSE_STRING_CHECK
+//#define VERBOSE_LOGIC_EXEC
 //#define VERBOSE_MENU
 //#define VERBOSE_MENU_DUMP
 //#define VERBOSE_MESSAGE_TEXT
@@ -162,22 +162,6 @@ void setMenuChild(MENU* menu, byte menuNo)
 //
 //    RAM_BANK = previousBank;
 //}
-
-
-void getLogicFile(LOGICFile* logicFile, byte logicFileNo)
-{
-    byte previousBank = RAM_BANK;
-    LOGICEntry logicEntry;
-
-    RAM_BANK = LOGIC_ENTRY_BANK;
-
-    logicEntry = logics[logicFileNo];
-
-    RAM_BANK = LOGIC_FILE_BANK;
-    *logicFile = *logicEntry.data;
-
-    RAM_BANK = previousBank;
-}
 
 char* getMessagePointer(byte logicFileNo, byte messageNo)
 {
@@ -635,12 +619,12 @@ void b1New_room_v(byte** data) // 1, 0x80
 
 void b1Load_logics(byte** data) // 1, 0x00 
 {
-    loadLogicFile(*(*data)++);
+    trampoline_1v(&loadLogicFile,*(*data)++, LOGIC_CODE_BANK);
 }
 
 void b1Load_logics_v(byte** data) // 1, 0x80 
 {
-    loadLogicFile(var[*(*data)++]);
+    trampoline_1v(&loadLogicFile, var[*(*data)++], LOGIC_CODE_BANK);
 }
 
 void b1Call(byte** data) // 1, 0x00 
@@ -2625,6 +2609,8 @@ void executeLogic(int logNum)
     ** not already in memory. */
     if (!currentLogic.loaded) {
         discardAfterward = TRUE;
+        
+        RAM_BANK = LOGIC_CODE_BANK;
         loadLogicFile(logNum);
 
         RAM_BANK = LOGIC_ENTRY_BANK;

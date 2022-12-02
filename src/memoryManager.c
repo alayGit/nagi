@@ -96,7 +96,8 @@ void bankedRamInit()
 		(int)_BANKRAM04_SIZE__,
 		(int)_BANKRAM05_SIZE__,
 		(int)_BANKRAM06_SIZE__,
-		(int)_BANKRAM07_SIZE__
+		(int)_BANKRAM07_SIZE__,
+		(int)_BANKRAM08_SIZE__
 
 	};
 
