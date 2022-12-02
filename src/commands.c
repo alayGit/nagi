@@ -34,7 +34,7 @@
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
 //#define VERBOSE_STRING_CHECK
-//#define VERBOSE_LOGIC_EXEC
+#define VERBOSE_LOGIC_EXEC
 //#define VERBOSE_MENU
 //#define VERBOSE_MENU_DUMP
 //#define VERBOSE_MESSAGE_TEXT
@@ -1633,6 +1633,7 @@ void b3Set_key(byte** data) // 3, 0x00
     scanCode = *(*data)++;
     eventCode = *(*data)++;
 
+
     /* Ignore cases which have both values set for now. They seem to behave
     ** differently than normal and often specify controllers that have
     ** already been defined.
@@ -2640,12 +2641,12 @@ void executeLogic(int logNum)
 
     while ((code < endPos) && stillExecuting) {
 
-        if (logNum != 0 && counter == 9)
+        if (logNum != 0 && counter == 61)
         {
 #ifdef VERBOSE_LOGIC_EXEC
             printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
 #endif // VERBOSE
-            exit(0);
+            //exit(0);
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
@@ -2742,7 +2743,10 @@ void executeLogic(int logNum)
         counter++;
     }
 
-    if (discardAfterward) discardLogicFile(logNum);
+    if (discardAfterward) {
+        RAM_BANK = LOGIC_CODE_BANK;
+        discardLogicFile(logNum);
+    }
 
     RAM_BANK = previousRamBank;
 }
