@@ -82,7 +82,7 @@
 
 //Golden RAM
 #define LOCAL_WORK_AREA_START 514
-#define LOCAL_WORK_AREA_SIZE
+#define LOCAL_WORK_AREA_SIZE 256
 
 
 

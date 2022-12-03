@@ -99,12 +99,15 @@ void getLogicEntry(LOGICEntry* logicEntry, byte logicFileNo)
 void initLogics()
 {
 	int i;
+	LOGICEntry logicEntry;
 
 	for (i = 0; i < 256; i++) {
-		logics[i].loaded = FALSE;
-		logics[i].entryPoint = 0;
-		logics[i].currentPoint = 0;
-		logics[i].data = NULL;
+		getLogicEntry(&logicEntry, i);
+
+		logicEntry.loaded = FALSE;
+		logicEntry.entryPoint = 0;
+		logicEntry.currentPoint = 0;
+		logicEntry.data = NULL;
 	}
 
 	loadLogicFile(0);

@@ -1406,15 +1406,17 @@ void b3ProcessString(char* stringPointer, byte stringBank, char* outputString)
 
 void b3Print(byte** data) // 1, 00 
 {
-    char* tempString = (char*)malloc(256);
+    char* tempString = (char*) & GOLDEN_RAM[LOCAL_WORK_AREA_START];
     BITMAP* temp;
+    
+    char* messagePointer = getMessagePointer(currentLog, (*(*data)++) - 1);
 
     show_mouse(NULL);
     temp = create_bitmap(640, 336);
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[(*(*data)++) - 1], 0, tempString);
+    b3ProcessString(messagePointer, 0, tempString);
     printInBoxBig(tempString, -1, -1, 30);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1422,8 +1424,6 @@ void b3Print(byte** data) // 1, 00
     blit(temp, agi_screen, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     destroy_bitmap(temp);
-
-    free(tempString);
 }
 
 void b3Print_v(byte** data) // 1, 0x80 
@@ -1431,11 +1431,13 @@ void b3Print_v(byte** data) // 1, 0x80
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
 
+    char* messagePointer = getMessagePointer(currentLog,(var[*(*data)++]) - 1);
+
     show_mouse(NULL);
     temp = create_bitmap(640, 336);
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[(var[*(*data)++]) - 1], 0, tempString);
+    b3ProcessString(messagePointer, 0, tempString);
     //printf("Warning Print In Bigbox Not Implemented Implement This");
     //printInBoxBig2(tempString, -1, -1, 30);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
@@ -1451,11 +1453,15 @@ void b3Display(byte** data) // 3, 0x00
 {
     int row, col, messNum;
     char* tempString = malloc(256);
+    char* messagePointer;
 
     col = *(*data)++;
     row = *(*data)++;
     messNum = *(*data)++;
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
+
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+
+    b3ProcessString(messagePointer, 0, tempString);
     drawBigString(screen, tempString, row * 16, 20 + (col * 16), agi_fg, agi_bg);
     /*lprintf("info: display() %s, fg: %d bg: %d row: %d col: %d",
        tempString, agi_fg, agi_bg, row, col);*/
@@ -1467,13 +1473,16 @@ void b3Display_v(byte** data) // 3, 0xE0
 {
     int row, col, messNum;
     char* tempString = (char*)malloc(256);
+    char* messagePointer;
 
     col = var[*(*data)++];
     row = var[*(*data)++];
     messNum = var[*(*data)++];
     //drawString(picture, logics[currentLog].data->messages[messNum-1],
     //   row*8, col*8, agi_fg, agi_bg);
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
+
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+    b3ProcessString(messagePointer, 0, tempString);
     drawBigString(screen, tempString, row * 16, 20 + (col * 16), agi_fg, agi_bg);
     /*lprintf("info: display.v() %s, foreground: %d background: %d",
        tempString, agi_fg, agi_bg);*/
@@ -1566,22 +1575,32 @@ void b3Status_line_off(byte** data) // 0, 0x00
 void b3Set_string(byte** data) // 2, 0x00 
 {
     int stringNum, messNum;
+    char* messagePointer;
+    LOGICFile logicFile;
+
+    getLogicFile(&logicFile, currentLog);
 
     stringNum = *(*data)++;
     messNum = *(*data)++;
-    strcpy(string[stringNum], logics[currentLog].data->messages[messNum - 1]);
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+
+    strcpyBanked(string[stringNum - 1], messagePointer, logicFile.messageBank);
 }
 
 void b3Get_string(byte** data) // 5, 0x00 
 {
     int strNum, messNum, row, col, l;
+    char* messagePointer;
 
     strNum = *(*data)++;
     messNum = *(*data)++;
     col = *(*data)++;
     row = *(*data)++;
     l = *(*data)++;
-    getString(logics[currentLog].data->messages[messNum - 1], string[strNum], row, col, l);
+
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+
+    getString(messagePointer, string[strNum], row, col, l);
 }
 
 void b3Word_to_string(byte** data) // 2, 0x00 
@@ -1605,10 +1624,13 @@ void b3Get_num(byte** data) // 2, 0x40
 {
     int messNum, varNum;
     char temp[80];
+    char* messagePointer;
 
     messNum = *(*data)++;
     varNum = *(*data)++;
-    getString(logics[currentLog].data->messages[messNum - 1], temp, 1, 23, 3);
+
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+    getString(messagePointer, temp, 1, 23, 3);
     var[varNum] = atoi(temp);
 }
 
@@ -1836,15 +1858,27 @@ void b4Log(byte** data) // 1, 0x00
 
 void b4Set_scan_start(byte** data) // 0, 0x00 
 {
+    LOGICEntry logicEntry;
+
+    getLogicEntry(&logicEntry, currentLog);
+
     /* currentPoint is set in executeLogic() */
-    logics[currentLog].entryPoint = logics[currentLog].currentPoint + 1;
+    logicEntry.entryPoint = logicEntry.currentPoint + 1;
     /* Does it return() at this point, or does it execute to the end?? */
+
+    setLogicEntry(&logicEntry, currentLog);
 }
 
 
 void b4Reset_scan_start(byte** data) // 0, 0x00 
 {
-    logics[currentLog].entryPoint = 0;
+    LOGICEntry logicEntry;
+
+    getLogicEntry(&logicEntry, currentLog);
+
+    logicEntry.entryPoint = 0;
+
+    setLogicEntry(&logicEntry, currentLog);
 }
 
 void b4Reposition_to(byte** data) // 3, 0x00 
@@ -1880,6 +1914,7 @@ void b4Print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions bef
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
     int messNum, x, y, l;
+    char* messagePointer;
 
     messNum = *(*data)++;
     x = *(*data)++;
@@ -1890,7 +1925,10 @@ void b4Print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions bef
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
+
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+
+    b3ProcessString(messagePointer, 0, tempString);
     printInBoxBig(tempString, x, y, l);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -1907,6 +1945,7 @@ void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
     int messNum, x, y, l;
+    char* messagePointer;
 
     messNum = var[*(*data)++];
     x = *(*data)++;
@@ -1917,7 +1956,9 @@ void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
     blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
     show_mouse(screen);
     while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
-    b3ProcessString(logics[currentLog].data->messages[messNum - 1], 0, tempString);
+
+    messagePointer = getMessagePointer(currentLog, messNum - 1);
+    b3ProcessString(messagePointer, 0, tempString);
     printInBoxBig(tempString, x, y, l);
     while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
     while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
@@ -2385,32 +2426,44 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
 
 int ifLogicHandlers(byte ch, byte** ppCodeWindowAddress, byte bank)
 {
+
+    int result;
+
+#ifdef VERBOSE_LOGIC_EXEC
+    printf("If Check %d d1 %d, %d", ch, *(*ppCodeWindowAddress), *(*ppCodeWindowAddress + 1));
+#endif // VERBOSE_LOGIC_EXEC
+
     switch (ch) {
-    case 0: return FALSE; break; /* Should never happen */
-    case 1: return trampoline_1b(&b1Equaln, ppCodeWindowAddress, bank); break;
-    case 2: return trampoline_1b(&b1Equalv, ppCodeWindowAddress, bank); break;
-    case 3: return trampoline_1b(&b1Lessn, ppCodeWindowAddress, bank); break;
-    case 4: return trampoline_1b(&b1Lessv, ppCodeWindowAddress, bank); break;
-    case 5: return trampoline_1b(&b1Greatern, ppCodeWindowAddress, bank); break;
-    case 6: return trampoline_1b(&b1Greaterv, ppCodeWindowAddress, bank); break;
-    case 7: return trampoline_1b(&b1Isset, ppCodeWindowAddress, bank); break;
-    case 8: return trampoline_1b(&b1Issetv, ppCodeWindowAddress, bank); break;
-    case 9: return trampoline_1b(&b1Has, ppCodeWindowAddress, bank); break;
-    case 10: return trampoline_1b(&b1Obj_in_room, ppCodeWindowAddress, bank); break;
-    case 11: return trampoline_1b(&b1Posn, ppCodeWindowAddress, bank); break;
-    case 12: return trampoline_1b(&b1Controller, ppCodeWindowAddress, bank); break;
-    case 13: return trampoline_1b(&b1Have_key, ppCodeWindowAddress, bank); break;
-    case 14: return trampoline_1b(&said, ppCodeWindowAddress, bank); break;
-    case 15: return trampoline_1b(&b1Compare_strings, ppCodeWindowAddress, bank); break;
-    case 16: return trampoline_1b(&b1Obj_in_box, ppCodeWindowAddress, bank); break;
-    case 17: return trampoline_1b(&b1Center_posn, ppCodeWindowAddress, bank); break;
-    case 18: return trampoline_1b(&b1Right_posn, ppCodeWindowAddress, bank); break;
+    case 0: result = FALSE; break; /* Should never happen */
+    case 1: result = trampoline_1b(&b1Equaln, ppCodeWindowAddress, bank); break;
+    case 2: result = trampoline_1b(&b1Equalv, ppCodeWindowAddress, bank); break;
+    case 3: result = trampoline_1b(&b1Lessn, ppCodeWindowAddress, bank); break;
+    case 4: result = trampoline_1b(&b1Lessv, ppCodeWindowAddress, bank); break;
+    case 5: result = trampoline_1b(&b1Greatern, ppCodeWindowAddress, bank); break;
+    case 6: result = trampoline_1b(&b1Greaterv, ppCodeWindowAddress, bank); break;
+    case 7: result = trampoline_1b(&b1Isset, ppCodeWindowAddress, bank); break;
+    case 8: result = trampoline_1b(&b1Issetv, ppCodeWindowAddress, bank); break;
+    case 9: result = trampoline_1b(&b1Has, ppCodeWindowAddress, bank); break;
+    case 10: result = trampoline_1b(&b1Obj_in_room, ppCodeWindowAddress, bank); break;
+    case 11: result = trampoline_1b(&b1Posn, ppCodeWindowAddress, bank); break;
+    case 12: result = trampoline_1b(&b1Controller, ppCodeWindowAddress, bank); break;
+    case 13: result = trampoline_1b(&b1Have_key, ppCodeWindowAddress, bank); break;
+    case 14: result = trampoline_1b(&said, ppCodeWindowAddress, bank); break;
+    case 15: result = trampoline_1b(&b1Compare_strings, ppCodeWindowAddress, bank); break;
+    case 16: result = trampoline_1b(&b1Obj_in_box, ppCodeWindowAddress, bank); break;
+    case 17: result = trampoline_1b(&b1Center_posn, ppCodeWindowAddress, bank); break;
+    case 18: result = trampoline_1b(&b1Right_posn, ppCodeWindowAddress, bank); break;
     default:
         ////lprintf("catastrophe: Illegal test [%d], logic %d, posn %d.",
             //ch, currentLog, logics[currentLog].currentPoint);
-        return FALSE;
+        result = FALSE;
         break; /* Should never happen */
     }
+
+#ifdef VERBOSE_LOGIC_EXEC
+   printf(" And the result is %d \n", result);
+#endif // VERBOSE_LOGIC_EXEC
+    return result;
 }
 
 #pragma code-name (pop)
@@ -2435,6 +2488,9 @@ byte getBankBasedOnCode(byte code)
     }
     return RAM_BANK;
 }
+
+int opCounter = 0;
+int printCounter = 1;
 
 /***************************************************************************
 ** ifHandler
@@ -2465,6 +2521,9 @@ void ifHandler(byte** data, byte codeBank)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif
+#ifdef VERBOSE_LOGIC_EXEC
+        printf("-- %d %d\n", printCounter++, ch);
+#endif // VERBOSE_LOGIC_EXEC
         switch (ch) {
         case 0xff: /* Closing if bracket. Expression must be true. */
 #ifdef DEBUG
@@ -2583,7 +2642,6 @@ void executeLogic(int logNum)
     boolean lastCodeWasNonWindow = FALSE;
 
     //Temp
-    int counter = 0;
 
     short int disp;
     char debugString[80];
@@ -2641,12 +2699,12 @@ void executeLogic(int logNum)
 
     while ((code < endPos) && stillExecuting) {
 
-        if (logNum != 0 && counter == 61)
+        if (opCounter == 300)
         {
 #ifdef VERBOSE_LOGIC_EXEC
-            printf("The code is now %u and the address is %p and the bank is %d \n", *code, code, RAM_BANK);
+            printf("The code is now %u and the address is %p and the bank is %d and the log num is %d \n", *code, code, RAM_BANK, logNum);
 #endif // VERBOSE
-            //exit(0);
+            exit(0);
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
@@ -2676,12 +2734,12 @@ void executeLogic(int logNum)
         }
 #endif  
 #ifdef VERBOSE_LOGIC_EXEC
-        printf("\n The code is %d, on bank %d address, %p \n", *code, RAM_BANK, code);
+        printf("\n The code is %d, on bank %d address, %p log num %d\n", *code, RAM_BANK, code, logNum);
 #endif // VERBOSE
         codeAtTimeOfLastBankSwitch = *code;
         instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
-
 #ifdef VERBOSE_LOGIC_EXEC
+        printf("%d %d\n", printCounter++, codeAtTimeOfLastBankSwitch);
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
 #endif // VERBOSE 
 
@@ -2740,7 +2798,7 @@ void executeLogic(int logNum)
 
         lastCodeWasNonWindow = FALSE;
 
-        counter++;
+        opCounter++;
     }
 
     if (discardAfterward) {

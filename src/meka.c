@@ -68,10 +68,10 @@ void adjustEgoPosition()
 
 void discardResources()
 {
-   byte i;
+   int i;
 
    for (i = 1; i < 256; i++) { 
-       trampoline_1v(&discardLogicFile, i, LOGIC_FILE_BANK);
+       trampoline_1v(&discardLogicFile, i, LOGIC_CODE_BANK);
    }
    for (i=0; i<256; i++) discardView(i);
    for (i=0; i<256; i++) discardPictureFile(i);
@@ -111,6 +111,9 @@ void newRoom()
    memset(directions, 0, 9);
    /* rectfill(screen, 0, 20+(22*16), 639, 463, 0); */   /* Clear screen */
    clear(screen);
+#ifdef VERBOSE
+   printf("New room code called");
+#endif // VERBOSE
 }
 
 /***************************************************************************
@@ -156,6 +159,7 @@ void interpret()
       hasEnteredNewRoom = FALSE;
       exitAllLogics = FALSE;
       executeLogic(0);
+      printf("Back To Meka");
       //dirnOfEgo = var[6];
       viewtab[0].direction = var[6];
       // <<-- Update status line here (score & sound)
@@ -165,7 +169,7 @@ void interpret()
       flag[5] = 0;
       flag[6] = FALSE;
       flag[12] = FALSE;
-      if (!hasEnteredNewRoom) //updateObjects();
+      if (!hasEnteredNewRoom) {} //updateObjects();
       if (hasEnteredNewRoom) newRoom();
    } while (hasEnteredNewRoom);
 }

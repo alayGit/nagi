@@ -34,6 +34,8 @@ void discardLogicFile(byte logFileNum);
 
 extern void getLogicDirectory(AGIFilePosType* returnedLogicDirectory, AGIFilePosType* logicDirectoryLocation);
 extern void getLogicFile(LOGICFile* logicFile, byte logicFileNo);
+extern void getLogicEntry(LOGICEntry* logicEntry, byte logicFileNo);
+extern void setLogicEntry(LOGICEntry* logicEntry, byte logicFileNo);
 
 
 #endif  /* _LOGIC_H_ */
