@@ -8,7 +8,7 @@
 ** (c) 1997 Lance Ewing - Original code (2 July 97)
 **                        Changed (26 Aug 97)
 **************************************************************************/
-//#define VERBOSE
+#define VERBOSE
 #include <string.h>
 
 #include "agifiles.h"

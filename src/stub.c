@@ -172,10 +172,6 @@ char cursorChar = '_';
 byte keyState[256], asciiState[256];
 int lastKey;
 
-boolean said(byte** data)
-{
-}
-
 void pollKeyboard()
 {
 

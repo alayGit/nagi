@@ -24,8 +24,8 @@
 #include "stub.h"
 #include "helpers.h"
 
-#define HIGHEST_BANK1_FUNC 40
-#define HIGHEST_BANK2_FUNC 100
+#define HIGHEST_BANK1_FUNC 38
+#define HIGHEST_BANK2_FUNC 98
 #define HIGHEST_BANK3_FUNC 138
 #define HIGHEST_BANK4_FUNC 181
 
@@ -401,6 +401,40 @@ boolean b1Have_key() // 0, 0x00
     return keypressed();
 }
 
+boolean b1Said(byte** data)
+{
+    int numOfArgs, wordNum, argValue;
+    boolean wordsMatch = TRUE;
+    byte argLo, argHi;
+
+    numOfArgs = *(*data)++;
+
+    if ((flag[2] == 0) || (flag[4] == 1)) {  /* Not valid input waiting */
+        *data += (numOfArgs * 2); /* Jump over arguments */
+        return FALSE;
+    }
+
+    /* Needs to deal with ANYWORD and ROL */
+    for (wordNum = 0; wordNum < numOfArgs; wordNum++) {
+        argLo = *(*data)++;
+        argHi = *(*data)++;
+        argValue = (argLo + (argHi << 8));
+        if (argValue == 9999) break; /* Should always be last argument */
+        if (argValue == 1) continue; /* Word comparison does not matter */
+        if (inputWords[wordNum] != argValue) wordsMatch = FALSE;
+    }
+
+    if ((numInputWords != numOfArgs) && (argValue != 9999)) return FALSE;
+
+    if (wordsMatch) {
+        flag[4] = TRUE;    /* said() accepted input */
+        numInputWords = 0;
+        flag[2] = FALSE;   /* not sure about this one */
+    }
+
+    return (wordsMatch);
+}
+
 /* The said() command is in parser.h
 boolean said(byte **data)
 {
@@ -634,6 +668,7 @@ void b1Call(byte** data) // 1, 0x00
 
 void b1Call_v(byte** data) // 1, 0x80 
 {
+    printf("Trying to execute to %d\n", var[*(*data)]);
     executeLogic(var[*(*data)++]);
 }
 
@@ -758,7 +793,10 @@ void b1Position_v(byte** data) // 3, 0x60
     /* Need to check that it hasn't been draw()n yet. */
 }
 
-void b1Get_posn(byte** data) // 3, 0x60 
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM02")
+
+void b2Get_posn(byte** data) // 3, 0x60 
 {
     int entryNum;
 
@@ -767,7 +805,7 @@ void b1Get_posn(byte** data) // 3, 0x60
     var[*(*data)++] = viewtab[entryNum].yPos;
 }
 
-void b1Reposition(byte** data) // 3, 0x60 
+void b2Reposition(byte** data) // 3, 0x60 
 {
     int entryNum, dx, dy;
 
@@ -778,8 +816,6 @@ void b1Reposition(byte** data) // 3, 0x60
     viewtab[entryNum].yPos += dy;
 }
 
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM02")
 
 void b2Set_view(byte** data) // 2, 0x00 
 {
@@ -1294,7 +1330,10 @@ void b2Load_sound(byte** data) // 1, 0x00
     loadSoundFile(soundNum);
 }
 
-void b2Play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM03")
+
+void b3Play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
 {
     int soundNum;
 
@@ -1304,14 +1343,11 @@ void b2Play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
     flag[soundEndFlag] = TRUE;
 }
 
-void b2Stop_sound(byte** data) // 0, 0x00 
+void b3Stop_sound(byte** data) // 0, 0x00 
 {
     checkForEnd = FALSE;
     stop_midi();
 }
-
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM03")
 
 boolean b3CharIsIn(char testChar, char* testString)
 {
@@ -2252,7 +2288,7 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
 #endif
         break;
     case 23:
-        b1Call_v(ppCodeWindowAddress);
+        trampoline_1(&b1Call_v,ppCodeWindowAddress, bank);
         /* The currentLog variable needs to be restored */
         *currentLog = logNum;
         if (exitAllLogics) return FALSE;
@@ -2276,8 +2312,8 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 36: trampoline_1(&b1Erase, ppCodeWindowAddress, bank); break;
     case 37: trampoline_1(&b1Position, ppCodeWindowAddress, bank); break;
     case 38: trampoline_1(&b1Position_v, ppCodeWindowAddress, bank); break;
-    case 39: trampoline_1(&b1Get_posn, ppCodeWindowAddress, bank); break;
-    case 40: trampoline_1(&b1Reposition, ppCodeWindowAddress, bank); break;
+    case 39: trampoline_1(&b2Get_posn, ppCodeWindowAddress, bank); break;
+    case 40: trampoline_1(&b2Reposition, ppCodeWindowAddress, bank); break;
     case 41: trampoline_1(&b2Set_view, ppCodeWindowAddress, bank); break;
     case 42: trampoline_1(&b2Set_view_v, ppCodeWindowAddress, bank); break;
     case 43: trampoline_1(&b2Set_loop, ppCodeWindowAddress, bank); break;
@@ -2336,8 +2372,8 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 96: trampoline_1(&b2Put_v, ppCodeWindowAddress, bank); break;
     case 97: trampoline_1(&b2Get_room_v, ppCodeWindowAddress, bank); break;
     case 98: trampoline_1(&b2Load_sound, ppCodeWindowAddress, bank); break;
-    case 99: trampoline_1(&b2Play_sound, ppCodeWindowAddress, bank); break;
-    case 100: trampoline_1(&b2Stop_sound, ppCodeWindowAddress, bank); break;
+    case 99: trampoline_1(&b3Play_sound, ppCodeWindowAddress, bank); break;
+    case 100: trampoline_1(&b3Stop_sound, ppCodeWindowAddress, bank); break;
     case 101: trampoline_1(&b3Print, ppCodeWindowAddress, bank); break;
     case 102: trampoline_1(&b3Print_v, ppCodeWindowAddress, bank); break;
     case 103: trampoline_1(&b3Display, ppCodeWindowAddress, bank); break;
@@ -2448,7 +2484,7 @@ int ifLogicHandlers(byte ch, byte** ppCodeWindowAddress, byte bank)
     case 11: result = trampoline_1b(&b1Posn, ppCodeWindowAddress, bank); break;
     case 12: result = trampoline_1b(&b1Controller, ppCodeWindowAddress, bank); break;
     case 13: result = trampoline_1b(&b1Have_key, ppCodeWindowAddress, bank); break;
-    case 14: result = trampoline_1b(&said, ppCodeWindowAddress, bank); break;
+    case 14: result = trampoline_1b(&b1Said, ppCodeWindowAddress, bank); break;
     case 15: result = trampoline_1b(&b1Compare_strings, ppCodeWindowAddress, bank); break;
     case 16: result = trampoline_1b(&b1Obj_in_box, ppCodeWindowAddress, bank); break;
     case 17: result = trampoline_1b(&b1Center_posn, ppCodeWindowAddress, bank); break;
@@ -2629,7 +2665,7 @@ void ifHandler(byte** data, byte codeBank)
 ***************************************************************************/
 void executeLogic(int logNum)
 {
-    byte previousRamBank = RAM_BANK;
+     byte previousRamBank = RAM_BANK;
     boolean discardAfterward = FALSE, stillExecuting = TRUE;
     byte* code, * endPos, * startPos, b1, b2;
     byte codeAtTimeOfLastBankSwitch;
@@ -2672,6 +2708,11 @@ void executeLogic(int logNum)
         RAM_BANK = LOGIC_CODE_BANK;
         loadLogicFile(logNum);
 
+        if (logNum == 45)
+        {
+            printf("Trying to call 45");
+        }
+
         RAM_BANK = LOGIC_ENTRY_BANK;
         currentLogic = logics[logNum];
 
@@ -2699,10 +2740,10 @@ void executeLogic(int logNum)
 
     while ((code < endPos) && stillExecuting) {
 
-        if (opCounter == 300)
+        if (printCounter > 7145)
         {
 #ifdef VERBOSE_LOGIC_EXEC
-            printf("The code is now %u and the address is %p and the bank is %d and the log num is %d \n", *code, code, RAM_BANK, logNum);
+            printf("The code is now %u and the address is %p and the bank is %d and the log num is %d and the counter is %d \n", *code, code, RAM_BANK, logNum, opCounter);
 #endif // VERBOSE
             exit(0);
         }

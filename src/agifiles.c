@@ -9,9 +9,9 @@
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
 //#define VERBOSE_DISPLAY_FILEOFFSETS
-//#define VERBOSE_DISPLAY_MESSAGES
-//#define VERBOSE_DISPLAY_OFFSETS
-//#define VERBOSE
+#define VERBOSE_DISPLAY_MESSAGES
+#define VERBOSE_DISPLAY_OFFSETS
+#define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -162,7 +162,7 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 		{
 			setLogicDirectory(&tempPos, &logdir[*count]);
 #ifdef VERBOSE_DISPLAY_FILEOFFSETS
-			printf("\n%d Logic File Name %s, Offset %lu\n", *count, logdir[*count].fileName, logdir[*count].filePos);
+			printf("\n%d Logic File Name %s, Offset %lu\n", *count, tempPos.fileName, logdir[*count].filePos);
 #endif // VERBOSE_DISPLAY_FILEOFFSETS
 
 
@@ -304,7 +304,7 @@ byte* readFileContentsIntoBankedRam(int size, byte* bank)
 	result = banked_alloc(size, bank);
 
 #ifdef VERBOSE
-	printf("Attempting to code data of size %d\n", size);
+	printf("Attempting to code data of size %d to %p\n", size, result);
 #endif
 	RAM_BANK = *bank;
 	cbm_read(SEQUENTIAL_LFN, result, size);

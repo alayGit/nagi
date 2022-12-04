@@ -6,6 +6,7 @@ int _noSegments;
 
 #ifdef _MSC_VER //Used for testing under windows
 byte* banked;
+#define BANK_RAM banked
 #endif 
 
 void initSegments(byte segOrder, byte noBanks, int segmentSize, byte noSegments, byte firstBank)
@@ -57,6 +58,7 @@ void initDynamicMemory()
 {
 #ifdef _MSC_VER
 	banked = (byte*)malloc(512000);
+#define BANK_RAM banked
 #endif // _MSC_VER
 #ifdef  __CX16__
 	byte previousRamBank = RAM_BANK;
@@ -80,6 +82,7 @@ void initDynamicMemory()
 #endif //  __CX16__
 }
 
+#ifdef  __CX16__
 void bankedRamInit()
 {
 #define FILE_NAME_LENGTH 13
@@ -143,11 +146,14 @@ void bankedRamInit()
 	}
 	RAM_BANK = previousBank;
 }
+#endif //  __CX16__
 
 void memoryMangerInit()
 {
 	initDynamicMemory();
-	bankedRamInit();
+#ifdef __CX16__
+bankedRamInit();
+#endif // __CX16__
 }
 
 //int getMemoryAreaAllocationStartIndex(int memoryArea)
@@ -177,8 +183,14 @@ byte* banked_alloc(int size, byte* bank)
 				if (!*(allocationByte))
 				{
 					*allocationByte = TRUE;
-					*bank = (byte) ((j * _memoryAreas[i].segmentSize) / BANK_SIZE + _memoryAreas[i].firstBank);
-					result = (_memoryAreas[i].segmentSize * j) % BANK_SIZE + &BANK_RAM[0];
+					printf("Bank Calc ((%d * %d) / %d + %d)\n", j, _memoryAreas[i].segmentSize, BANK_SIZE, _memoryAreas[i].firstBank);
+					*bank = (byte) (((unsigned long)j * _memoryAreas[i].segmentSize) / BANK_SIZE + _memoryAreas[i].firstBank);
+					
+					//printf("Size of unsigned long long %d, size of unsigned long %d", sizeof(unsigned long long), sizeof(unsigned long));
+
+					printf("Result calc: (%d * %d) mod %d + %p;\n", _memoryAreas[i].segmentSize, j, BANK_SIZE, &BANK_RAM[0]);
+					result = ((unsigned long) _memoryAreas[i].segmentSize * j) % BANK_SIZE + &BANK_RAM[0];
+					printf("The result is %p, on bank %d size: %d, segment %d\n", result, bank, i, j);
 				}
 			}
 		}

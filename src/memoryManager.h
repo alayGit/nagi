@@ -1,7 +1,10 @@
 #ifndef _MEMORYMANAGER_H_
 #define _MEMORYMANAGER_H_
 
+#ifndef _MSC_VER
 #include <cx16.h>
+#endif
+
 #include "general.h"
 
 #ifndef _MSC_VER
@@ -88,14 +91,15 @@
 
 #ifdef _MSC_VER //Used for testing under windows
 extern byte* banked;
-#define  banked
 #endif 
 
 #define GOLDEN_RAM        ((unsigned char *)0x0400)
 
 extern int _noSegments;
 
+#ifndef _MSC_VER
 extern void _BANKRAM01_SIZE__[], _BANKRAM02_SIZE__[], _BANKRAM03_SIZE__[], _BANKRAM04_SIZE__[], _BANKRAM05_SIZE__[], _BANKRAM06_SIZE__[], _BANKRAM07_SIZE__[], _BANKRAM08_SIZE__[];
+#endif // !_MSC_VER
 
 typedef struct {          /* DIR entry structure */
 	byte firstBank;
