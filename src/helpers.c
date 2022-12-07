@@ -1,5 +1,7 @@
 #include "helpers.h"
 
+boolean debugStop = FALSE;
+
 byte convertAsciiByteToPetsciiByte(byte* toConvert)
 {
 	if (*toConvert == ASCIIDASH)

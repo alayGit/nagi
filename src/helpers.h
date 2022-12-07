@@ -44,4 +44,6 @@ extern int sprintfBanked(const char* buffer, byte bank, char const* const format
 
 extern void setLogicDirectory(AGIFilePosType* newLogicDirectory, AGIFilePosType* logicDirectoryLocation);
 
+extern boolean debugStop;
+
 #endif

@@ -60,6 +60,9 @@ int numOfMenus = 0;
 MENU* the_menu = (MENU*)&BANK_RAM[MENU_START];
 MENU* the_menuChildren = (MENU*)&BANK_RAM[MENU_CHILD_START];
 
+int opCounter = 0;
+int printCounter = 1;
+
 void executeLogic(int logNum);
 
 int getNum(char* inputString, int* i, int inputStringBank)
@@ -2525,9 +2528,6 @@ byte getBankBasedOnCode(byte code)
     return RAM_BANK;
 }
 
-int opCounter = 0;
-int printCounter = 1;
-
 /***************************************************************************
 ** ifHandler
 ***************************************************************************/
@@ -2557,9 +2557,11 @@ void ifHandler(byte** data, byte codeBank)
             if ((readkey() & 0xff) == 'q') closedown();
         }
 #endif
+
 #ifdef VERBOSE_LOGIC_EXEC
-        printf("-- %d %d\n", printCounter++, ch);
+        printf("-- %d %d\n", printCounter + 1, ch);
 #endif // VERBOSE_LOGIC_EXEC
+        printCounter++;
         switch (ch) {
         case 0xff: /* Closing if bracket. Expression must be true. */
 #ifdef DEBUG
@@ -2706,13 +2708,11 @@ void executeLogic(int logNum)
         discardAfterward = TRUE;
         
         RAM_BANK = LOGIC_CODE_BANK;
+
+
+
         loadLogicFile(logNum);
-
-        if (logNum == 45)
-        {
-            printf("Trying to call 45");
-        }
-
+        
         RAM_BANK = LOGIC_ENTRY_BANK;
         currentLogic = logics[logNum];
 
@@ -2745,7 +2745,7 @@ void executeLogic(int logNum)
 #ifdef VERBOSE_LOGIC_EXEC
             printf("The code is now %u and the address is %p and the bank is %d and the log num is %d and the counter is %d \n", *code, code, RAM_BANK, logNum, opCounter);
 #endif // VERBOSE
-            exit(0);
+
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
@@ -2780,9 +2780,10 @@ void executeLogic(int logNum)
         codeAtTimeOfLastBankSwitch = *code;
         instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
 #ifdef VERBOSE_LOGIC_EXEC
-        printf("%d %d\n", printCounter++, codeAtTimeOfLastBankSwitch);
+        printf("%d %d\n", printCounter + 1, codeAtTimeOfLastBankSwitch);
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
 #endif // VERBOSE 
+        printCounter++;
 
         if (*code < 0xfe)
         {

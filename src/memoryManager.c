@@ -190,7 +190,7 @@ byte* banked_alloc(int size, byte* bank)
 
 					printf("Result calc: (%d * %d) mod %d + %p;\n", _memoryAreas[i].segmentSize, j, BANK_SIZE, &BANK_RAM[0]);
 					result = ((unsigned long) _memoryAreas[i].segmentSize * j) % BANK_SIZE + &BANK_RAM[0];
-					printf("The result is %p, on bank %d size: %d, segment %d\n", result, bank, i, j);
+					printf("The result is %p, on bank %d size: %d, segment %d\n", result, *bank, i, j);
 				}
 			}
 		}
@@ -205,10 +205,12 @@ byte* banked_alloc(int size, byte* bank)
 
 boolean banked_dealloc(byte* ptr, byte bank)
 {
-	byte i;
+	int i;
 	byte size = 0;
 	byte segment = 0;
 	byte result = FALSE;
+	MemoryArea memoryArea;
+	byte* allocationAddress;
 
 #ifdef  __CX16__
 	byte previousRamBank = RAM_BANK;
@@ -221,14 +223,18 @@ boolean banked_dealloc(byte* ptr, byte bank)
 		}
 	}
 
-	segment = ((ptr - &BANK_RAM[0]) / _memoryAreas[i].segmentSize);
+	memoryArea = _memoryAreas[size];
 
-	if (BANK_RAM[segment])
+	allocationAddress = memoryArea.start + ((ptr - &BANK_RAM[0]) / memoryArea.segmentSize) ;
+
+	if (*(allocationAddress))
 	{
-		BANK_RAM[segment] = FALSE;
+		*(allocationAddress) = FALSE;
 
 		result = TRUE;
 	}
+
+	printf("\n Deallocation segment (%p - %p)  %p \n", allocationAddress, &BANK_RAM[0],  allocationAddress - &BANK_RAM[0]);
 
 #ifdef  __CX16__
 	RAM_BANK = previousRamBank;

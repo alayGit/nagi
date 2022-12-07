@@ -9,9 +9,9 @@
 ** (c) 1997 Lance Ewing
 ***************************************************************************/
 //#define VERBOSE_DISPLAY_FILEOFFSETS
-#define VERBOSE_DISPLAY_MESSAGES
-#define VERBOSE_DISPLAY_OFFSETS
-#define VERBOSE
+//#define VERBOSE_DISPLAY_MESSAGES
+//#define VERBOSE_DISPLAY_OFFSETS
+//#define VERBOSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -493,7 +493,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	RAM_BANK = FILE_LOADER_HELPERS;
 
-	seekAndCheckSignature(&fileName[0], location);
+	seekAndCheckSignature(&fileName[0], location);	
 	AGIData->codeBank = seekAndReadLogicIntoMemory(AGIData);
 
 	if (resType == LOGIC) {
