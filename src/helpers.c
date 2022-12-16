@@ -21,8 +21,10 @@ byte convertAsciiByteToPetsciiByte(byte* toConvert)
 void trampoline_1(fnTrampoline_1 func, void* data, byte bank)
 {
 	byte previousRamBank = RAM_BANK;
+
 	RAM_BANK = bank;
 	func(data);
+
 	RAM_BANK = previousRamBank;
 }
 
