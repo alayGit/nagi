@@ -135,6 +135,45 @@ void updateStatusLine()
    }
 }
 
+//Should be in view, but temporarily
+void initObjects()
+{
+    int entryNum;
+    ViewTable localviewtab;
+    //spriteScreen = create_bitmap(160, 168);
+
+    for (entryNum = 0; entryNum < TABLESIZE; entryNum++) {      
+        localviewtab.stepTime = 1;
+        localviewtab.stepTimeCount = 1;
+        localviewtab.xPos = 0;
+        localviewtab.yPos = 0;
+        localviewtab.currentView = 0;
+        localviewtab.viewData = NULL;
+        localviewtab.currentLoop = 0;
+        localviewtab.numberOfLoops = 0;
+        localviewtab.loopData = NULL;
+        localviewtab.currentCel = 0;
+        localviewtab.numberOfCels = 0;
+        localviewtab.celData = NULL;
+        localviewtab.bgPic = NULL;
+        localviewtab.bgPri = NULL;
+        localviewtab.bgX = 0;
+        localviewtab.bgY = 0;
+        localviewtab.xsize = 0;
+        localviewtab.ysize = 0;
+        localviewtab.stepSize = 1;
+        localviewtab.cycleTime = 1;
+        localviewtab.cycleTimeCount = 1;
+        localviewtab.direction = 0;
+        localviewtab.motion = 0;
+        localviewtab.cycleStatus = 0;
+        localviewtab.priority = 0;
+        localviewtab.flags = 0;
+
+        setViewTab(&localviewtab, entryNum);
+    }
+}
+
 /***************************************************************************
 ** interpret
 **
@@ -240,6 +279,8 @@ void initialise()
     initPictures();
     initSound();
     initViews();
+
+    RAM_BANK = MEKA_BANK;
     initObjects();
     loadObjectFile();
     loadWords();
@@ -256,6 +297,7 @@ void initialise()
 void main()
 {
    int ret, oldCount=0;
+
    //chdir("..\\KQ1-2917");
    //chdir("..\\COMPILER\\NEW\\SAMPLE\\TEMPLATE");
    //chdir("\\GAMES\\SIERRA\\MH2");

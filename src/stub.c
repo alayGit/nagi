@@ -38,8 +38,30 @@ int do_menu(MENU* menu, int x, int y)
 	return 0;
 }
 
-//View
-ViewTable viewtab[1];
+ViewTable* viewtab = (ViewTable*)&BANK_RAM[VIEWTAB_START];
+
+void getViewTab(ViewTable* returnedViewTab, byte viewTabNumber)
+{
+	byte previousRamBank = RAM_BANK;
+
+	RAM_BANK = VIEWTAB_BANK;
+
+	*returnedViewTab = viewtab[viewTabNumber];
+
+	RAM_BANK = previousRamBank;
+}
+
+void setViewTab(ViewTable* localViewtab, byte viewTabNumber)
+{
+	byte previousRamBank = RAM_BANK;
+
+	RAM_BANK = VIEWTAB_BANK;
+
+	viewtab[viewTabNumber] = *viewtab;
+
+	RAM_BANK = previousRamBank;
+}
+
 
 void updateObj(int entryNum) {
 
@@ -200,10 +222,6 @@ void calcObjMotion()
 
 void initViews() {
 
-}
-
-void initObjects()
-{
 }
 
 void discardObjects() {

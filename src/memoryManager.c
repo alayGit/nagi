@@ -1,5 +1,5 @@
 #include "memoryManager.h"
-#define VERBOSE
+//#define VERBOSE
 MemoryArea* _memoryAreas;
 int _noSegments;
 
@@ -183,14 +183,22 @@ byte* banked_alloc(int size, byte* bank)
 				if (!*(allocationByte))
 				{
 					*allocationByte = TRUE;
+
+#ifdef VERBOSE
+
 					printf("Bank Calc ((%d * %d) / %d + %d)\n", j, _memoryAreas[i].segmentSize, BANK_SIZE, _memoryAreas[i].firstBank);
+#endif
 					*bank = (byte) (((unsigned long)j * _memoryAreas[i].segmentSize) / BANK_SIZE + _memoryAreas[i].firstBank);
 					
 					//printf("Size of unsigned long long %d, size of unsigned long %d", sizeof(unsigned long long), sizeof(unsigned long));
 
+#ifdef VERBOSE
 					printf("Result calc: (%d * %d) mod %d + %p;\n", _memoryAreas[i].segmentSize, j, BANK_SIZE, &BANK_RAM[0]);
+#endif
 					result = ((unsigned long) _memoryAreas[i].segmentSize * j) % BANK_SIZE + &BANK_RAM[0];
+#ifdef VERBOSE
 					printf("The result is %p, on bank %d size: %d, segment %d\n", result, *bank, i, j);
+#endif // VERBOSE
 				}
 			}
 		}
@@ -234,7 +242,9 @@ boolean banked_dealloc(byte* ptr, byte bank)
 		result = TRUE;
 	}
 
+#ifdef VERBOSE
 	printf("\n Deallocation segment (%p - %p)  %p \n", allocationAddress, &BANK_RAM[0],  allocationAddress - &BANK_RAM[0]);
+#endif // VERBOSE
 
 #ifdef  __CX16__
 	RAM_BANK = previousRamBank;

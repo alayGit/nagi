@@ -1,6 +1,8 @@
 #ifndef _STUB_H
 #define _STUB_H
 #include "general.h"
+#include "memoryManager.h"
+#include <cx16.h>
 //allgero
 void stop_midi();
 void show_mouse(BITMAP* bmp);
@@ -111,7 +113,6 @@ typedef struct {
 
 void setCel(byte entryNum, byte celNum);
 void initViews();
-void initObjects();
 void resetViews();
 void discardObjects();
 void setLoop(byte entryNum, byte loopNum);
@@ -162,7 +163,11 @@ typedef struct {
 } ViewTable;
 
 
-extern ViewTable viewtab[];
+extern ViewTable* viewtab;
+
+extern void getViewTab(ViewTable* returnedViewTab, byte viewTabNumber);
+extern void setViewTab(ViewTable* viewTab, byte viewTabNumber);
+
 
 void discardView(byte viewNum);
 

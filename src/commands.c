@@ -24,8 +24,8 @@
 #include "stub.h"
 #include "helpers.h"
 
-#define HIGHEST_BANK1_FUNC 38
-#define HIGHEST_BANK2_FUNC 98
+#define HIGHEST_BANK1_FUNC 36
+#define HIGHEST_BANK2_FUNC 91
 #define HIGHEST_BANK3_FUNC 138
 #define HIGHEST_BANK4_FUNC 181
 
@@ -34,7 +34,9 @@
 #define  PROGRAM_CONTROL  1
 #define CODE_WINDOW_SIZE 10
 //#define VERBOSE_STRING_CHECK
-#define VERBOSE_LOGIC_EXEC
+//#define VERBOSE_LOGIC_EXEC
+#define VERBOSE_SCRIPT_START
+//#define VERBOSE_PRINT_COUNTER;
 //#define VERBOSE_MENU
 //#define VERBOSE_MENU_DUMP
 //#define VERBOSE_MESSAGE_TEXT
@@ -67,23 +69,23 @@ void executeLogic(int logNum);
 
 int getNum(char* inputString, int* i, int inputStringBank)
 {
-   /* char strPos = 0;
-    char* tempString = &BANK_RAM[GET_NUM_TEMP_START];
-    byte previousRamBank = RAM_BANK;
+    /* char strPos = 0;
+     char* tempString = &BANK_RAM[GET_NUM_TEMP_START];
+     byte previousRamBank = RAM_BANK;
 
-    RAM_BANK = inputStringBank;
+     RAM_BANK = inputStringBank;
 
-    while (inputString[*i] == ' ') { *i++; }
-    if ((inputString[*i] < '0') && (inputString[*i] > '9')) return 0;
-    while ((inputString[*i] >= '0') && (inputString[*i] <= '9')) {
-        tempString[strPos++] = inputString[(*i)++];
-    }
-    tempString[strPos] = 0;
+     while (inputString[*i] == ' ') { *i++; }
+     if ((inputString[*i] < '0') && (inputString[*i] > '9')) return 0;
+     while ((inputString[*i] >= '0') && (inputString[*i] <= '9')) {
+         tempString[strPos++] = inputString[(*i)++];
+     }
+     tempString[strPos] = 0;
 
-    (*i)--;
+     (*i)--;
 
-    RAM_BANK = previousRamBank;
-    return (atoi(tempString));*/
+     RAM_BANK = previousRamBank;
+     return (atoi(tempString));*/
 }
 
 void menuChildInit()
@@ -353,15 +355,18 @@ boolean b1Obj_in_room(byte** data) // 2, 0x40
 boolean b1Posn(byte** data) // 5, 0x00 
 {
     int objNum, x1, y1, x2, y2;
+    ViewTable localViewtab;
 
     objNum = *(*data)++;
+    getViewTab(&localViewtab, objNum);
+
     x1 = *(*data)++;
     y1 = *(*data)++;
     x2 = *(*data)++;
     y2 = *(*data)++;
 
-    return ((viewtab[objNum].xPos >= x1) && (viewtab[objNum].yPos >= y1)
-        && (viewtab[objNum].xPos <= x2) && (viewtab[objNum].yPos <= y2));
+    return ((localViewtab.xPos >= x1) && (localViewtab.yPos >= y1)
+        && (localViewtab.xPos <= x2) && (localViewtab.yPos <= y2));
 }
 
 boolean b1Controller(byte** data) // 1, 0x00 
@@ -458,49 +463,57 @@ boolean b1Compare_strings(byte** data) // 2, 0x00
 boolean b1Obj_in_box(byte** data) // 5, 0x00 
 {
     int objNum, x1, y1, x2, y2;
-
+    ViewTable localViewtab;
     objNum = *(*data)++;
     x1 = *(*data)++;
     y1 = *(*data)++;
     x2 = *(*data)++;
     y2 = *(*data)++;
 
-    return ((viewtab[objNum].xPos >= x1) &&
-        (viewtab[objNum].yPos >= y1) &&
-        ((viewtab[objNum].xPos + viewtab[objNum].xsize - 1) <= x2) &&
-        (viewtab[objNum].yPos <= y2));
+    getViewTab(&localViewtab, objNum);
+
+    return ((localViewtab.xPos >= x1) &&
+        (localViewtab.yPos >= y1) &&
+        ((localViewtab.xPos + localViewtab.xsize - 1) <= x2) &&
+        (localViewtab.yPos <= y2));
 }
 
 boolean b1Center_posn(byte** data) // 5, 0x00 }
 {
     int objNum, x1, y1, x2, y2;
-
+    ViewTable localViewtab;
     objNum = *(*data)++;
     x1 = *(*data)++;
     y1 = *(*data)++;
     x2 = *(*data)++;
     y2 = *(*data)++;
 
-    return (((viewtab[objNum].xPos + (viewtab[objNum].xsize / 2)) >= x1) &&
-        (viewtab[objNum].yPos >= y1) &&
-        ((viewtab[objNum].xPos + (viewtab[objNum].xsize / 2)) <= x2) &&
-        (viewtab[objNum].yPos <= y2));
+    getViewTab(&localViewtab, objNum);
+
+    return (((localViewtab.xPos + (localViewtab.xsize / 2)) >= x1) &&
+        (localViewtab.yPos >= y1) &&
+        ((localViewtab.xPos + (localViewtab.xsize / 2)) <= x2) &&
+        (localViewtab.yPos <= y2));
 }
 
 boolean b1Right_posn(byte** data) // 5, 0x00
 {
     int objNum, x1, y1, x2, y2;
+    ViewTable localViewtab;
 
     objNum = *(*data)++;
+
+    getViewTab(&localViewtab, objNum);
+
     x1 = *(*data)++;
     y1 = *(*data)++;
     x2 = *(*data)++;
     y2 = *(*data)++;
 
-    return (((viewtab[objNum].xPos + viewtab[objNum].xsize - 1) >= x1) &&
-        (viewtab[objNum].yPos >= y1) &&
-        ((viewtab[objNum].xPos + viewtab[objNum].xsize - 1) <= x2) &&
-        (viewtab[objNum].yPos <= y2));
+    return (((localViewtab.xPos + localViewtab.xsize - 1) >= x1) &&
+        (localViewtab.yPos >= y1) &&
+        ((localViewtab.xPos + localViewtab.xsize - 1) <= x2) &&
+        (localViewtab.yPos <= y2));
 }
 
 
@@ -737,86 +750,129 @@ void b1Discard_view(byte** data) // 1, 0x00
 void b1Animate_obj(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewTab;
 
     entryNum = *(*data)++;
     //viewtab[entryNum].flags |= (ANIMATED | UPDATE | CYCLING);
-    viewtab[entryNum].flags = (ANIMATED | UPDATE | CYCLING);
+    getViewTab(&localViewTab, entryNum);
+
+    //localViewtab.flags |= (ANIMATED | UPDATE | CYCLING);
+    localViewTab.flags = (ANIMATED | UPDATE | CYCLING);
     /* Not sure about CYCLING */
     /* Not sure about whether these two are set to zero */
-    viewtab[entryNum].motion = 0;
-    viewtab[entryNum].cycleStatus = 0;
-    viewtab[entryNum].flags |= MOTION;
-    if (entryNum != 0) viewtab[entryNum].direction = 0;
+    localViewTab.motion = 0;
+    localViewTab.cycleStatus = 0;
+    localViewTab.flags |= MOTION;
+    if (entryNum != 0) localViewTab.direction = 0;
+
+    setViewTab(&localViewTab, entryNum);
 }
 
 void b1Unanimate_all(byte** data) // 0, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     /* Mark all objects as unanimated and not drawn */
     for (entryNum = 0; entryNum < TABLESIZE; entryNum++)
-        viewtab[entryNum].flags &= ~(ANIMATED | DRAWN);
+    {
+        getViewTab(&localViewtab, entryNum);
+        
+        localViewtab.flags &= ~(ANIMATED | DRAWN);
+
+        setViewTab(&localViewtab, entryNum);
+    }
 }
 
 void b1Draw(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= (DRAWN | UPDATE);   /* Not sure about update */
-    setCel(entryNum, viewtab[entryNum].currentCel);
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags |= (DRAWN | UPDATE);   /* Not sure about update */
+    setCel(entryNum, localViewtab.currentCel);
     drawObject(entryNum);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b1Erase(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~DRAWN;
-}
+    getViewTab(&localViewtab, entryNum);
+    
 
-void b1Position(byte** data) // 3, 0x00 
-{
-    int entryNum;
-
-    entryNum = *(*data)++;
-    viewtab[entryNum].xPos = *(*data)++;
-    viewtab[entryNum].yPos = *(*data)++;
-    /* Need to check that it hasn't been draw()n yet. */
-}
-
-void b1Position_v(byte** data) // 3, 0x60 
-{
-    int entryNum;
-
-    entryNum = *(*data)++;
-    viewtab[entryNum].xPos = var[*(*data)++];
-    viewtab[entryNum].yPos = var[*(*data)++];
-    /* Need to check that it hasn't been draw()n yet. */
+    localViewtab.flags &= ~DRAWN;
+    
+    setViewTab(&localViewtab, entryNum);
 }
 
 #pragma code-name (pop)
 #pragma code-name (push, "BANKRAM02")
 
+void b2Position(byte** data) // 3, 0x00 
+{
+    int entryNum;
+    ViewTable localViewtab;
+
+    entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.xPos = *(*data)++;
+    localViewtab.yPos = *(*data)++;
+
+    setViewTab(&localViewtab, entryNum);
+    /* Need to check that it hasn't been draw()n yet. */
+}
+
+void b2Position_v(byte** data) // 3, 0x60 
+{
+    int entryNum;
+    ViewTable localViewtab;
+
+    entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.xPos = var[*(*data)++];
+    localViewtab.yPos = var[*(*data)++];
+
+    setViewTab(&localViewtab, entryNum);
+    /* Need to check that it hasn't been draw()n yet. */
+}
+
 void b2Get_posn(byte** data) // 3, 0x60 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    var[*(*data)++] = viewtab[entryNum].xPos;
-    var[*(*data)++] = viewtab[entryNum].yPos;
+    getViewTab(&localViewtab, entryNum);
+
+
+    var[*(*data)++] = localViewtab.xPos;
+    var[*(*data)++] = localViewtab.yPos;
 }
 
 void b2Reposition(byte** data) // 3, 0x60 
 {
     int entryNum, dx, dy;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+
     dx = (signed char)var[*(*data)++];
     dy = (signed char)var[*(*data)++];
-    viewtab[entryNum].xPos += dx;
-    viewtab[entryNum].yPos += dy;
+    localViewtab.xPos += dx;
+    localViewtab.yPos += dy;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 
@@ -861,17 +917,28 @@ void b2Set_loop_v(byte** data) // 2, 0x40
 void b2Fix_loop(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= FIXLOOP;
+    getViewTab(&localViewtab, entryNum);
+
+
+    localViewtab.flags |= FIXLOOP;
+
+    setViewTab(&localViewtab, entryNum);
+
 }
 
 void b2Release_loop(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~FIXLOOP;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~FIXLOOP;
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_cel(byte** data) // 2, 0x00 
@@ -895,97 +962,151 @@ void b2Set_cel_v(byte** data) // 2, 0x40
 void b2Last_cel(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
     varNum = *(*data)++;
-    var[varNum] = viewtab[entryNum].numberOfCels - 1;
+
+    var[varNum] = localViewtab.numberOfCels - 1;
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Current_cel(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
     varNum = *(*data)++;
-    var[varNum] = viewtab[entryNum].currentCel;
+
+    var[varNum] = localViewtab.currentCel;
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Current_loop(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
     varNum = *(*data)++;
-    var[varNum] = viewtab[entryNum].currentLoop;
+    getViewTab(&localViewtab, entryNum);
+
+    var[varNum] = localViewtab.currentLoop;
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Current_view(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+    
     varNum = *(*data)++;
-    var[varNum] = viewtab[entryNum].currentView;
+    var[varNum] = localViewtab.currentView;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Number_of_loops(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+    
     varNum = *(*data)++;
-    var[varNum] = viewtab[entryNum].numberOfLoops;
+    var[varNum] = localViewtab.numberOfLoops;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_priority(byte** data) // 2, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].priority = *(*data)++;
-    viewtab[entryNum].flags |= FIXEDPRIORITY;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.priority = *(*data)++;
+    localViewtab.flags |= FIXEDPRIORITY;
+    
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_priority_v(byte** data) // 2, 0x40 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].priority = var[*(*data)++];
-    viewtab[entryNum].flags |= FIXEDPRIORITY;
+    getViewTab(&localViewtab, entryNum);
+    
+    localViewtab.priority = var[*(*data)++];
+    localViewtab.flags |= FIXEDPRIORITY;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Release_priority(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~FIXEDPRIORITY;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~FIXEDPRIORITY;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Get_priority(byte** data) // 2, 0x40 
 {
     int entryNum, varNum;
-
+    ViewTable localViewtab;
+    
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+
+
     varNum = *(*data)++;
-    var[varNum] = viewtab[entryNum].priority;
+    var[varNum] = localViewtab.priority;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Stop_update(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~UPDATE;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~UPDATE;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Start_update(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= UPDATE;
+    getViewTab(&localViewtab, entryNum);
+
+
+    localViewtab.flags |= UPDATE;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Force_update(byte** data) // 1, 0x00 
@@ -1000,17 +1121,28 @@ void b2Force_update(byte** data) // 1, 0x00
 void b2Ignore_horizon(byte** data) // 1, 0x00 
 {
     int entryNum;
-
+    ViewTable localViewtab;
+    
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= IGNOREHORIZON;
+    getViewTab(&localViewtab, entryNum);
+
+
+    localViewtab.flags |= IGNOREHORIZON;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Observe_horizon(byte** data) // 1, 0x00 
 {
     int entryNum;
-
+    ViewTable localViewtab;
+    
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~IGNOREHORIZON;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~IGNOREHORIZON;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_horizon(byte** data) // 1, 0x00 
@@ -1021,256 +1153,385 @@ void b2Set_horizon(byte** data) // 1, 0x00
 void b2Object_on_water(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= ONWATER;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags |= ONWATER;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Object_on_land(byte** data) // 1, 0x00 
 {
     int entryNum;
-
+    ViewTable localViewtab;
+    
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= ONLAND;
+    getViewTab(&localViewtab, entryNum);
+    
+    localViewtab.flags |= ONLAND;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Object_on_anything(byte** data) // 1, 0x00 
 {
     int entryNum;
-
+    ViewTable localViewtab;
+    
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~(ONWATER | ONLAND);
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~(ONWATER | ONLAND);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Ignore_objs(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= IGNOREOBJECTS;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags |= IGNOREOBJECTS;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Observe_objs(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~IGNOREOBJECTS;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~IGNOREOBJECTS;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 
 void b2Distance(byte** data) // 3, 0x20 
 {
     int o1, o2, varNum, x1, y1, x2, y2;
+    ViewTable localViewtab1, localViewtab2;
 
     o1 = *(*data)++;
     o2 = *(*data)++;
+
+    getViewTab(&localViewtab1, o1);
+    getViewTab(&localViewtab2, o2);
+
     varNum = *(*data)++;
     /* Check that both objects are on screen here. If they aren't
     ** then 255 should be returned. */
-    if (!((viewtab[o1].flags & DRAWN) && (viewtab[o2].flags & DRAWN))) {
+    if (!((localViewtab1.flags & DRAWN) && (localViewtab2.flags & DRAWN))) {
         var[varNum] = 255;
         return;
     }
-    x1 = viewtab[o1].xPos;
-    y1 = viewtab[o1].yPos;
-    x2 = viewtab[o2].xPos;
-    y2 = viewtab[o2].yPos;
+    x1 = localViewtab1.xPos;
+    y1 = localViewtab1.yPos;
+    x2 = localViewtab2.xPos;
+    y2 = localViewtab2.yPos;
     var[varNum] = abs(x1 - x2) + abs(y1 - y2);
 }
 
 void b2Stop_cycling(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~CYCLING;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~CYCLING;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Start_cycling(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= CYCLING;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags |= CYCLING;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Normal_cycle(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].cycleStatus = 0;
+    getViewTab(&localViewtab, entryNum);
+    
+    localViewtab.cycleStatus = 0;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2End_of_loop(byte** data) // 2, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].param1 = *(*data)++;
-    viewtab[entryNum].cycleStatus = 1;
-    viewtab[entryNum].flags |= (UPDATE | CYCLING);
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.param1 = *(*data)++;
+    localViewtab.cycleStatus = 1;
+    localViewtab.flags |= (UPDATE | CYCLING);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Reverse_cycle(byte** data) // 1, 0x00
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
     /* Store the other parameters here */
 
-    viewtab[entryNum].cycleStatus = 3;
+    localViewtab.cycleStatus = 3;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Reverse_loop(byte** data) // 2, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].param1 = *(*data)++;
-    viewtab[entryNum].cycleStatus = 2;
-    viewtab[entryNum].flags |= (UPDATE | CYCLING);
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.param1 = *(*data)++;
+    localViewtab.cycleStatus = 2;
+    localViewtab.flags |= (UPDATE | CYCLING);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Cycle_time(byte** data) // 2, 0x40 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].cycleTime = var[*(*data)++];
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.cycleTime = var[*(*data)++];
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Stop_motion(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~MOTION;
-    viewtab[entryNum].direction = 0;
-    viewtab[entryNum].motion = 0;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~MOTION;
+    localViewtab.direction = 0;
+    localViewtab.motion = 0;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Start_motion(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= MOTION;
-    viewtab[entryNum].motion = 0;        /* Not sure about this */
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags |= MOTION;
+    localViewtab.motion = 0;        /* Not sure about this */
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Step_size(byte** data) // 2, 0x40 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].stepSize = var[*(*data)++];
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.stepSize = var[*(*data)++];
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Step_time(byte** data) // 2, 0x40 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].stepTime = var[*(*data)++];
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.stepTime = var[*(*data)++];
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Move_obj(byte** data) // 5, 0x00 
 {
     int entryNum;
     byte stepVal;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].param1 = *(*data)++;
-    viewtab[entryNum].param2 = *(*data)++;
-    viewtab[entryNum].param3 = viewtab[entryNum].stepSize;  /* Save stepsize */
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.param1 = *(*data)++;
+    localViewtab.param2 = *(*data)++;
+    localViewtab.param3 = localViewtab.stepSize;  /* Save stepsize */
     stepVal = *(*data)++;
-    if (stepVal > 0) viewtab[entryNum].stepSize = stepVal;
-    viewtab[entryNum].param4 = *(*data)++;
-    viewtab[entryNum].motion = 3;
-    viewtab[entryNum].flags |= MOTION;
+    if (stepVal > 0) localViewtab.stepSize = stepVal;
+    localViewtab.param4 = *(*data)++;
+    localViewtab.motion = 3;
+    localViewtab.flags |= MOTION;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Move_obj_v(byte** data) // 5, 0x70 
 {
     int entryNum;
     byte stepVal;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].param1 = var[*(*data)++];
-    viewtab[entryNum].param2 = var[*(*data)++];
-    viewtab[entryNum].param3 = viewtab[entryNum].stepSize;  /* Save stepsize */
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.param1 = var[*(*data)++];
+    localViewtab.param2 = var[*(*data)++];
+    localViewtab.param3 = localViewtab.stepSize;  /* Save stepsize */
     stepVal = var[*(*data)++];
-    if (stepVal > 0) viewtab[entryNum].stepSize = stepVal;
-    viewtab[entryNum].param4 = *(*data)++;
-    viewtab[entryNum].motion = 3;
-    viewtab[entryNum].flags |= MOTION;
+    if (stepVal > 0) localViewtab.stepSize = stepVal;
+    localViewtab.param4 = *(*data)++;
+    localViewtab.motion = 3;
+    localViewtab.flags |= MOTION;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Follow_ego(byte** data) // 3, 0x00 
 {
     int entryNum, stepVal, flagNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+
     stepVal = *(*data)++;
     flagNum = *(*data)++;
-    viewtab[entryNum].param1 = viewtab[entryNum].stepSize;
+    localViewtab.param1 = localViewtab.stepSize;
     /* Might need to put 'if (stepVal != 0)' */
-    //viewtab[entryNum].stepSize = stepVal;
-    viewtab[entryNum].param2 = flagNum;
-    viewtab[entryNum].motion = 2;
-    viewtab[entryNum].flags |= MOTION;
+    //localViewtab.stepSize = stepVal;
+    localViewtab.param2 = flagNum;
+    localViewtab.motion = 2;
+    localViewtab.flags |= MOTION;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Wander(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].motion = 1;
-    viewtab[entryNum].flags |= MOTION;
+    getViewTab(&localViewtab, entryNum);
+
+
+    localViewtab.motion = 1;
+    localViewtab.flags |= MOTION;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Normal_motion(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].motion = 0;
-    viewtab[entryNum].flags |= MOTION;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.motion = 0;
+    localViewtab.flags |= MOTION;
+
+    setViewTab(&localViewtab, entryNum);    
 }
 
 void b2Set_dir(byte** data) // 2, 0x40 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].direction = var[*(*data)++];
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.direction = var[*(*data)++];
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Get_dir(byte** data) // 2, 0x40 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    var[*(*data)++] = viewtab[entryNum].direction;
+    getViewTab(&localViewtab, entryNum);
+
+    var[*(*data)++] = localViewtab.direction;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Ignore_blocks(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags |= IGNOREBLOCKS;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags |= IGNOREBLOCKS;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Observe_blocks(byte** data) // 1, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].flags &= ~IGNOREBLOCKS;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.flags &= ~IGNOREBLOCKS;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Block(byte** data) // 4, 0x00 
@@ -1284,22 +1545,26 @@ void b2Unblock(byte** data) // 0, 0x00
 
 }
 
-void b2Get(byte** data) // 1, 00 
+#pragma code-name (pop)
+#pragma code-name (push, "BANKRAM03")
+
+void b3Get(byte** data) // 1, 00 
 {
     objects[*(*data)++].roomNum = 255;
 }
 
-void b2Get_v(byte** data) // 1, 0x80 
+void b3Get_v(byte** data) // 1, 0x80 
 {
     objects[var[*(*data)++]].roomNum = 255;
 }
 
-void b2Drop(byte** data) // 1, 0x00 
+void b3Drop(byte** data) // 1, 0x00 
 {
     objects[*(*data)++].roomNum = 0;
 }
 
-void b2Put(byte** data) // 2, 0x00 
+
+void b3Put(byte** data) // 2, 0x00 
 {
     int objNum, room;
 
@@ -1308,7 +1573,7 @@ void b2Put(byte** data) // 2, 0x00
     objects[objNum].roomNum = room;
 }
 
-void b2Put_v(byte** data) // 2, 0x40 
+void b3Put_v(byte** data) // 2, 0x40 
 {
     int objNum, room;
 
@@ -1317,7 +1582,7 @@ void b2Put_v(byte** data) // 2, 0x40
     objects[objNum].roomNum = room;
 }
 
-void b2Get_room_v(byte** data) // 2, 0xC0 
+void b3Get_room_v(byte** data) // 2, 0xC0 
 {
     int objNum, room;
 
@@ -1325,16 +1590,13 @@ void b2Get_room_v(byte** data) // 2, 0xC0
     var[*(*data)++] = objects[objNum].roomNum;
 }
 
-void b2Load_sound(byte** data) // 1, 0x00 
+void b3Load_sound(byte** data) // 1, 0x00 
 {
     int soundNum;
 
     soundNum = *(*data)++;
     loadSoundFile(soundNum);
 }
-
-#pragma code-name (pop)
-#pragma code-name (push, "BANKRAM03")
 
 void b3Play_sound(byte** data) // 2, 00  sound() renamed to avoid clash
 {
@@ -1445,9 +1707,9 @@ void b3ProcessString(char* stringPointer, byte stringBank, char* outputString)
 
 void b3Print(byte** data) // 1, 00 
 {
-    char* tempString = (char*) & GOLDEN_RAM[LOCAL_WORK_AREA_START];
+    char* tempString = (char*)&GOLDEN_RAM[LOCAL_WORK_AREA_START];
     BITMAP* temp;
-    
+
     char* messagePointer = getMessagePointer(currentLog, (*(*data)++) - 1);
 
     show_mouse(NULL);
@@ -1470,7 +1732,7 @@ void b3Print_v(byte** data) // 1, 0x80
     char* tempString = (char*)malloc(256);
     BITMAP* temp;
 
-    char* messagePointer = getMessagePointer(currentLog,(var[*(*data)++]) - 1);
+    char* messagePointer = getMessagePointer(currentLog, (var[*(*data)++]) - 1);
 
     show_mouse(NULL);
     temp = create_bitmap(640, 336);
@@ -1923,19 +2185,29 @@ void b4Reset_scan_start(byte** data) // 0, 0x00
 void b4Reposition_to(byte** data) // 3, 0x00 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].xPos = *(*data)++;
-    viewtab[entryNum].yPos = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.xPos = *(*data)++;
+    localViewtab.yPos = *(*data)++;
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b4Reposition_to_v(byte** data) // 3, 0x60 
 {
     int entryNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
-    viewtab[entryNum].xPos = var[*(*data)++];
-    viewtab[entryNum].yPos = var[*(*data)++];
+    getViewTab(&localViewtab, entryNum);
+
+    localViewtab.xPos = var[*(*data)++];
+    localViewtab.yPos = var[*(*data)++];
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b4Trace_on(byte** data) // 0, 0x00 
@@ -1959,24 +2231,24 @@ void b4Print_at(byte** data) // 4, 0x00           /* 3 args for AGI versions bef
     x = *(*data)++;
     y = *(*data)++;
     l = *(*data)++;
-    show_mouse(NULL);
-    temp = create_bitmap(640, 336);
-    blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
-    show_mouse(screen);
-    while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
+    //show_mouse(NULL);
+    //temp = create_bitmap(640, 336);
+    //blit(agi_screen, temp, 0, 0, 0, 0, 640, 336);
+    //show_mouse(screen);
+    //while (key[KEY_ENTER] || key[KEY_ESC]) { /* Wait */ }
 
-    messagePointer = getMessagePointer(currentLog, messNum - 1);
+    //messagePointer = getMessagePointer(currentLog, messNum - 1);
 
-    b3ProcessString(messagePointer, 0, tempString);
-    printInBoxBig(tempString, x, y, l);
-    while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
-    while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
-    show_mouse(NULL);
-    blit(temp, agi_screen, 0, 0, 0, 0, 640, 336);
-    show_mouse(screen);
-    destroy_bitmap(temp);
+    //b3ProcessString(messagePointer, 0, tempString);
+    //printInBoxBig(tempString, x, y, l);
+    //while (!key[KEY_ENTER] && !key[KEY_ESC]) { /* Wait */ }
+    //while (key[KEY_ENTER] || key[KEY_ESC]) { clear_keybuf(); }
+    //show_mouse(NULL);
+    //blit(temp, agi_screen, 0, 0, 0, 0, 640, 336);
+    //show_mouse(screen);
+    //destroy_bitmap(temp);
 
-    free(tempString);
+    //free(tempString);
 }
 
 void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
@@ -2158,7 +2430,7 @@ void b4Set_menu_item(byte** data) // 2, 0x00
 
     messNum = *(*data)++;
     controllerNum = *(*data)++;
-    
+
     if (events[controllerNum].type == NO_EVENT) {
         events[controllerNum].type = MENU_EVENT;
     }
@@ -2169,7 +2441,7 @@ void b4Set_menu_item(byte** data) // 2, 0x00
     childMenu.menuTextBank = currentLogicFile.messageBank;
 
     setMenuChild(&childMenu, numOfMenus - 1);
-    
+
 
 #ifdef VERBOSE_MENU_DUMP
     testMenus();
@@ -2291,7 +2563,7 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
 #endif
         break;
     case 23:
-        trampoline_1(&b1Call_v,ppCodeWindowAddress, bank);
+        trampoline_1(&b1Call_v, ppCodeWindowAddress, bank);
         /* The currentLog variable needs to be restored */
         *currentLog = logNum;
         if (exitAllLogics) return FALSE;
@@ -2313,8 +2585,8 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 34: trampoline_1(&b1Unanimate_all, ppCodeWindowAddress, bank); break;
     case 35: trampoline_1(&b1Draw, ppCodeWindowAddress, bank); break;
     case 36: trampoline_1(&b1Erase, ppCodeWindowAddress, bank); break;
-    case 37: trampoline_1(&b1Position, ppCodeWindowAddress, bank); break;
-    case 38: trampoline_1(&b1Position_v, ppCodeWindowAddress, bank); break;
+    case 37: trampoline_1(&b2Position, ppCodeWindowAddress, bank); break;
+    case 38: trampoline_1(&b2Position_v, ppCodeWindowAddress, bank); break;
     case 39: trampoline_1(&b2Get_posn, ppCodeWindowAddress, bank); break;
     case 40: trampoline_1(&b2Reposition, ppCodeWindowAddress, bank); break;
     case 41: trampoline_1(&b2Set_view, ppCodeWindowAddress, bank); break;
@@ -2368,13 +2640,13 @@ boolean b5instructionHandler(byte code, int* currentLog, byte logNum, byte** ppC
     case 89: trampoline_1(&b2Observe_blocks, ppCodeWindowAddress, bank); break;
     case 90: trampoline_1(&b2Block, ppCodeWindowAddress, bank); break;
     case 91: trampoline_1(&b2Unblock, ppCodeWindowAddress, bank); break;
-    case 92: trampoline_1(&b2Get, ppCodeWindowAddress, bank); break;
-    case 93: trampoline_1(&b2Get_v, ppCodeWindowAddress, bank); break;
-    case 94: trampoline_1(&b2Drop, ppCodeWindowAddress, bank); break;
-    case 95: trampoline_1(&b2Put, ppCodeWindowAddress, bank); break;
-    case 96: trampoline_1(&b2Put_v, ppCodeWindowAddress, bank); break;
-    case 97: trampoline_1(&b2Get_room_v, ppCodeWindowAddress, bank); break;
-    case 98: trampoline_1(&b2Load_sound, ppCodeWindowAddress, bank); break;
+    case 92: trampoline_1(&b3Get, ppCodeWindowAddress, bank); break;
+    case 93: trampoline_1(&b3Get_v, ppCodeWindowAddress, bank); break;
+    case 94: trampoline_1(&b3Drop, ppCodeWindowAddress, bank); break;
+    case 95: trampoline_1(&b3Put, ppCodeWindowAddress, bank); break;
+    case 96: trampoline_1(&b3Put_v, ppCodeWindowAddress, bank); break;
+    case 97: trampoline_1(&b3Get_room_v, ppCodeWindowAddress, bank); break;
+    case 98: trampoline_1(&b3Load_sound, ppCodeWindowAddress, bank); break;
     case 99: trampoline_1(&b3Play_sound, ppCodeWindowAddress, bank); break;
     case 100: trampoline_1(&b3Stop_sound, ppCodeWindowAddress, bank); break;
     case 101: trampoline_1(&b3Print, ppCodeWindowAddress, bank); break;
@@ -2500,7 +2772,7 @@ int ifLogicHandlers(byte ch, byte** ppCodeWindowAddress, byte bank)
     }
 
 #ifdef VERBOSE_LOGIC_EXEC
-   printf(" And the result is %d \n", result);
+    printf(" And the result is %d \n", result);
 #endif // VERBOSE_LOGIC_EXEC
     return result;
 }
@@ -2667,7 +2939,7 @@ void ifHandler(byte** data, byte codeBank)
 ***************************************************************************/
 void executeLogic(int logNum)
 {
-     byte previousRamBank = RAM_BANK;
+    byte previousRamBank = RAM_BANK;
     boolean discardAfterward = FALSE, stillExecuting = TRUE;
     byte* code, * endPos, * startPos, b1, b2;
     byte codeAtTimeOfLastBankSwitch;
@@ -2693,9 +2965,10 @@ void executeLogic(int logNum)
     RAM_BANK = LOGIC_FILE_BANK;
     currentLogicFile = *currentLogic.data;
 
+#ifdef VERBOSE_SCRIPT_START
+    printf("ex s. %d\n", logNum);
+#endif // VERBOSE_SCRIPT_START
 
-    //printf("I am here in execute");
-    //exit(0);
 
 #ifdef DEBUG
     sprintf(debugString, "LOGIC.%d:       ", currentLog);
@@ -2706,13 +2979,13 @@ void executeLogic(int logNum)
     ** not already in memory. */
     if (!currentLogic.loaded) {
         discardAfterward = TRUE;
-        
+
         RAM_BANK = LOGIC_CODE_BANK;
 
 
 
         loadLogicFile(logNum);
-        
+
         RAM_BANK = LOGIC_ENTRY_BANK;
         currentLogic = logics[logNum];
 
@@ -2739,13 +3012,17 @@ void executeLogic(int logNum)
     RAM_BANK = currentLogicFile.codeBank;
 
     while ((code < endPos) && stillExecuting) {
+        if (logNum == 46)
+        {
+            printf("The code is now %u and the address is %p and the bank is %d and the log num is %d and the counter is %d \n", *code, code, RAM_BANK, logNum, opCounter);
+        }
 
-        if (printCounter > 7145)
+        if (printCounter > 499)
         {
 #ifdef VERBOSE_LOGIC_EXEC
             printf("The code is now %u and the address is %p and the bank is %d and the log num is %d and the counter is %d \n", *code, code, RAM_BANK, logNum, opCounter);
 #endif // VERBOSE
-
+            //exit(0);
         }
 
         memcpy(&codeWindow[0], code, CODE_WINDOW_SIZE);
@@ -2779,8 +3056,11 @@ void executeLogic(int logNum)
 #endif // VERBOSE
         codeAtTimeOfLastBankSwitch = *code;
         instructionCodeBank = getBankBasedOnCode(codeAtTimeOfLastBankSwitch);
+        
+#ifdef VERBOSE_PRINT_COUNTER
+        printf("%d %d %d\n", printCounter + 1, codeAtTimeOfLastBankSwitch, currentLog);
+#endif // VERBOSE_PRINT_COUNTER
 #ifdef VERBOSE_LOGIC_EXEC
-        printf("%d %d\n", printCounter + 1, codeAtTimeOfLastBankSwitch);
         printf("Bank is now %d to execute code %d \n", RAM_BANK, codeAtTimeOfLastBankSwitch);
 #endif // VERBOSE 
         printCounter++;
