@@ -33,6 +33,7 @@
     <ClInclude Include="src\SOUND.H" />
     <ClInclude Include="src\stub.h" />
     <ClInclude Include="src\timer.h" />
+    <ClInclude Include="src\view.h" />
     <ClInclude Include="src\WORDS.H" />
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +55,7 @@
     <ClCompile Include="src\stub.c" />
     <ClCompile Include="src\TEXT.C" />
     <ClCompile Include="src\timer.c" />
+    <ClCompile Include="src\view.c" />
     <ClCompile Include="src\WORDS.C" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

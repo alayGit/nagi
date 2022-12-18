@@ -1,6 +1,15 @@
 #include "stub.h"
 
 //Allegro
+void clear_to_color(BITMAP* bitmap, int color)
+{
+}
+
+void stretch_blit(BITMAP* s, BITMAP* d, int s_x, int s_y, int s_w, int s_h, int d_x, int d_y, int d_w, int d_h)
+{
+
+}
+
 void show_mouse(BITMAP* bmp) {
 
 }
@@ -38,43 +47,6 @@ int do_menu(MENU* menu, int x, int y)
 	return 0;
 }
 
-ViewTable* viewtab = (ViewTable*)&BANK_RAM[VIEWTAB_START];
-
-void getViewTab(ViewTable* returnedViewTab, byte viewTabNumber)
-{
-	byte previousRamBank = RAM_BANK;
-
-	RAM_BANK = VIEWTAB_BANK;
-
-	*returnedViewTab = viewtab[viewTabNumber];
-
-	RAM_BANK = previousRamBank;
-}
-
-void setViewTab(ViewTable* localViewtab, byte viewTabNumber)
-{
-	byte previousRamBank = RAM_BANK;
-
-	RAM_BANK = VIEWTAB_BANK;
-
-	viewtab[viewTabNumber] = *viewtab;
-
-	RAM_BANK = previousRamBank;
-}
-
-
-void updateObj(int entryNum) {
-
-}
-
-void resetViews()
-{
-}
-
-void discardView(byte viewNum)
-{
-}
-
 void clear(BITMAP* bitmap)
 {
 }
@@ -83,20 +55,8 @@ void rectfill(BITMAP* bmp, int x1, int y1, int x2, int y2, int color)
 {
 }
 
-void drawObject(int entryNum)
-{
-}
-
-void loadViewFile(byte viewNum) {
-
-}
-
 void lookupWords(char* inputLine)
 {
-
-}
-
-void showObjectState(int objNum) {
 
 }
 
@@ -118,6 +78,14 @@ BITMAP* agi_screen;      /* This is a subbitmap of the screen */
 int numInputWords, inputWords[10];
 char wordText[10][80];
 
+void showPicture()
+{
+
+}
+void showDebugPri()
+{
+
+}
 
 void discardPictureFile(int picFileNum) {
 
@@ -167,16 +135,17 @@ void loadSoundFile(int soundNum) {
 
 }
 
-void showDebugPri() {
-
-}
-
-void showPicture() {
-
-}
-
-
 //Graphics
+void drawString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour)
+{
+
+}
+
+void drawChar(BITMAP* scn, byte charNum, int x, int y, int foreColour, int backColour)
+{
+
+}
+
 void drawBigString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour)
 {
 
@@ -187,6 +156,15 @@ byte directions[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 //allgero
 BITMAP* screen;
+void rect(BITMAP* bmp, int x1, int y1, int x2, int y2, int color)
+{
+
+}
+
+void stretch_sprite(BITMAP* bmp, BITMAP* sprite, int x, int y, int w, int h)
+{
+
+}
 
 //Parser
 boolean haveKey = FALSE;
@@ -208,33 +186,12 @@ void getString(char* promptStr, char* returnStr, int x, int y, int l) {
 
 }
 
-
-eventType events[256];
-
-//View
-void setCel(byte entryNum, byte celNum) {
-
-}
-
-void calcObjMotion()
-{
-}
-
-void initViews() {
+//Object
+void loadObjectFile() {
 
 }
 
 void discardObjects() {
-
-}
-
-void setLoop(byte entryNum, byte loopNum) {
-
-}
-
-
-//Object
-void loadObjectFile() {
 
 }
 
@@ -257,14 +214,6 @@ extern SoundFile loadedSounds[];
 extern boolean checkForEnd;
 extern int soundEndFlag;
 
-void addToPic(int vNum, int lNum, int cNum, int x, int y, int pNum, int bCol) {
-
-}
-
-void addViewToTable(byte entryNum, byte viewNum) {
-
-}
-
 void stop_midi()
 {
 }
@@ -272,7 +221,7 @@ void stop_midi()
 
 //objects
 int numObjects;
-objectType* objects;
+//objectType* objects;
 
 //Text
 void printInBoxBig2(char* theString) {

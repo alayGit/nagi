@@ -31,6 +31,7 @@ typedef struct {
 	int v_w;
 	int v_h;
 	int color_depth;
+	byte** line;
 } BITMAP;
 
 typedef struct {          /* DIR entry structure */

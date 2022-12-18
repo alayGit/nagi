@@ -57,6 +57,8 @@
     <ClInclude Include="src\helpers.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\commands.h" />
+    <ClInclude Include="src\view.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\COMMANDS.C">
@@ -116,6 +118,7 @@
     <ClCompile Include="src\helpers.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\view.c" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

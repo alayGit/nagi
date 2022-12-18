@@ -100,8 +100,12 @@ void bankedRamInit()
 		(int)_BANKRAM05_SIZE__,
 		(int)_BANKRAM06_SIZE__,
 		(int)_BANKRAM07_SIZE__,
-		(int)_BANKRAM08_SIZE__
-
+		(int)_BANKRAM08_SIZE__,
+		(int)_BANKRAM09_SIZE__,
+		(int)_BANKRAM0A_SIZE__,
+		(int)_BANKRAM0B_SIZE__,
+		(int)_BANKRAM0C_SIZE__,
+		(int)_BANKRAM0D_SIZE__
 	};
 
 
@@ -111,17 +115,20 @@ void bankedRamInit()
 		printf("The bank ram size %d is %d\n", i + 1, bankRamSizes[i]);
 #endif // VERBOSE
 
-
-		sprintf(fileName, "agi.cx16.0%d", i + 1);
+		sprintf(fileName, "agi.cx16.0%x", i + 1);
+		
+#ifdef VERBOSE
+		printf("Loading file %s\n", fileName);
+#endif // VERBOSE
 
 		RAM_BANK = i + 1;
 		if ((fp = fopen(fileName, "rb")) != NULL) {
 
-#ifdef VERBOSE
-			printf("Loading file %s\n", fileName);
-#endif // VERBOSE
-			fgetc(fp);
-			fgetc(fp);
+			if (RAM_BANK < 0xa)
+			{
+				fgetc(fp);
+				fgetc(fp);
+			}
 
 			for (j = 0; j < bankRamSizes[i]; j++) {
 				fileByte = (byte) fgetc(fp);
@@ -144,6 +151,7 @@ void bankedRamInit()
 #endif // VERBOSE
 		}
 	}
+
 	RAM_BANK = previousBank;
 }
 #endif //  __CX16__

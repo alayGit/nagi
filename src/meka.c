@@ -16,7 +16,7 @@
 #include "agifiles.h"
 #include "logic.h"
 #include "commands.h"
-//#include "view.h"
+#include "view.h"
 #include "stub.h"
 #include "memoryManager.h"
 //#include "object.h"
@@ -73,7 +73,7 @@ void discardResources()
    for (i = 1; i < 256; i++) { 
        trampoline_1v(&discardLogicFile, i, LOGIC_CODE_BANK);
    }
-   for (i=0; i<256; i++) discardView(i);
+   for (i=0; i<256; i++) trampoline_1v(&b9DiscardView, i, VIEW_CODE_BANK_1);
    for (i=0; i<256; i++) discardPictureFile(i);
    for (i=0; i<256; i++) discardSoundFile(i);
 }
@@ -89,7 +89,7 @@ void discardResources()
 ***************************************************************************/
 void newRoom()
 {
-   resetViews();
+  trampoline_0(&b9ResetViews, VIEW_CODE_BANK_1);
    //stop_update_all();
    //unanimate_all();
    discardResources();
@@ -135,45 +135,6 @@ void updateStatusLine()
    }
 }
 
-//Should be in view, but temporarily
-void initObjects()
-{
-    int entryNum;
-    ViewTable localviewtab;
-    //spriteScreen = create_bitmap(160, 168);
-
-    for (entryNum = 0; entryNum < TABLESIZE; entryNum++) {      
-        localviewtab.stepTime = 1;
-        localviewtab.stepTimeCount = 1;
-        localviewtab.xPos = 0;
-        localviewtab.yPos = 0;
-        localviewtab.currentView = 0;
-        localviewtab.viewData = NULL;
-        localviewtab.currentLoop = 0;
-        localviewtab.numberOfLoops = 0;
-        localviewtab.loopData = NULL;
-        localviewtab.currentCel = 0;
-        localviewtab.numberOfCels = 0;
-        localviewtab.celData = NULL;
-        localviewtab.bgPic = NULL;
-        localviewtab.bgPri = NULL;
-        localviewtab.bgX = 0;
-        localviewtab.bgY = 0;
-        localviewtab.xsize = 0;
-        localviewtab.ysize = 0;
-        localviewtab.stepSize = 1;
-        localviewtab.cycleTime = 1;
-        localviewtab.cycleTimeCount = 1;
-        localviewtab.direction = 0;
-        localviewtab.motion = 0;
-        localviewtab.cycleStatus = 0;
-        localviewtab.priority = 0;
-        localviewtab.flags = 0;
-
-        setViewTab(&localviewtab, entryNum);
-    }
-}
-
 /***************************************************************************
 ** interpret
 **
@@ -190,7 +151,9 @@ void interpret()
    //else
    //   var[6] = dirnOfEgo;
    viewtab[0].direction = var[6];
-   calcObjMotion();
+
+   trampoline_0(&bCCalcObjMotion, VIEW_CODE_BANK_4);
+
    // <<-- Update status line here (score & sound)
    updateStatusLine();
 
@@ -198,7 +161,9 @@ void interpret()
       hasEnteredNewRoom = FALSE;
       exitAllLogics = FALSE;
       executeLogic(0);
+#ifdef VERBOSE
       printf("Back To Meka");
+#endif // VERBOSE
       //dirnOfEgo = var[6];
       viewtab[0].direction = var[6];
       // <<-- Update status line here (score & sound)
@@ -208,7 +173,9 @@ void interpret()
       flag[5] = 0;
       flag[6] = FALSE;
       flag[12] = FALSE;
-      if (!hasEnteredNewRoom) {} //updateObjects();
+      if (!hasEnteredNewRoom) {
+        trampoline_0(&bBUpdateObjects, VIEW_CODE_BANK_3);
+      }
       if (hasEnteredNewRoom) newRoom();
    } while (hasEnteredNewRoom);
 }
@@ -278,10 +245,12 @@ void initialise()
     initPicture();
     initPictures();
     initSound();
-    initViews();
+    
+    RAM_BANK = 9;
+    b9InitViews();
+    b9InitObjects();
 
     RAM_BANK = MEKA_BANK;
-    initObjects();
     loadObjectFile();
     loadWords();
     initEvents();
@@ -307,6 +276,7 @@ void main()
    //chdir("..\\KQ2-2917");
 
    initialise();
+
    RAM_BANK = MEKA_BANK;
    while (TRUE) {
       /* Cycle initiator. Controlled by delay variable (var[10). */

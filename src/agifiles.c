@@ -485,7 +485,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 	sprintf(&fileName[0], "vol.%d", location->fileNum);
 
 #ifdef VERBOSE
-	printf("The file name is %s", &fileName[0]);
+	printf("---The file name is %s", &fileName[0]);
 #endif // VERBOSE
 
 

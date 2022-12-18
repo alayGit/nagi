@@ -76,7 +76,7 @@
 
 #define FIRST_CODE_BANK 1
 #define LAST_CODE_BANK 5
-#define NO_CODE_BANKS 8
+#define NO_CODE_BANKS 13
 
 
 //Code Banks
@@ -84,10 +84,15 @@
 #define FILE_LOADER_HELPERS 6
 #define MEKA_BANK 7
 #define LOGIC_CODE_BANK 8
+#define VIEW_CODE_BANK_1 0x9
+#define VIEW_CODE_BANK_2 0xA
+#define VIEW_CODE_BANK_3 0xB
+#define VIEW_CODE_BANK_4 0xC
+#define VIEW_CODE_BANK_5 0xD
 
 //Golden RAM
 #define LOCAL_WORK_AREA_START 514
-#define LOCAL_WORK_AREA_SIZE 256
+#define LOCAL_WORK_AREA_SIZE 500
 
 
 
@@ -100,7 +105,7 @@ extern byte* banked;
 extern int _noSegments;
 
 #ifndef _MSC_VER
-extern void _BANKRAM01_SIZE__[], _BANKRAM02_SIZE__[], _BANKRAM03_SIZE__[], _BANKRAM04_SIZE__[], _BANKRAM05_SIZE__[], _BANKRAM06_SIZE__[], _BANKRAM07_SIZE__[], _BANKRAM08_SIZE__[];
+extern void _BANKRAM01_SIZE__[], _BANKRAM02_SIZE__[], _BANKRAM03_SIZE__[], _BANKRAM04_SIZE__[], _BANKRAM05_SIZE__[], _BANKRAM06_SIZE__[], _BANKRAM07_SIZE__[], _BANKRAM08_SIZE__[], _BANKRAM09_SIZE__[], _BANKRAM0A_SIZE__[], _BANKRAM0B_SIZE__[], _BANKRAM0C_SIZE__[], _BANKRAM0D_SIZE__[];
 #endif // !_MSC_VER
 
 typedef struct {          /* DIR entry structure */

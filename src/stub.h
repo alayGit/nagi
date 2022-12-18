@@ -6,8 +6,13 @@
 //allgero
 void stop_midi();
 void show_mouse(BITMAP* bmp);
+extern void stretch_sprite(BITMAP* bmp, BITMAP* sprite, int x, int y, int w, int h);
+extern void clear_to_color(BITMAP* bitmap, int color);
+extern void stretch_blit(BITMAP* s, BITMAP* d, int s_x, int s_y, int s_w, int s_h, int d_x, int d_y, int d_w, int d_h);
 
 int keypressed();
+extern BITMAP* create_bitmap(int width, int height);
+extern void rect(BITMAP* bmp, int x1, int y1, int x2, int y2, int color);
 
 typedef struct MENU
 {
@@ -66,6 +71,8 @@ void initPicture();
 void initPictures();
 void closePicture();
 void drawPic(byte* data, int pLen, boolean okToClearScreen);
+void showPicture();
+void showDebugPri();
 
 extern BITMAP* picture, * priority, * control, * agi_screen, * working_screen;
 
@@ -88,102 +95,6 @@ extern boolean checkForEnd;
 extern int soundEndFlag;
 
 //View
-
-#define TABLESIZE  20  // 100
-
-#define DRAWN         0x0001
-#define IGNOREBLOCKS  0x0002
-#define FIXEDPRIORITY 0x0004
-#define IGNOREHORIZON 0x0008
-#define UPDATE        0x0010
-#define CYCLING       0x0020
-#define ANIMATED      0x0040
-#define MOTION        0x0080
-#define ONWATER       0x0100
-#define IGNOREOBJECTS 0x0200
-#define ONLAND        0x0800
-#define FIXLOOP       0x2000
-
-typedef struct {
-	byte width;
-	byte height;
-	byte transparency;
-	BITMAP* bmp;
-} Cel;
-
-void setCel(byte entryNum, byte celNum);
-void initViews();
-void resetViews();
-void discardObjects();
-void setLoop(byte entryNum, byte loopNum);
-
-typedef struct {
-	byte numberOfCels;
-	Cel* cels;
-} Loop;
-
-typedef struct {
-	boolean loaded;
-	byte numberOfLoops;
-	Loop* loops;
-	char* description;
-} View;
-
-typedef struct {
-	byte stepTime;
-	byte stepTimeCount;
-	word xPos;
-	word yPos;
-	byte currentView;
-	View* viewData;             /* This pointer points to the loaded view */
-	byte currentLoop;
-	byte numberOfLoops;
-	Loop* loopData;             /* ditto */
-	byte currentCel;
-	byte numberOfCels;
-	Cel* celData;              /* ditto */
-	BITMAP* bgPic;             /* Storage for background behind drawn view */
-	BITMAP* bgPri;
-	word bgX;                  /* Position to place background bmp */
-	word bgY;
-	word xsize;
-	word ysize;
-	byte stepSize;
-	byte cycleTime;
-	byte cycleTimeCount;
-	byte direction;
-	byte motion;
-	byte cycleStatus;
-	byte priority;
-	word flags;
-	byte param1;
-	byte param2;
-	byte param3;
-	byte param4;
-} ViewTable;
-
-
-extern ViewTable* viewtab;
-
-extern void getViewTab(ViewTable* returnedViewTab, byte viewTabNumber);
-extern void setViewTab(ViewTable* viewTab, byte viewTabNumber);
-
-
-void discardView(byte viewNum);
-
-void calcObjMotion();
-void addToPic(int vNum, int lNum, int cNum, int x, int y, int pNum, int bCol);
-void addViewToTable(byte entryNum, byte viewNum);
-
-void drawObject(int entryNum);
-
-void showDebugPri();
-
-void showObjectState(int objNum);
-
-void showPicture();
-
-void updateObj(int entryNum);
 
 //Logic 
 extern byte directions[9];
@@ -361,12 +272,14 @@ void initAGIScreen();
 void initPalette();
 void loadPictureFile(int picFileNum);
 void loadSoundFile(int soundNum);
-void loadViewFile(byte viewNum);
+void b9LoadViewFile(byte viewNum);
 
 extern PictureFile loadedPictures[];
 
 //Graphics
+extern void drawString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour);
 void drawBigString(BITMAP* scn, char* data, int x, int y, int foreColour, int backColour);
+extern void drawChar(BITMAP* scn, byte charNum, int x, int y, int foreColour, int backColour);
 #endif
 
 //Parser
@@ -375,14 +288,6 @@ boolean said(byte** data);
 void getString(char* promptStr, char* returnStr, int x, int y, int l);
 
 extern char cursorChar;
-
-typedef struct {
-	byte type;     /* either key or menu item */
-	byte eventID;  /* either scancode or menu item ID */
-	byte asciiValue;
-	byte scanCodeValue;
-	boolean activated;
-} eventType;
 
 #define  NO_EVENT         0
 #define  ASCII_KEY_EVENT  1
@@ -402,8 +307,6 @@ extern boolean haveKey;
 void pollKeyboard();
 void initEvents();
 
-extern eventType events[256];
-
 void lookupWords(char* inputLine);
 
 //Object
@@ -417,13 +320,9 @@ void discardWords();
 extern byte* key;
 
 //Objects
-typedef struct {
-	int roomNum;
-	char* name;
-} objectType;
-
-extern objectType* objects;
 extern int numObjects;
+
+extern void discardObjects();
 
 //Text
 void printInBoxBig(char* theString, int x, int y, int lineLen);

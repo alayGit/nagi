@@ -18,6 +18,18 @@ byte convertAsciiByteToPetsciiByte(byte* toConvert)
 	}
 }
 
+void trampoline_0(fnTrampoline_0 func, byte bank)
+{
+	byte previousRamBank = RAM_BANK;
+
+	RAM_BANK = bank;
+
+	func();
+
+	RAM_BANK = previousRamBank;
+}
+
+
 void trampoline_1(fnTrampoline_1 func, void* data, byte bank)
 {
 	byte previousRamBank = RAM_BANK;
@@ -27,7 +39,6 @@ void trampoline_1(fnTrampoline_1 func, void* data, byte bank)
 
 	RAM_BANK = previousRamBank;
 }
-
 
 byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank)
 {
@@ -45,6 +56,30 @@ void trampoline_1v(fnTrampoline_1v func, byte data, byte bank)
 	byte previousRamBank = RAM_BANK;
 	RAM_BANK = bank;
 	func(data);
+	RAM_BANK = previousRamBank;
+}
+
+void trampoline_1i(fnTrampoline_1i func, byte data, byte bank)
+{
+	byte previousRamBank = RAM_BANK;
+	RAM_BANK = bank;
+	func(data);
+	RAM_BANK = previousRamBank;
+}
+
+void trampoline_2v(fnTrampoline_2v func, byte data1, byte data2, byte bank)
+{
+	byte previousRamBank = RAM_BANK;
+	RAM_BANK = bank;
+	func(data1, data2);
+	RAM_BANK = previousRamBank;
+}
+
+void trampoline_3i(fnTrampoline_3i func, byte data1, byte data2, byte data3, byte bank)
+{
+	byte previousRamBank = RAM_BANK;
+	RAM_BANK = bank;
+	func(data1, data2, data3);
 	RAM_BANK = previousRamBank;
 }
 

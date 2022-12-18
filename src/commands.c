@@ -21,6 +21,7 @@
 #include "general.h"
 #include "logic.h"
 #include "memoryManager.h"
+#include "view.h"
 #include "stub.h"
 #include "helpers.h"
 
@@ -66,6 +67,29 @@ int opCounter = 0;
 int printCounter = 1;
 
 void executeLogic(int logNum);
+
+//TEMP Should Be In Events
+typedef struct {
+    byte type;     /* either key or menu item */
+    byte eventID;  /* either scancode or menu item ID */
+    byte asciiValue;
+    byte scanCodeValue;
+    boolean activated;
+} eventType;
+
+eventType events[256];
+
+//
+
+//Temp Should Be In Objects
+typedef struct {
+	int roomNum;
+	char* name;
+} objectType;
+
+objectType* objects;
+
+//
 
 int getNum(char* inputString, int* i, int inputStringBank)
 {
@@ -734,17 +758,17 @@ void b1Show_pri_screen(byte** data) // 0, 0x00
 
 void b1Load_view(byte** data) // 1, 0x00 
 {
-    loadViewFile(*(*data)++);
+    trampoline_1v(&b9LoadViewFile, (*(*data)++), VIEW_CODE_BANK_1);
 }
 
 void b1Load_view_v(byte** data) // 1, 0x80 
 {
-    loadViewFile(var[*(*data)++]);
+    trampoline_1v(&b9LoadViewFile, var[*(*data)++], VIEW_CODE_BANK_1);
 }
 
 void b1Discard_view(byte** data) // 1, 0x00 
 {
-    discardView(*(*data)++);
+    trampoline_1v(&b9DiscardView, *(*data)++, VIEW_CODE_BANK_1);
 }
 
 void b1Animate_obj(byte** data) // 1, 0x00 
@@ -793,8 +817,9 @@ void b1Draw(byte** data) // 1, 0x00
     getViewTab(&localViewtab, entryNum);
 
     localViewtab.flags |= (DRAWN | UPDATE);   /* Not sure about update */
-    setCel(entryNum, localViewtab.currentCel);
-    drawObject(entryNum);
+     
+   viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, localViewtab.currentCel, VIEW_CODE_BANK_1);
+    trampoline_1i(&b9DrawObject,entryNum, VIEW_CODE_BANK_1);
 
     setViewTab(&localViewtab, entryNum);
 }
@@ -879,39 +904,62 @@ void b2Reposition(byte** data) // 3, 0x60
 void b2Set_view(byte** data) // 2, 0x00 
 {
     int entryNum, viewNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
     viewNum = *(*data)++;
-    addViewToTable(entryNum, viewNum);
+    
+    getViewTab(&localViewtab, entryNum);
+
+    viewUpdaterTrampoline1b(&b9AddViewToTable, &localViewtab, viewNum, VIEW_CODE_BANK_1);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_view_v(byte** data) // 2, 0x40 
 {
     int entryNum, viewNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
     viewNum = var[*(*data)++];
-    addViewToTable(entryNum, viewNum);
+
+    getViewTab(&localViewtab, entryNum);
+
+    viewUpdaterTrampoline1b(&b9AddViewToTable, &localViewtab, viewNum, VIEW_CODE_BANK_1);
+
+    getViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_loop(byte** data) // 2, 0x00 
 {
     int entryNum, loopNum;
+    ViewTable localViewtab; 
 
     entryNum = *(*data)++;
     loopNum = *(*data)++;
-    setLoop(entryNum, loopNum);
-    setCel(entryNum, 0);
+
+    getViewTab(&localViewtab, entryNum);
+    viewUpdaterTrampoline1b(&b9SetLoop, &localViewtab, loopNum, VIEW_CODE_BANK_1);
+    viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, 0, VIEW_CODE_BANK_1);
+    
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_loop_v(byte** data) // 2, 0x40 
 {
     int entryNum, loopNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
+    getViewTab(&localViewtab, entryNum);
+    
     loopNum = var[*(*data)++];
-    setLoop(entryNum, loopNum);
-    setCel(entryNum, 0);
+
+    viewUpdaterTrampoline1b(&b9SetLoop, &localViewtab, loopNum, VIEW_CODE_BANK_1);
+   viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, loopNum, VIEW_CODE_BANK_1);
+
+   setViewTab(&localViewtab, entryNum);
 }
 
 void b2Fix_loop(byte** data) // 1, 0x00 
@@ -944,19 +992,31 @@ void b2Release_loop(byte** data) // 1, 0x00
 void b2Set_cel(byte** data) // 2, 0x00 
 {
     int entryNum, celNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
     celNum = *(*data)++;
-    setCel(entryNum, celNum);
+    
+    getViewTab(&localViewtab, entryNum);
+
+    viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, celNum, VIEW_CODE_BANK_1);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Set_cel_v(byte** data) // 2, 0x40 
 {
     int entryNum, celNum;
+    ViewTable localViewtab;
 
     entryNum = *(*data)++;
     celNum = var[*(*data)++];
-    setCel(entryNum, celNum);
+
+    getViewTab(&localViewtab, entryNum);
+
+    viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, celNum, VIEW_CODE_BANK_1);
+
+    setViewTab(&localViewtab, entryNum);
 }
 
 void b2Last_cel(byte** data) // 2, 0x40 
@@ -1115,7 +1175,8 @@ void b2Force_update(byte** data) // 1, 0x00
 
     entryNum = *(*data)++;
     /* Do immediate update here. Call update(entryNum) */
-    updateObj(entryNum);
+    
+    trampoline_1i(&bAUpdateObj, entryNum, VIEW_CODE_BANK_1);
 }
 
 void b2Ignore_horizon(byte** data) // 1, 0x00 
@@ -1993,7 +2054,7 @@ void b3Add_to_pic(byte** data) // 7, 0x00
     priNum = *(*data)++;
     baseCol = *(*data)++;
 
-    addToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
+    addToPicTrampoline(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
 void b3Add_to_pic_v(byte** data) // 7, 0xFE 
@@ -2008,7 +2069,7 @@ void b3Add_to_pic_v(byte** data) // 7, 0xFE
     priNum = var[*(*data)++];
     baseCol = var[*(*data)++];
 
-    addToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
+    addToPicTrampoline(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
 void b3Status(byte** data) // 0, 0x00 
@@ -2082,7 +2143,7 @@ void b3Obj_status_v(byte** data) // 1, 0x80
     /* Not supported yet */
 
     /* showView(viewtab[objectNum].currentView); */
-    showObjectState(objectNum);
+    trampoline_1i(&bDShowObjectState,objectNum, VIEW_CODE_BANK_4);
 }
 
 
@@ -2283,7 +2344,7 @@ void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
 
 void b4Discard_view_v(byte** data) // 1, 0x80 
 {
-    discardView(var[*(*data)++]);
+    trampoline_1v(&b9DiscardView, var[*(*data)++], VIEW_CODE_BANK_1);
 }
 
 void b4Clear_text_rect(byte** data) // 5, 0x00 
