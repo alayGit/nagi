@@ -30,7 +30,7 @@ void trampoline_0(fnTrampoline_0 func, byte bank)
 }
 
 
-void trampoline_1(fnTrampoline_1 func, void* data, byte bank)
+void trampoline_1pp(fnTrampoline_1 func, byte** data, byte bank)
 {
 	byte previousRamBank = RAM_BANK;
 
@@ -40,7 +40,7 @@ void trampoline_1(fnTrampoline_1 func, void* data, byte bank)
 	RAM_BANK = previousRamBank;
 }
 
-byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank)
+boolean trampoline_1pRetbool(fnTrampoline_1ppRetbool func, byte** data, byte bank)
 {
 	byte returnVal;
 	byte previousRamBank = RAM_BANK;

@@ -96,6 +96,26 @@ void setViewTab(ViewTable* localViewtab, byte viewTabNumber)
     RAM_BANK = previousRamBank;
 }
 
+void viewUpdaterTrampoline1p(fnTrampolineViewUpdater1p func, ViewTable* localViewtab, byte* data, byte bank)
+{
+    byte previousRamBank = RAM_BANK;
+    RAM_BANK = bank;
+
+    func(localViewtab, data);
+
+    RAM_BANK = previousRamBank;
+}
+
+void viewUpdaterTrampoline0(fnTrampolineViewUpdater0 func, ViewTable* localViewtab, byte bank)
+{
+    byte previousRamBank = RAM_BANK;
+    RAM_BANK = bank;
+
+    func(localViewtab);
+
+    RAM_BANK = previousRamBank;
+}
+
 void viewUpdaterTrampoline1b(fnTrampolineViewUpdater1b func, ViewTable* localViewtab, byte data, byte bank)
 {
     byte previousRamBank = RAM_BANK;
@@ -1490,9 +1510,10 @@ void bCCalcObjMotion()
         } /* MOTION */
 
         /* Automatic change of direction if needed */
-        setViewTab(&localViewtab, entryNum);
 
-        trampoline_1b(&b9CalcDirection, &localViewtab, VIEW_CODE_BANK_1);
+        viewUpdaterTrampoline0(&b9CalcDirection, &localViewtab, VIEW_CODE_BANK_1);
+
+        setViewTab(&localViewtab, entryNum);
     }
 }
 

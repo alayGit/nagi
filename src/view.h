@@ -82,12 +82,18 @@ extern View loadedViews[];
 
 extern BITMAP* spriteScreen;
 
+typedef void (*fnTrampolineViewUpdater0)(ViewTable* localViewtab);
 typedef void (*fnTrampolineViewUpdater1b)(ViewTable* localViewtab, byte num);
+typedef void (*fnTrampolineViewUpdater1p)(ViewTable* localViewtab, byte* data1);
+
 typedef void (*fnTrampolineViewUpdater2i)(ViewTable* localViewtab, int data1, int data2);
 
 extern void getViewTab(ViewTable* returnedViewTab, byte viewTabNumber);
 extern void setViewTab(ViewTable* viewTab, byte viewTabNumber);
+
+extern void viewUpdaterTrampoline0(fnTrampolineViewUpdater0 func, ViewTable* localViewtab, byte bank);
 extern void viewUpdaterTrampoline1b(fnTrampolineViewUpdater1b func, ViewTable* localViewtab, byte celNum, byte bank);
+extern void viewUpdaterTrampoline1p(fnTrampolineViewUpdater1p func, ViewTable* localViewtab, byte* data, byte bank);
 
 void addToPicTrampoline(int vNum, int lNum, int cNum, int x, int y, int pNum, int bCol);
 

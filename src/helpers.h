@@ -24,8 +24,8 @@
 #define DIFF_ASCII_PETSCII_LOWER -32
 
 typedef void (*fnTrampoline_0)();
-typedef void (*fnTrampoline_1)(void* data);
-typedef byte (*fnTrampoline_1b)(void* data);
+typedef void (*fnTrampoline_1)(byte** data);
+typedef boolean (*fnTrampoline_1ppRetbool)(byte** data);
 
 typedef void (*fnTrampoline_1i)(int data);
 typedef void (*fnTrampoline_1v)(byte data);
@@ -37,8 +37,8 @@ typedef void (*fnTrampoline_3i)(int data1, int data2, int data3);
 byte convertAsciiByteToPetsciiByte(byte* toConvert);
 
 extern void trampoline_0(fnTrampoline_0 func, byte bank);
-extern void trampoline_1(fnTrampoline_1 func, void* data, byte bank);
-extern byte trampoline_1b(fnTrampoline_1b func, void* data, byte bank);
+extern void trampoline_1pp(fnTrampoline_1 func, byte** data, byte bank);
+extern boolean trampoline_1pRetbool(fnTrampoline_1ppRetbool func, byte** data, byte bank);
 extern void trampoline_1i(fnTrampoline_1i func, byte data, byte bank);
 
 extern void trampoline_1v(fnTrampoline_1v func, byte data, byte bank);
