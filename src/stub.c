@@ -1,5 +1,7 @@
 #include "stub.h"
 
+//A temporary file so that references to yet to be imported files can resolved
+
 //Allegro
 void clear_to_color(BITMAP* bitmap, int color)
 {

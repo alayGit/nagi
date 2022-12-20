@@ -3,6 +3,9 @@
 #include "general.h"
 #include "memoryManager.h"
 #include <cx16.h>
+
+//A temporary file so that references to yet to be imported files can resolved
+
 //allgero
 void stop_midi();
 void show_mouse(BITMAP* bmp);
