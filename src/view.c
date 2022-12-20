@@ -1478,7 +1478,7 @@ void bCCalcObjMotion()
                     }
                     break;
                 case 2: /* follow.ego */
-                    trampoline_1i(&bAFollowEgo, entryNum, VIEW_CODE_BANK_1);
+                    trampoline_1Int(&bAFollowEgo, entryNum, VIEW_CODE_BANK_1);
                     if ((localViewtab.xPos == localViewtab0.xPos) &&
                         (localViewtab.yPos == localViewtab0.yPos)) {
                         localViewtab.motion = 0;

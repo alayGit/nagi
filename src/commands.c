@@ -695,12 +695,12 @@ void b1New_room_v(byte** data) // 1, 0x80
 
 void b1Load_logics(byte** data) // 1, 0x00 
 {
-    trampoline_1v(&loadLogicFile,*(*data)++, LOGIC_CODE_BANK);
+    trampoline_1Int(&loadLogicFile,*(*data)++, LOGIC_CODE_BANK);
 }
 
 void b1Load_logics_v(byte** data) // 1, 0x80 
 {
-    trampoline_1v(&loadLogicFile, var[*(*data)++], LOGIC_CODE_BANK);
+    trampoline_1Int(&loadLogicFile, var[*(*data)++], LOGIC_CODE_BANK);
 }
 
 void b1Call(byte** data) // 1, 0x00 
@@ -760,17 +760,17 @@ void b1Show_pri_screen(byte** data) // 0, 0x00
 
 void b1Load_view(byte** data) // 1, 0x00 
 {
-    trampoline_1v(&b9LoadViewFile, (*(*data)++), VIEW_CODE_BANK_1);
+    trampoline_1Int(&b9LoadViewFile, (*(*data)++), VIEW_CODE_BANK_1);
 }
 
 void b1Load_view_v(byte** data) // 1, 0x80 
 {
-    trampoline_1v(&b9LoadViewFile, var[*(*data)++], VIEW_CODE_BANK_1);
+    trampoline_1Int(&b9LoadViewFile, var[*(*data)++], VIEW_CODE_BANK_1);
 }
 
 void b1Discard_view(byte** data) // 1, 0x00 
 {
-    trampoline_1v(&b9DiscardView, *(*data)++, VIEW_CODE_BANK_1);
+    trampoline_1Int(&b9DiscardView, *(*data)++, VIEW_CODE_BANK_1);
 }
 
 void b1Animate_obj(byte** data) // 1, 0x00 
@@ -821,7 +821,7 @@ void b1Draw(byte** data) // 1, 0x00
     localViewtab.flags |= (DRAWN | UPDATE);   /* Not sure about update */
      
    trampolineViewUpdater1Int(&b9SetCel, &localViewtab, localViewtab.currentCel, VIEW_CODE_BANK_1);
-    trampoline_1i(&b9DrawObject,entryNum, VIEW_CODE_BANK_1);
+    trampoline_1Int(&b9DrawObject,entryNum, VIEW_CODE_BANK_1);
 
     setViewTab(&localViewtab, entryNum);
 }
@@ -1178,7 +1178,7 @@ void b2Force_update(byte** data) // 1, 0x00
     entryNum = *(*data)++;
     /* Do immediate update here. Call update(entryNum) */
     
-    trampoline_1i(&bAUpdateObj, entryNum, VIEW_CODE_BANK_1);
+    trampoline_1Int(&bAUpdateObj, entryNum, VIEW_CODE_BANK_1);
 }
 
 void b2Ignore_horizon(byte** data) // 1, 0x00 
@@ -2145,7 +2145,7 @@ void b3Obj_status_v(byte** data) // 1, 0x80
     /* Not supported yet */
 
     /* showView(viewtab[objectNum].currentView); */
-    trampoline_1i(&bDShowObjectState,objectNum, VIEW_CODE_BANK_4);
+    trampoline_1Int(&bDShowObjectState,objectNum, VIEW_CODE_BANK_4);
 }
 
 
@@ -2346,7 +2346,7 @@ void b4Print_at_v(byte** data) // 4, 0x80         /* 2_440 (maybe laterz) */
 
 void b4Discard_view_v(byte** data) // 1, 0x80 
 {
-    trampoline_1v(&b9DiscardView, var[*(*data)++], VIEW_CODE_BANK_1);
+    trampoline_1Int(&b9DiscardView, var[*(*data)++], VIEW_CODE_BANK_1);
 }
 
 void b4Clear_text_rect(byte** data) // 5, 0x00 

@@ -25,24 +25,24 @@
 
 typedef void (*fnTrampoline_0)();
 
-typedef void (*fnTrampoline_1)(byte** data);
-typedef boolean (*fnTrampoline_1ppRetbool)(byte** data);
-typedef void (*fnTrampoline_1i)(int data);
-typedef void (*fnTrampoline_1v)(byte data);
+typedef void (*fnTrampoline_1BytePointerPointer)(byte** data);
+typedef boolean (*fnTrampoline_1BytePointerPointerRetBool)(byte** data);
+typedef void (*fnTrampoline_1Int)(int data);
+typedef void (*fnTrampoline_1Int)(int data);
 
-typedef void (*fnTrampoline_2v)(byte data, byte data2);
+typedef void (*fnTrampoline_2Int)(int data, int data2);
 
 typedef void (*fnTrampoline_3Int)(int data1, int data2, int data3);
 
 byte convertAsciiByteToPetsciiByte(byte* toConvert);
 
 extern void trampoline_0(fnTrampoline_0 func, byte bank);
-extern void trampoline_1pp(fnTrampoline_1 func, byte** data, byte bank);
-extern boolean trampoline_1pRetbool(fnTrampoline_1ppRetbool func, byte** data, byte bank);
-extern void trampoline_1i(fnTrampoline_1i func, byte data, byte bank);
+extern void trampoline_1pp(fnTrampoline_1BytePointerPointer func, byte** data, byte bank);
+extern boolean trampoline_1pRetbool(fnTrampoline_1BytePointerPointerRetBool func, byte** data, byte bank);
 
-extern void trampoline_1v(fnTrampoline_1v func, byte data, byte bank);
-extern void trampoline_2Int(fnTrampoline_2v func, int data1, int data2, byte bank);
+extern void trampoline_1Int(fnTrampoline_1Int func, int data, byte bank);
+extern void trampoline_1Int(fnTrampoline_1Int func, int data, byte bank);
+extern void trampoline_2Int(fnTrampoline_2Int func, int data1, int data2, byte bank);
 
 extern void trampoline_3Int(fnTrampoline_3Int func, int data1, int data2, int data3, int bank);
 

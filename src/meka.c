@@ -71,9 +71,9 @@ void discardResources()
    int i;
 
    for (i = 1; i < 256; i++) { 
-       trampoline_1v(&discardLogicFile, i, LOGIC_CODE_BANK);
+       trampoline_1Int(&discardLogicFile, i, LOGIC_CODE_BANK);
    }
-   for (i=0; i<256; i++) trampoline_1v(&b9DiscardView, i, VIEW_CODE_BANK_1);
+   for (i=0; i<256; i++) trampoline_1Int(&b9DiscardView, i, VIEW_CODE_BANK_1);
    for (i=0; i<256; i++) discardPictureFile(i);
    for (i=0; i<256; i++) discardSoundFile(i);
 }
