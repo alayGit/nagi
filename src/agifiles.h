@@ -35,8 +35,8 @@ extern AGIFilePosType* snddir;
 
 extern int numLogics, numPictures, numViews, numSounds;
 
-void initFiles();
-void loadAGIDirs();
-void loadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData);
+void b6InitFiles();
+void b6LoadAGIDirs();
+void b6LoadAGIFile(int resType, AGIFilePosType* location, AGIFile *AGIData);
 
 #endif  /* _AGIFILES_H_ */

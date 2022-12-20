@@ -46,7 +46,7 @@ int dirnOfEgo, newRoomNum, score;
 extern int picFNum;    // Debugging. Delete at some stage!!
 
 #pragma code-name (push, "BANKRAM07")
-void adjustEgoPosition()
+void b7AdjustEgoPosition()
 {
    switch (var[2]) {
       case 1:
@@ -66,12 +66,12 @@ void adjustEgoPosition()
    // Might need to stop motion of ego 
 }
 
-void discardResources()
+void b7DiscardResources()
 {
    int i;
 
    for (i = 1; i < 256; i++) { 
-       trampoline_1Int(&discardLogicFile, i, LOGIC_CODE_BANK);
+       trampoline_1Int(&b8DiscardLogicFile, i, LOGIC_CODE_BANK);
    }
    for (i=0; i<256; i++) trampoline_1Int(&b9DiscardView, i, VIEW_CODE_BANK_1);
    for (i=0; i<256; i++) discardPictureFile(i);
@@ -87,12 +87,12 @@ void discardResources()
 ** main module for this reason and also because it is one of the most
 ** important of the AGI commands.
 ***************************************************************************/
-void newRoom()
+void b7NewRoom()
 {
   trampoline_0(&b9ResetViews, VIEW_CODE_BANK_1);
    //stop_update_all();
    //unanimate_all();
-   discardResources();
+   b7DiscardResources();
    controlMode = PLAYER_CONTROL;
    //unblock();
    horizon = 36;
@@ -102,7 +102,7 @@ void newRoom()
    var[5] = 0;
    var[9] = 0;
    var[16] = 0;
-   adjustEgoPosition();
+   b7AdjustEgoPosition();
    var[2] = 0;
    flag[2] = 0;
    flag[5] = 1;
@@ -121,7 +121,7 @@ void newRoom()
 **
 ** The status line shows the score and sound at the top of the screen.
 ***************************************************************************/
-void updateStatusLine()
+void b7UpdateStatusLine()
 {
    char scoreStr[256], soundStr[256];
 
@@ -141,7 +141,7 @@ void updateStatusLine()
 ** The main routine that gets called everytime the timing procedure is
 ** activated.
 ***************************************************************************/
-void interpret()
+void b7Interpret()
 {
    flag[2] = FALSE;   //The player has issued a command line
    flag[4] = FALSE;   //The 'said' command has accepted the input
@@ -155,7 +155,7 @@ void interpret()
    trampoline_0(&bCCalcObjMotion, VIEW_CODE_BANK_4);
 
    // <<-- Update status line here (score & sound)
-   updateStatusLine();
+   b7UpdateStatusLine();
 
    do {
       hasEnteredNewRoom = FALSE;
@@ -167,7 +167,7 @@ void interpret()
       //dirnOfEgo = var[6];
       viewtab[0].direction = var[6];
       // <<-- Update status line here (score & sound)
-      updateStatusLine();
+      b7UpdateStatusLine();
       var[5] = 0;
       var[4] = 0;
       flag[5] = 0;
@@ -176,11 +176,11 @@ void interpret()
       if (!hasEnteredNewRoom) {
         trampoline_0(&bBUpdateObjects, VIEW_CODE_BANK_3);
       }
-      if (hasEnteredNewRoom) newRoom();
+      if (hasEnteredNewRoom) b7NewRoom();
    } while (hasEnteredNewRoom);
 }
 
-void timing_proc()
+void b7Timing_proc()
 {
    counter++;
    hund += 5;
@@ -202,7 +202,7 @@ void timing_proc()
    }
 }
 
-void closedown()
+void b7Closedown()
 {
    discardObjects();
    discardWords();
@@ -218,10 +218,10 @@ void initialise()
     byte previousRamBank = RAM_BANK;
     int i;
     memoryMangerInit();
-    initTimer(&timing_proc);
+    initTimer(&b7Timing_proc);
 
     RAM_BANK = LOAD_DIRS_BANK;
-    initFiles();             /* Load resource directories */
+    b6InitFiles();             /* Load resource directories */
     //// <<--  Determine exact version in here
     for (i = 0; i < 255; i++) {  /* Initialize variables and flags */
         var[i] = 0;
@@ -241,7 +241,7 @@ void initialise()
     initPalette();
 
     RAM_BANK = LOGIC_CODE_BANK;
-    initLogics();
+    b8InitLogics();
     initPicture();
     initPictures();
     initSound();
@@ -284,7 +284,7 @@ void main()
 #ifdef VERBOSE
           printf("Interpret Runs");
 #endif // VERBOSE
-          interpret();
+          b7Interpret();
         counter=0;
       }
       checkTimer(TIMER_WAIT_MS);

@@ -96,7 +96,7 @@ void getLogicEntry(LOGICEntry* logicEntry, byte logicFileNo)
 ** this function.
 ***************************************************************************/
 #pragma code-name (push, "BANKRAM08")
-void initLogics()
+void b8InitLogics()
 {
 	int i;
 	LOGICEntry logicEntry;
@@ -110,7 +110,7 @@ void initLogics()
 		logicEntry.data = NULL;
 	}
 
-	loadLogicFile(0);
+	b8LoadLogicFile(0);
 }
 
 
@@ -120,7 +120,7 @@ void initLogics()
 ** Purpose: To load a LOGIC file, decode the messages, and store in a
 ** suitable structure.
 **************************************************************************/
-void loadLogicFile(byte logFileNum)
+void b8LoadLogicFile(byte logFileNum)
 {
 	AGIFile tempAGI;
 	AGIFilePosType agiFilePosType;
@@ -136,7 +136,7 @@ void loadLogicFile(byte logFileNum)
 	printf("\n%d Retrieved file num %d, Offset %lu\n", logFileNum, agiFilePosType.filePos);
 #endif // VERBOSE
 
-	discardLogicFile(logFileNum);
+	b8DiscardLogicFile(logFileNum);
 	/* Load LOGIC file, calculate logic code length, and copy
 	** logic code into tempLOGIC. */
 
@@ -145,7 +145,7 @@ void loadLogicFile(byte logFileNum)
 	printf("Loading Logic %d\n", logFileNum);
 #endif // VERBOSE
 
-	loadAGIFile(LOGIC, &agiFilePosType, &tempAGI);
+	b6LoadAGIFile(LOGIC, &agiFilePosType, &tempAGI);
 
 	getLogicFile(&logicData, logFileNum);
 	logicData.codeBank = tempAGI.codeBank;
@@ -180,7 +180,7 @@ void loadLogicFile(byte logFileNum)
 ** struct. This function can only be used with dynamically allocated
 ** LOGICFile structs which is what I plan to use.
 **************************************************************************/
-void discardLogicFile(byte logFileNum)
+void b8DiscardLogicFile(byte logFileNum)
 {
 	int messNum;
 	LOGICFile logicData;
@@ -214,8 +214,8 @@ void discardLogicFile(byte logFileNum)
 
 void testLogic()
 {
-	initFiles();
-	initLogics();
-	loadLogicFile(0);
-	discardLogicFile(0);
+	b6InitFiles();
+	b8InitLogics();
+	b8LoadLogicFile(0);
+	b8DiscardLogicFile(0);
 }

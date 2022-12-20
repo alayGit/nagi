@@ -127,7 +127,7 @@ int8_t cx16_fseek(uint8_t channel, uint32_t offset) {
 ** Purpose: To read in an individual AGI directory file. This function
 ** should only be called by loadAGIDirs() below.
 ***************************************************************************/
-void loadAGIDir(int dirNum, char* fName, int* count)
+void b6LoadAGIDir(int dirNum, char* fName, int* count)
 {
 	FILE* fp;
 	unsigned char byte1, byte2, byte3;
@@ -202,7 +202,7 @@ void loadAGIDir(int dirNum, char* fName, int* count)
 /***************************************************************************
 ** loadAGIv3Dir
 ***************************************************************************/
-void loadAGIv3Dir()
+void b6LoadAGIv3Dir()
 {
 	//FILE *dirFile;
 	//unsigned char dirName[15], *marker, *dirData, *endPos, *dataPos;
@@ -267,36 +267,36 @@ void loadAGIv3Dir()
 ** SNDDIR and store the information in a usable format. This function must
 ** be called once at the start of the interpreter.
 ***************************************************************************/
-void loadAGIDirs()
+void b6LoadAGIDirs()
 {
 	numLogics = numPictures = numViews = numSounds = 0;
 	if (version3) {
-		loadAGIv3Dir();
+		b6LoadAGIv3Dir();
 	}
 	else {
 #ifdef VERBOSE
 		printf("Loading Indexes");
 #endif // VERBOSE
-		loadAGIDir(0, "logdir", &numLogics);
-		loadAGIDir(1, "picdir", &numPictures);
-		loadAGIDir(2, "viewdir", &numViews);
-		loadAGIDir(3, "snddir", &numSounds);
+		b6LoadAGIDir(0, "logdir", &numLogics);
+		b6LoadAGIDir(1, "picdir", &numPictures);
+		b6LoadAGIDir(2, "viewdir", &numViews);
+		b6LoadAGIDir(3, "snddir", &numSounds);
 #ifdef VERBOSE
 		printf("Indexs Loaded\n");
 #endif
 	}
 }
 
-void initFiles()
+void b6InitFiles()
 {
 	//loadGameSig(gameSig);
 	//if (strlen(gameSig) > 0) version3 = TRUE;
-	loadAGIDirs();
+	b6LoadAGIDirs();
 }
 
 #pragma code-name (pop)
 
-byte* readFileContentsIntoBankedRam(int size, byte* bank)
+byte* b6ReadFileContentsIntoBankedRam(int size, byte* bank)
 {
 	byte* result;
 	byte previousRamBank = RAM_BANK;
@@ -362,12 +362,12 @@ byte* readFileContentsIntoBankedRam(int size, byte* bank)
 
 #define getMessageSectionSize AGIData->totalSize - AGIData->codeSize - 5 - AGIData->noMessages * 2
 
-unsigned int getPositionOfFirstMessage(AGIFile* AGIData)
+unsigned int b6GetPositionOfFirstMessage(AGIFile* AGIData)
 {
 	return AGIData->noMessages * NO_BYTES_PER_MESSAGE;
 }
 
-boolean seekAndCheckSignature(char* fileName, AGIFilePosType* location)
+boolean b6SeekAndCheckSignature(char* fileName, AGIFilePosType* location)
 {
 	boolean result = TRUE, signatureValidationPassed;
 	const byte EXPECT_SIG_1 = 0x12;
@@ -401,7 +401,7 @@ boolean seekAndCheckSignature(char* fileName, AGIFilePosType* location)
 	return result;
 }
 
-byte seekAndReadLogicIntoMemory(AGIFile* AGIData)
+byte b6SeekAndReadLogicIntoMemory(AGIFile* AGIData)
 {
 	byte currentByte, bank;
 	unsigned char byte1, byte2, volNum;
@@ -429,7 +429,7 @@ byte seekAndReadLogicIntoMemory(AGIFile* AGIData)
 
 	AGIData->codeSize = byte1 + byte2 * 256;
 
-	AGIData->code = readFileContentsIntoBankedRam(AGIData->codeSize, &bank);
+	AGIData->code = b6ReadFileContentsIntoBankedRam(AGIData->codeSize, &bank);
 
 	return bank;
 }
@@ -437,7 +437,7 @@ byte seekAndReadLogicIntoMemory(AGIFile* AGIData)
 #pragma code-name (pop)
 
 //https://www.liquisearch.com/what_is_avis_durgan
-void xOrAvisDurgan(byte* toXOR, unsigned int* avisPos)
+void b6XOrAvisDurgan(byte* toXOR, unsigned int* avisPos)
 {
 	*toXOR ^= avisDurgan[*avisPos];
 	*avisPos = (*avisPos + 1) % 11;
@@ -460,7 +460,7 @@ void xOrAvisDurgan(byte* toXOR, unsigned int* avisPos)
 **
 ** In both cases the format that is easier to deal with is returned.
 **************************************************************************/
-void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
+void b6LoadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 {
 #define SEPARATOR 0
 
@@ -493,8 +493,8 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 	RAM_BANK = FILE_LOADER_HELPERS;
 
-	seekAndCheckSignature(&fileName[0], location);	
-	AGIData->codeBank = seekAndReadLogicIntoMemory(AGIData);
+	b6SeekAndCheckSignature(&fileName[0], location);	
+	AGIData->codeBank = b6SeekAndReadLogicIntoMemory(AGIData);
 
 	if (resType == LOGIC) {
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
@@ -503,11 +503,11 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 		cbm_read(SEQUENTIAL_LFN, &byte1, 1);
 		cbm_read(SEQUENTIAL_LFN, &byte2, 1);
 		
-		wholeMessageSectionData = readFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &AGIData->messageBank);
+		wholeMessageSectionData = b6ReadFileContentsIntoBankedRam(AGIData->totalSize - AGIData->codeSize - 5, &AGIData->messageBank);
 		AGIData->messagePointers = (byte**)&wholeMessageSectionData[0];
 
 
-		AGIData->messageData = &wholeMessageSectionData[getPositionOfFirstMessage(AGIData)];
+		AGIData->messageData = &wholeMessageSectionData[b6GetPositionOfFirstMessage(AGIData)];
 
 		RAM_BANK = AGIData->messageBank;
 
@@ -518,7 +518,7 @@ void loadAGIFile(int resType, AGIFilePosType* location, AGIFile* AGIData)
 
 		for (i = 0; i < getMessageSectionSize; i++) {
 
-			xOrAvisDurgan((byte*)&AGIData->messageData[i], &avisPos);
+			b6XOrAvisDurgan((byte*)&AGIData->messageData[i], &avisPos);
 			convertAsciiByteToPetsciiByte(&AGIData->messageData[i]);
 
 			if (lastCharacterSeparator)

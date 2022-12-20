@@ -695,12 +695,12 @@ void b1New_room_v(byte** data) // 1, 0x80
 
 void b1Load_logics(byte** data) // 1, 0x00 
 {
-    trampoline_1Int(&loadLogicFile,*(*data)++, LOGIC_CODE_BANK);
+    trampoline_1Int(&b8LoadLogicFile,*(*data)++, LOGIC_CODE_BANK);
 }
 
 void b1Load_logics_v(byte** data) // 1, 0x80 
 {
-    trampoline_1Int(&loadLogicFile, var[*(*data)++], LOGIC_CODE_BANK);
+    trampoline_1Int(&b8LoadLogicFile, var[*(*data)++], LOGIC_CODE_BANK);
 }
 
 void b1Call(byte** data) // 1, 0x00 
@@ -3047,7 +3047,7 @@ void executeLogic(int logNum)
 
 
 
-        loadLogicFile(logNum);
+        b8LoadLogicFile(logNum);
 
         RAM_BANK = LOGIC_ENTRY_BANK;
         currentLogic = logics[logNum];
@@ -3188,7 +3188,7 @@ void executeLogic(int logNum)
 
     if (discardAfterward) {
         RAM_BANK = LOGIC_CODE_BANK;
-        discardLogicFile(logNum);
+        b8DiscardLogicFile(logNum);
     }
 
     RAM_BANK = previousRamBank;
