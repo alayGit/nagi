@@ -67,7 +67,7 @@ void trampoline_1i(fnTrampoline_1i func, byte data, byte bank)
 	RAM_BANK = previousRamBank;
 }
 
-void trampoline_2v(fnTrampoline_2v func, byte data1, byte data2, byte bank)
+void trampoline_2Int(fnTrampoline_2v func, int data1, int data2, byte bank)
 {
 	byte previousRamBank = RAM_BANK;
 	RAM_BANK = bank;
@@ -75,7 +75,7 @@ void trampoline_2v(fnTrampoline_2v func, byte data1, byte data2, byte bank)
 	RAM_BANK = previousRamBank;
 }
 
-void trampoline_3i(fnTrampoline_3i func, byte data1, byte data2, byte data3, byte bank)
+void trampoline_3Int(fnTrampoline_3Int func, int data1, int data2, int data3, int bank)
 {
 	byte previousRamBank = RAM_BANK;
 	RAM_BANK = bank;

@@ -820,7 +820,7 @@ void b1Draw(byte** data) // 1, 0x00
 
     localViewtab.flags |= (DRAWN | UPDATE);   /* Not sure about update */
      
-   viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, localViewtab.currentCel, VIEW_CODE_BANK_1);
+   trampolineViewUpdater1Int(&b9SetCel, &localViewtab, localViewtab.currentCel, VIEW_CODE_BANK_1);
     trampoline_1i(&b9DrawObject,entryNum, VIEW_CODE_BANK_1);
 
     setViewTab(&localViewtab, entryNum);
@@ -913,7 +913,7 @@ void b2Set_view(byte** data) // 2, 0x00
     
     getViewTab(&localViewtab, entryNum);
 
-    viewUpdaterTrampoline1b(&b9AddViewToTable, &localViewtab, viewNum, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9AddViewToTable, &localViewtab, viewNum, VIEW_CODE_BANK_1);
 
     setViewTab(&localViewtab, entryNum);
 }
@@ -928,7 +928,7 @@ void b2Set_view_v(byte** data) // 2, 0x40
 
     getViewTab(&localViewtab, entryNum);
 
-    viewUpdaterTrampoline1b(&b9AddViewToTable, &localViewtab, viewNum, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9AddViewToTable, &localViewtab, viewNum, VIEW_CODE_BANK_1);
 
     getViewTab(&localViewtab, entryNum);
 }
@@ -942,8 +942,8 @@ void b2Set_loop(byte** data) // 2, 0x00
     loopNum = *(*data)++;
 
     getViewTab(&localViewtab, entryNum);
-    viewUpdaterTrampoline1b(&b9SetLoop, &localViewtab, loopNum, VIEW_CODE_BANK_1);
-    viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, 0, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9SetLoop, &localViewtab, loopNum, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9SetCel, &localViewtab, 0, VIEW_CODE_BANK_1);
     
     setViewTab(&localViewtab, entryNum);
 }
@@ -958,8 +958,8 @@ void b2Set_loop_v(byte** data) // 2, 0x40
     
     loopNum = var[*(*data)++];
 
-    viewUpdaterTrampoline1b(&b9SetLoop, &localViewtab, loopNum, VIEW_CODE_BANK_1);
-   viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, loopNum, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9SetLoop, &localViewtab, loopNum, VIEW_CODE_BANK_1);
+   trampolineViewUpdater1Int(&b9SetCel, &localViewtab, loopNum, VIEW_CODE_BANK_1);
 
    setViewTab(&localViewtab, entryNum);
 }
@@ -1001,7 +1001,7 @@ void b2Set_cel(byte** data) // 2, 0x00
     
     getViewTab(&localViewtab, entryNum);
 
-    viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, celNum, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9SetCel, &localViewtab, celNum, VIEW_CODE_BANK_1);
 
     setViewTab(&localViewtab, entryNum);
 }
@@ -1016,7 +1016,7 @@ void b2Set_cel_v(byte** data) // 2, 0x40
 
     getViewTab(&localViewtab, entryNum);
 
-    viewUpdaterTrampoline1b(&b9SetCel, &localViewtab, celNum, VIEW_CODE_BANK_1);
+    trampolineViewUpdater1Int(&b9SetCel, &localViewtab, celNum, VIEW_CODE_BANK_1);
 
     setViewTab(&localViewtab, entryNum);
 }
@@ -2056,7 +2056,7 @@ void b3Add_to_pic(byte** data) // 7, 0x00
     priNum = *(*data)++;
     baseCol = *(*data)++;
 
-    addToPicTrampoline(viewNum, loopNum, celNum, x, y, priNum, baseCol);
+    trampolineAddToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
 void b3Add_to_pic_v(byte** data) // 7, 0xFE 
@@ -2071,7 +2071,7 @@ void b3Add_to_pic_v(byte** data) // 7, 0xFE
     priNum = var[*(*data)++];
     baseCol = var[*(*data)++];
 
-    addToPicTrampoline(viewNum, loopNum, celNum, x, y, priNum, baseCol);
+    trampolineAddToPic(viewNum, loopNum, celNum, x, y, priNum, baseCol);
 }
 
 void b3Status(byte** data) // 0, 0x00 
