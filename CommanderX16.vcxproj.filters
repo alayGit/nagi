@@ -4,116 +4,26 @@
     <None Include="..\.gitignore" />
     <None Include="makefile" />
     <None Include="test.bat" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\AGICODES.H">
+    <None Include="src\test.asm">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DECOMP.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GENERAL.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GUI.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\LIST.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\OBJECT.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PALETTE.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PARSER.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PICTURE.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SOUND.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WORDS.H">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timer.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stub.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\agiFiles.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\logic.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\memoryManager.h">
-      <Filter>src</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\COMMANDS.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DECOMP.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GRAPHICS.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GUI.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MEKA.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OBJECT.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PARSER.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PICTURE.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PLAY.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SHOWLOG.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SOUND.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TEXT.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WORDS.C">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\timer.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stub.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\agiFiles.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\logic.c">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\memoryManager.c">
-      <Filter>src</Filter>
-    </ClCompile>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
       <UniqueIdentifier>{c7ec4cc1-2dad-4cd4-94ef-c15464dcdfb4}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\exampleBankCall.c">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\main.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ TARGETS := cx16
 
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
-PROGRAM := agi
+PROGRAM := sbe
 
 # Path(s) to additional libraries required for linking the program
 # Use only if you don't want to place copies of the libraries in SRCDIR
@@ -309,7 +309,7 @@ $(TARGETOBJDIR)/%.o: %.a65 | $(TARGETOBJDIR)
 	$(CC) -t $(CC65TARGET) -c --create-dep $(@:.o=.d) $(ASFLAGS) -o $@ $<
 
 $(PROGRAM): $(CONFIG) $(OBJECTS) $(LIBS)
-	$(CC) -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^) -g 
+	$(CC) -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^) -g -C cx16-bank.cfg
 
 test: $(PROGRAM)
 	$(PREEMUCMD)
